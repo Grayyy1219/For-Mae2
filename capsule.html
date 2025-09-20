@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Capsule • Monthsary</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="assets/app.js"></script>
+  </head>
+  <body data-page="capsule">
+    <div id="letterOverlay" class="overlay">
+      <div class="overlay-card">
+        <button
+          id="closeOverlay"
+          class="overlay-close"
+          aria-label="Close letter"
+        >
+          ✕
+        </button>
+        <div class="overlay-header">Happy Monthsary, Mi!</div>
+        <div id="letterFull" class="typewriter typewriter-large"></div>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="brand">❤️ Monthsary Time-Capsule</div>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="admin.html">Admin</a>
+        <a href="qr.html">QR</a>
+      </nav>
+    </header>
+
+    <main class="capsule-wrap">
+      <div class="capsule-header">
+        <h1 id="capTitle">Happy Monthsary, Mi!</h1>
+        <p class="hint">Love kita, today and always.”</p>
+        <div class="row center">
+          <button id="backHome" class="btn btn-secondary">⟵ Back Home</button>
+        </div>
+      </div>
+
+      <section>
+        <h3>Letter</h3>
+        <div id="letter" class="typewriter"></div>
+      </section>
+
+      <section>
+        <h3>Photo Strip</h3>
+        <div id="photos" class="photo-strip"></div>
+      </section>
+
+      <section>
+        <h3>10‑sec Voice Note</h3>
+        <audio id="voice" controls style="width: 100%"></audio>
+      </section>
+
+      <section class="surprise">
+        <h3>This Month’s Surprise</h3>
+        <p id="surprise"></p>
+      </section>
+
+      <section>
+        <h3>Our Little Stats</h3>
+        <div class="stats">
+          <div class="stat-card">
+            <div class="label">Days Together</div>
+            <div id="statDays" class="value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Songs Added</div>
+            <div id="statSongs" class="value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Places Visited</div>
+            <div id="statPlaces" class="value">0</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <canvas
+      id="confettiCanvas"
+      class="confetti-canvas"
+      aria-hidden="true"
+    ></canvas>
+  </body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Monthsary Time-Capsule</title>
+    <meta
+      name="description"
+      content="A sweet monthsary time-capsule with monthly surprises."
+    />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="preload" href="assets/soft-pop.mp3" as="audio" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="assets/app.js"></script>
+  </head>
+  <body data-page="home">
+    <header class="site-header">
+      <div class="brand">❤️ Monthsary Time-Capsule</div>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="admin.html">Admin</a>
+        <a href="qr.html">QR</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <div class="ring-wrap">
+          <div class="ring-bg"></div>
+          <div class="ring-progress" id="ringProgress"></div>
+          <div class="heart" aria-hidden="true">❤️</div>
+          <div class="progress-text"><span id="progressCount">0</span>/12</div>
+        </div>
+        <h1 class="headline">Open this month’s capsule</h1>
+        <p class="subhead">
+          Hey?, open this month’s surprise. Love kita, today and always.
+        </p>
+        <button id="openCurrent" class="btn btn-primary heartbeat" disabled>
+          Open
+        </button>
+        <div class="countdown">
+          <span id="countdownLabel">Opens in</span>
+          <strong id="countdown">--:--:--</strong>
+        </div>
+      </section>
+
+      <section
+        class="months-grid"
+        id="monthsGrid"
+        aria-label="All months"
+      ></section>
+    </main>
+
+    <footer class="site-footer">
+      <small>Happy Monthsary, Love! • Made with 💖</small>
+    </footer>
+
+    <audio id="sfxOpen" src="assets/soft-pop.mp3" preload="auto"></audio>
+    <canvas
+      id="confettiCanvas"
+      class="confetti-canvas"
+      aria-hidden="true"
+    ></canvas>
+  </body>
+</html>

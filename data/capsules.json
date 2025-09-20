@@ -1,0 +1,161 @@
+{
+  "settings": {
+    "siteTitle": "Time-Capsule",
+    "brandText": "❤️ Monthsary Time-Capsule",
+    "favicon": "assets/favicon.svg",
+    "theme": {
+      "accent": "#8b5cf6",
+      "accent2": "#c4b5fd",
+      "ringFill": "#a78bfa"
+    },
+    "heartEmoji": "❤️",
+    "homeHeadline": "Open this month’s capsule",
+    "homeSubhead": "Tara, open this month’s surprise. Mahal kita, today and always.",
+    "openButtonText": "Open",
+    "footerText": "Happy Monthsary, Love! • Made with 💖",
+    "capsuleGreeting": "Happy Monthsary, Mi!",
+    "statusIcons": {
+      "unlocked": "❤️",
+      "ready": "💌",
+      "locked": "🔒"
+    },
+    "confettiColors": [
+      "#8b5cf6",
+      "#a78bfa",
+      "#c4b5fd",
+      "#60a5fa",
+      "#f472b6"
+    ]
+  },
+  "startDate": "2022-03-19T12:00:00.000Z",
+  "months": [
+    {
+      "id": 1,
+      "title": "Month 1",
+      "letter": "Mi,\n\nHappy first monthsary! Thank you for the laughs, the kilig, and every small moment we share. Here’s to many more.\n\n– Grayyy ❤️",
+      "photos": [
+        "assets/sample1.jpg",
+        "assets/sample2.jpg"
+      ],
+      "voiceNote": "",
+      "surprise": "Coupon: Ice cream date on me 🍨",
+      "songsAdded": [
+        "https://open.spotify.com/track/04S1pkp1VaIqjg8zZqknR5/"
+      ],
+      "placesVisited": [
+        "Cafe",
+        "Park"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Month 2",
+      "letter": "A sweet note for month two. 💌",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "Pasta night 🍝",
+      "songsAdded": [],
+      "placesVisited": []
+    },
+    {
+      "id": 3,
+      "title": "Month 3",
+      "letter": "Quarter-year love note.",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "Sunset walk 🌅",
+      "songsAdded": [],
+      "placesVisited": []
+    },
+    {
+      "id": 4,
+      "title": "Month 4",
+      "letter": "",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "",
+      "songsAdded": [],
+      "placesVisited": []
+    },
+    {
+      "id": 5,
+      "title": "Month 5",
+      "letter": "",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "",
+      "songsAdded": [],
+      "placesVisited": []
+    },
+    {
+      "id": 6,
+      "title": "Month 6",
+      "letter": "",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "",
+      "songsAdded": [],
+      "placesVisited": []
+    },
+    {
+      "id": 7,
+      "title": "Month 7",
+      "letter": "",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "",
+      "songsAdded": [],
+      "placesVisited": []
+    },
+    {
+      "id": 8,
+      "title": "Month 8",
+      "letter": "",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "",
+      "songsAdded": [],
+      "placesVisited": []
+    },
+    {
+      "id": 9,
+      "title": "Month 9",
+      "letter": "",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "",
+      "songsAdded": [],
+      "placesVisited": []
+    },
+    {
+      "id": 10,
+      "title": "Month 10",
+      "letter": "",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "",
+      "songsAdded": [],
+      "placesVisited": []
+    },
+    {
+      "id": 11,
+      "title": "Month 11",
+      "letter": "",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "",
+      "songsAdded": [],
+      "placesVisited": []
+    },
+    {
+      "id": 12,
+      "title": "Month 12",
+      "letter": "",
+      "photos": [],
+      "voiceNote": "",
+      "surprise": "",
+      "songsAdded": [],
+      "placesVisited": []
+    }
+  ]
+}

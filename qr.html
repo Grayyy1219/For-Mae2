@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QR • Monthsary</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <main class="qr-wrap">
+      <h1>QR Code</h1>
+      <p class="hint">Print this and tuck it into a card or flowers 🌸</p>
+      <div class="row no-print">
+        <input
+          id="url"
+          style="
+            flex: 1;
+            min-width: 360px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #202539;
+            background: #0b0f1e;
+            color: #e9ecf3;
+          "
+        />
+        <button id="gen" class="btn">Generate</button>
+        <a class="btn btn-secondary" href="index.html">Back</a>
+      </div>
+      <div class="qr-card">
+        <h2 style="margin: 6px 0">Monthsary Time-Capsule</h2>
+        <img id="qr" alt="QR Code" width="300" height="300" />
+        <div id="lbl" class="hint" style="margin-top: 8px"></div>
+      </div>
+      <div class="no-print center">
+        <button class="btn" onclick="window.print()">Print</button>
+      </div>
+    </main>
+    <script>
+      const input = document.getElementById("url");
+      const img = document.getElementById("qr");
+      const lbl = document.getElementById("lbl");
+      const gen = () => {
+        const u = input.value.trim();
+        if (!u) return;
+        const api =
+          "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=20&data=" +
+          encodeURIComponent(u);
+        img.src = api;
+        lbl.textContent = u;
+      };
+      document.getElementById("gen").addEventListener("click", gen);
+      input.value =
+        location.origin +
+        location.pathname.replace(/\/[^/]*$/, "/") +
+        "index.html";
+      gen();
+    </script>
+  </body>
+</html>

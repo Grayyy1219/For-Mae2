@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin • Monthsary</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <style>
+      .gate {
+        max-width: 520px;
+        margin: 12vh auto;
+        background: #0b0f1e;
+        border: 1px solid #202539;
+        border-radius: 14px;
+        padding: 16px;
+      }
+      .gate h1 {
+        margin: 8px 0 10px;
+        text-align: center;
+      }
+      .gate .row {
+        align-items: center;
+      }
+      .gate input[type="password"] {
+        flex: 1;
+        min-width: 240px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #202539;
+        background: #0b0f1e;
+        color: #e9ecf3;
+      }
+      details.setup {
+        margin-top: 14px;
+      }
+      code.inline {
+        background: #111527;
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+      pre.small {
+        white-space: pre-wrap;
+        font-size: 12px;
+        color: #9aa3b2;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .tab {
+        background: #202539;
+        color: #e9ecf3;
+        border: 0;
+        border-radius: 999px;
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+      .tab.active {
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+        color: #0b0d13;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+        margin: 10px 0;
+      }
+      .form-grid label {
+        display: grid;
+        gap: 6px;
+        font-size: 13px;
+        color: #9aa3b2;
+      }
+      .form-grid input,
+      .form-grid textarea,
+      select {
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #202539;
+        background: #0b0f1e;
+        color: #e9ecf3;
+        width: 100%;
+        min-height: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="gate">
+      <h1>Admin Unlock</h1>
+      <p class="hint">Enter your passphrase to unlock the Admin.</p>
+      <div class="row">
+        <input id="pass" type="password" placeholder="Passphrase" />
+        <button id="unlock" class="btn">Unlock</button>
+        <a class="btn btn-secondary" href="index.html">Back</a>
+      </div>
+    </div>
+
+    <script>
+      window.__ADMIN_PAYLOAD =
+        "v1:oElSRGmwNUD+NiPIrddQDg==:st/k+FqAvacfBMmK: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";
+
+      const $ = (s, el = document) => el.querySelector(s);
+      const enc = new TextEncoder();
+      const dec = new TextDecoder();
+      const b64e = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+      const b64d = (str) => Uint8Array.from(atob(str), (c) => c.charCodeAt(0));
+
+      async function deriveKey(pass, salt) {
+        const keyMaterial = await crypto.subtle.importKey(
+          "raw",
+          enc.encode(pass),
+          { name: "PBKDF2" },
+          false,
+          ["deriveKey"]
+        );
+        return crypto.subtle.deriveKey(
+          { name: "PBKDF2", salt, iterations: 250000, hash: "SHA-256" },
+          keyMaterial,
+          { name: "AES-GCM", length: 256 },
+          false,
+          ["encrypt", "decrypt"]
+        );
+      }
+      async function decryptPayload(payload, pass) {
+        const [v, s, iv, data] = payload.split(":");
+        if (v !== "v1") throw new Error("bad format");
+        const salt = b64d(s);
+        const ivb = b64d(iv);
+        const dat = b64d(data);
+        const key = await deriveKey(pass, salt);
+        const plain = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: ivb },
+          key,
+          dat
+        );
+        return dec.decode(plain);
+      }
+
+      function renderAdminUI() {
+        const html = `
+          <main class="admin-wrap">
+            <h1>Admin</h1>
+            <p class="hint">Load, edit, and export your Monthsary content. Use Settings for quick tweaks, Capsule to edit a month, or JSON for full control.</p>
+            <div class="row">
+              <input type="file" id="fileIn" accept="application/json" />
+              <button id="btnFetch" class="btn btn-secondary">Fetch current</button>
+              <button id="btnSave" class="btn">Save override</button>
+              <button id="btnExport" class="btn">Export file</button>
+              <a class="btn btn-secondary" href="index.html">Back</a>
+            </div>
+            <div class="tabs">
+              <button class="tab active" data-tab="settings">Settings</button>
+              <button class="tab" data-tab="capsule">Capsule</button>
+              <button class="tab" data-tab="json">JSON</button>
+            </div>
+            <section id="tab-settings">
+              <h3>Site Settings</h3>
+              <div class="form-grid">
+                <label>Site Title<input id="s_siteTitle" type="text" /></label>
+                <label>Brand Text<input id="s_brandText" type="text" /></label>
+                <label>Favicon URL<input id="s_favicon" type="text" /></label>
+                <label>Heart Emoji<input id="s_heartEmoji" type="text" /></label>
+                <label>Accent<input id="s_theme_accent" type="color" value="#8b5cf6" /></label>
+                <label>Accent 2<input id="s_theme_accent2" type="color" value="#c4b5fd" /></label>
+                <label>Ring Fill<input id="s_theme_ringFill" type="color" value="#a78bfa" /></label>
+                <label>Home Headline<input id="s_homeHeadline" type="text" /></label>
+                <label>Home Subhead<input id="s_homeSubhead" type="text" /></label>
+                <label>Open Button<input id="s_openButtonText" type="text" /></label>
+                <label>Footer Text<input id="s_footerText" type="text" /></label>
+                <label>Capsule Greeting<input id="s_capsuleGreeting" type="text" /></label>
+                <label>Icon: Unlocked
+                  <div class="row">
+                    <input id="s_icon_unlocked" type="text" placeholder="Emoji or image URL/data URI" style="flex:1" />
+                    <input id="s_icon_unlocked_file" type="file" accept="image/*" style="display:none" />
+                    <button id="s_icon_unlocked_up" type="button" class="btn btn-secondary">Upload Image</button>
+                  </div>
+                </label>
+                <label>Icon: Ready
+                  <div class="row">
+                    <input id="s_icon_ready" type="text" placeholder="Emoji or image URL/data URI" style="flex:1" />
+                    <input id="s_icon_ready_file" type="file" accept="image/*" style="display:none" />
+                    <button id="s_icon_ready_up" type="button" class="btn btn-secondary">Upload Image</button>
+                  </div>
+                </label>
+                <label>Icon: Locked
+                  <div class="row">
+                    <input id="s_icon_locked" type="text" placeholder="Emoji or image URL/data URI" style="flex:1" />
+                    <input id="s_icon_locked_file" type="file" accept="image/*" style="display:none" />
+                    <button id="s_icon_locked_up" type="button" class="btn btn-secondary">Upload Image</button>
+                  </div>
+                </label>
+                <label style="grid-column:1 / -1">Confetti Colors
+                  <div id="confettiList" class="row"></div>
+                  <div class="row">
+                    <button id="addConfettiColor" type="button" class="btn btn-secondary">Add Color</button>
+                  </div>
+                  <input id="s_confetti" type="text" placeholder="#8b5cf6,#a78bfa,#c4b5fd" style="display:none" />
+                </label>
+              </div>
+              <div class="row">
+                <button id="applySettings" class="btn">Apply Settings</button>
+              </div>
+            </section>
+            <section id="tab-capsule" style="display:none">
+              <h3>Edit Capsule</h3>
+              <div class="row">
+                <label style="flex:1">Month<select id="c_id" style="width:100%"></select></label>
+              </div>
+              <div class="form-grid">
+                <label>Title<input id="c_title" type="text" /></label>
+                <label>Unlock Date<input id="c_unlockDate" type="datetime-local" /></label>
+                <label>Surprise<input id="c_surprise" type="text" /></label>
+                <label>Songs Added (CSV)<input id="c_songs" type="text" /></label>
+                <label>Places Visited (CSV)<input id="c_places" type="text" /></label>
+                <label>Voice Note URL<input id="c_voice" type="text" /></label>
+                <label style="grid-column:1 / -1">Letter<textarea id="c_letter" rows="6"></textarea></label>
+                <label style="grid-column:1 / -1">Photos (CSV)<input id="c_photos" type="text" placeholder="assets/p1.jpg,assets/p2.jpg" /></label>
+              </div>
+              <div class="row">
+                <button id="applyCapsule" class="btn">Save Month</button>
+              </div>
+            </section>
+            <section id="tab-json" style="display:none">
+              <h3>Raw JSON</h3>
+            </section>
+            <textarea id="editor" spellcheck="false"></textarea>
+            <pre class="hint" id="status"></pre>
+          </main>
+        `;
+        document.body.innerHTML = html;
+
+        const STORAGE_OVERRIDE = "mtc_capsules_override";
+        const $ = (s, el = document) => el.querySelector(s);
+        const status = (msg) => ($("#status").textContent = msg);
+        const show = (id) => (document.getElementById(id).style.display = "");
+        const hide = (id) =>
+          (document.getElementById(id).style.display = "none");
+        let state = null;
+        function toCSV(arr) {
+          return (arr || []).join(", ");
+        }
+        function fromCSV(str) {
+          return (str || "")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
+        function updateConfettiCSV() {
+          const colors = Array.from(
+            document.querySelectorAll(".confetti-color")
+          ).map((i) => i.value);
+          const csv = toCSV(colors);
+          const hidden = document.getElementById("s_confetti");
+          if (hidden) hidden.value = csv;
+        }
+        function addConfettiPicker(value) {
+          const list = document.getElementById("confettiList");
+          if (!list) return;
+          const wrap = document.createElement("div");
+          wrap.className = "row";
+          const input = document.createElement("input");
+          input.type = "color";
+          input.className = "confetti-color";
+          input.value = value || "#8b5cf6";
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "btn btn-secondary remove-color";
+          btn.textContent = "Remove";
+          wrap.appendChild(input);
+          wrap.appendChild(btn);
+          list.appendChild(wrap);
+          input.addEventListener("change", updateConfettiCSV);
+          btn.addEventListener("click", () => {
+            wrap.remove();
+            updateConfettiCSV();
+          });
+          updateConfettiCSV();
+        }
+        function renderConfettiPickers(arr) {
+          const list = document.getElementById("confettiList");
+          if (!list) return;
+          list.innerHTML = "";
+          const colors =
+            arr && arr.length ? arr : ["#8b5cf6", "#a78bfa", "#c4b5fd"];
+          colors.forEach((c) => addConfettiPicker(c));
+          updateConfettiCSV();
+        }
+        function syncEditor() {
+          $("#editor").value = JSON.stringify(state, null, 2);
+        }
+        function syncFromEditor() {
+          try {
+            state = JSON.parse($("#editor").value || "{}");
+          } catch (e) {
+            status("JSON parse error: " + e.message);
+          }
+        }
+        function fillSettingsForm(obj) {
+          const s = (obj && obj.settings) || {};
+          $("#s_siteTitle").value = s.siteTitle || "";
+          $("#s_brandText").value = s.brandText || "";
+          $("#s_favicon").value = s.favicon || "";
+          $("#s_heartEmoji").value = s.heartEmoji || "";
+          $("#s_theme_accent").value = s.theme?.accent || "";
+          $("#s_theme_accent2").value = s.theme?.accent2 || "";
+          $("#s_theme_ringFill").value = s.theme?.ringFill || "";
+          $("#s_homeHeadline").value = s.homeHeadline || "";
+          $("#s_homeSubhead").value = s.homeSubhead || "";
+          $("#s_openButtonText").value = s.openButtonText || "";
+          $("#s_footerText").value = s.footerText || "";
+          $("#s_capsuleGreeting").value = s.capsuleGreeting || "";
+          $("#s_icon_unlocked").value = s.statusIcons?.unlocked || "";
+          $("#s_icon_ready").value = s.statusIcons?.ready || "";
+          $("#s_icon_locked").value = s.statusIcons?.locked || "";
+          $("#s_confetti").value = toCSV(s.confettiColors || []);
+        }
+        function applySettingsForm() {
+          state.settings = state.settings || {};
+          const s = state.settings;
+          s.siteTitle = $("#s_siteTitle").value.trim();
+          s.brandText = $("#s_brandText").value.trim();
+          s.favicon = $("#s_favicon").value.trim();
+          s.heartEmoji = $("#s_heartEmoji").value.trim();
+          s.theme = s.theme || {};
+          s.theme.accent = $("#s_theme_accent").value.trim();
+          s.theme.accent2 = $("#s_theme_accent2").value.trim();
+          s.theme.ringFill = $("#s_theme_ringFill").value.trim();
+          s.homeHeadline = $("#s_homeHeadline").value.trim();
+          s.homeSubhead = $("#s_homeSubhead").value.trim();
+          s.openButtonText = $("#s_openButtonText").value.trim();
+          s.footerText = $("#s_footerText").value.trim();
+          s.capsuleGreeting = $("#s_capsuleGreeting").value.trim();
+          s.statusIcons = s.statusIcons || {};
+          s.statusIcons.unlocked = $("#s_icon_unlocked").value.trim();
+          s.statusIcons.ready = $("#s_icon_ready").value.trim();
+          s.statusIcons.locked = $("#s_icon_locked").value.trim();
+          s.confettiColors = fromCSV($("#s_confetti").value);
+          syncEditor();
+          try {
+            localStorage.setItem(STORAGE_OVERRIDE, JSON.stringify(state));
+            status("Applied settings and saved override to localStorage.");
+          } catch (e) {
+            status(
+              "Applied settings, but failed saving override: " + e.message
+            );
+          }
+        }
+        function populateMonthSelect() {
+          const sel = $("#c_id");
+          sel.innerHTML = "";
+          (state.months || []).forEach((m) => {
+            const o = document.createElement("option");
+            o.value = m.id;
+            o.textContent = `${m.id}: ${m.title || "Untitled"}`;
+            sel.appendChild(o);
+          });
+        }
+        function fillCapsuleForm(id) {
+          const m = (state.months || []).find(
+            (x) => Number(x.id) === Number(id)
+          );
+          if (!m) return;
+          $("#c_title").value = m.title || "";
+          $("#c_unlockDate").value = m.unlockDate
+            ? new Date(m.unlockDate).toISOString().slice(0, 16)
+            : "";
+          $("#c_surprise").value = m.surprise || "";
+          $("#c_songs").value = toCSV(m.songsAdded || []);
+          $("#c_places").value = toCSV(m.placesVisited || []);
+          $("#c_voice").value = m.voiceNote || "";
+          $("#c_letter").value = m.letter || "";
+          $("#c_photos").value = toCSV(m.photos || []);
+        }
+        function applyCapsuleForm() {
+          const id = Number($("#c_id").value);
+          const m = (state.months || []).find((x) => Number(x.id) === id);
+          if (!m) return;
+          m.title = $("#c_title").value.trim();
+          const dt = $("#c_unlockDate").value;
+          m.unlockDate = dt ? new Date(dt).toISOString() : m.unlockDate;
+          m.surprise = $("#c_surprise").value.trim();
+          m.songsAdded = fromCSV($("#c_songs").value);
+          m.placesVisited = fromCSV($("#c_places").value);
+          m.voiceNote = $("#c_voice").value.trim();
+          m.letter = $("#c_letter").value;
+          m.photos = fromCSV($("#c_photos").value);
+          populateMonthSelect();
+          syncEditor();
+          try {
+            localStorage.setItem(STORAGE_OVERRIDE, JSON.stringify(state));
+            status(
+              "Saved month " + id + " and saved override to localStorage."
+            );
+          } catch (e) {
+            status(
+              "Saved month " + id + ", but failed saving override: " + e.message
+            );
+          }
+        }
+        async function fetchCurrent() {
+          try {
+            const override = localStorage.getItem(STORAGE_OVERRIDE);
+            if (override) {
+              $("#editor").value = JSON.stringify(
+                JSON.parse(override),
+                null,
+                2
+              );
+              status("Loaded local override");
+            } else {
+              const res = await fetch("data/capsules.json", {
+                cache: "no-store",
+              });
+              if (!res.ok) throw new Error("Failed to fetch file");
+              const json = await res.json();
+              $("#editor").value = JSON.stringify(json, null, 2);
+              status("Loaded data/capsules.json");
+            }
+          } catch (e) {
+            status("Error: " + e.message);
+          }
+          syncFromEditor();
+          fillSettingsForm(state);
+          populateMonthSelect();
+          fillCapsuleForm($("#c_id").value || 1);
+        }
+        document.addEventListener("click", (e) => {
+          if (e.target.id === "btnFetch") fetchCurrent();
+          if (e.target.id === "btnSave") {
+            try {
+              syncFromEditor();
+              localStorage.setItem(STORAGE_OVERRIDE, JSON.stringify(state));
+              status("Saved override to localStorage.");
+            } catch (err) {
+              status("JSON error: " + err.message);
+            }
+          }
+          if (e.target.id === "btnExport") {
+            try {
+              syncFromEditor();
+              const blob = new Blob([JSON.stringify(state, null, 2)], {
+                type: "application/json",
+              });
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(blob);
+              a.download = "capsules.json";
+              a.click();
+              URL.revokeObjectURL(a.href);
+              status("Exported file.");
+            } catch (err) {
+              status("Export error: " + err.message);
+            }
+          }
+          if (e.target.id === "s_icon_unlocked_up") {
+            e.preventDefault();
+            document.getElementById("s_icon_unlocked_file").click();
+          }
+          if (e.target.id === "s_icon_ready_up") {
+            e.preventDefault();
+            document.getElementById("s_icon_ready_file").click();
+          }
+          if (e.target.id === "s_icon_locked_up") {
+            e.preventDefault();
+            document.getElementById("s_icon_locked_file").click();
+          }
+          if (e.target.id === "applySettings") {
+            applySettingsForm();
+          }
+          if (e.target.id === "applyCapsule") {
+            applyCapsuleForm();
+          }
+          if (e.target.classList.contains("tab")) {
+            document
+              .querySelectorAll(".tab")
+              .forEach((b) => b.classList.remove("active"));
+            e.target.classList.add("active");
+            const tab = e.target.getAttribute("data-tab");
+            if (tab === "settings") {
+              show("tab-settings");
+              hide("tab-capsule");
+              hide("tab-json");
+              $("#editor").style.display = "none";
+              $("#status").style.display = "none";
+            }
+            if (tab === "capsule") {
+              hide("tab-settings");
+              show("tab-capsule");
+              hide("tab-json");
+              $("#editor").style.display = "none";
+              $("#status").style.display = "none";
+            }
+            if (tab === "json") {
+              hide("tab-settings");
+              hide("tab-capsule");
+              show("tab-json");
+              $("#editor").style.display = "block";
+              $("#status").style.display = "block";
+            }
+          }
+        });
+        document.addEventListener("change", (e) => {
+          if (e.target && e.target.id === "c_id")
+            fillCapsuleForm(e.target.value);
+        });
+
+        function hookFileToInput(fileId, textId) {
+          const fin = document.getElementById(fileId);
+          const tin = document.getElementById(textId);
+          if (!fin || !tin) return;
+          fin.addEventListener("change", () => {
+            const f = fin.files && fin.files[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = () => {
+              tin.value = r.result;
+            };
+            r.readAsDataURL(f);
+          });
+        }
+        hookFileToInput("s_icon_unlocked_file", "s_icon_unlocked");
+        hookFileToInput("s_icon_ready_file", "s_icon_ready");
+        hookFileToInput("s_icon_locked_file", "s_icon_locked");
+
+        (function () {
+          const addBtn = document.getElementById("addConfettiColor");
+          if (addBtn)
+            addBtn.addEventListener("click", () =>
+              addConfettiPicker("#8b5cf6")
+            );
+        })();
+
+        (function () {
+          const fin = document.getElementById("fileIn");
+          if (!fin) return;
+          fin.addEventListener("change", (e) => {
+            const f = e.target.files && e.target.files[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = () => {
+              try {
+                state = JSON.parse(r.result);
+                $("#editor").value = JSON.stringify(state, null, 2);
+                try {
+                  localStorage.setItem(STORAGE_OVERRIDE, JSON.stringify(state));
+                } catch {}
+                status("Imported JSON and saved override to localStorage.");
+                fillSettingsForm(state);
+                populateMonthSelect();
+                fillCapsuleForm($("#c_id").value || 1);
+              } catch (err) {
+                $("#editor").value = r.result;
+                status("Loaded file, but JSON parse error: " + err.message);
+              }
+            };
+            r.readAsText(f);
+          });
+        })();
+
+        fetchCurrent();
+      }
+
+      document.getElementById("unlock").addEventListener("click", async () => {
+        const pass = document.getElementById("pass").value.trim();
+        if (!pass) return;
+        const payload = window.__ADMIN_PAYLOAD;
+        if (!payload) {
+          alert("No payload set.");
+          return;
+        }
+        try {
+          await decryptPayload(payload, pass);
+          renderAdminUI();
+        } catch (e) {
+          alert("Wrong passphrase or corrupted payload.");
+          console.error(e);
+        }
+      });
+
+      (function () {
+        const input = document.getElementById("pass");
+        if (input) {
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              const btn = document.getElementById("unlock");
+              if (btn) btn.click();
+            }
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
