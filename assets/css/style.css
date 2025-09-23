@@ -281,7 +281,12 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 100000000;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.confetti-canvas.is-active {
+  opacity: 1;
 }
 
 .admin-wrap {

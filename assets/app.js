@@ -111,6 +111,10 @@
   function confettiBurst() {
     const canvas = $("#confettiCanvas");
     if (!canvas) return;
+    +(
+      (+canvas.classList.add("is-active"))
+    );
+
     const ctx = canvas.getContext("2d");
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const { innerWidth: W, innerHeight: H } = window;
@@ -127,22 +131,29 @@
       "#60a5fa",
       "#f472b6",
     ];
-    const N = 140;
-    const parts = Array.from({ length: N }).map(() => ({
+
+    const parts = Array.from({ length: 160 }, () => ({
       x: Math.random() * W,
-      y: -20 - Math.random() * 40,
-      vx: -1 + Math.random() * 2,
-      vy: 2 + Math.random() * 3,
-      s: 6 + Math.random() * 6,
+      y: -20 + Math.random() * 20,
+      vx: -2 + Math.random() * 4,
+      vy: 1 + Math.random() * 3,
+      s: 6 + Math.random() * 8,
       rot: Math.random() * Math.PI,
       vr: -0.2 + Math.random() * 0.4,
       col: colors[(Math.random() * colors.length) | 0],
     }));
+
     let t = 0;
-    const maxT = 80;
+    const maxT = 80; 
+    const fadeFrames = 30; 
+
     function tick() {
       t++;
       ctx.clearRect(0, 0, W, H);
+
+      const alpha = t <= maxT ? 1 : Math.max(0, 1 - (t - maxT) / fadeFrames);
+      ctx.globalAlpha = alpha;
+
       for (const p of parts) {
         p.x += p.vx;
         p.y += p.vy;
@@ -155,8 +166,16 @@
         ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
         ctx.restore();
       }
-      if (t < maxT) requestAnimationFrame(tick);
-      else ctx.clearRect(0, 0, W, H);
+
+      ctx.globalAlpha = 1;
+      if (t < maxT + fadeFrames) {
+        requestAnimationFrame(tick);
+      } else {
+        canvas.classList.remove("is-active");
+        setTimeout(() => {
+          ctx.clearRect(0, 0, W, H);
+        }, 400); 
+      }
     }
     tick();
   }
@@ -427,6 +446,30 @@
     };
     tick();
   }
+  function typewriter(el, text, speed = 90, onDone) {
+    el.textContent = "";
+    let i = 0;
+    const tick = () => {
+      if (i <= text.length) {
+        el.textContent = text.slice(0, i);
+        const prev = text[i - 1] || "";
+        i++;
+
+        if (i > text.length) {
+          if (typeof onDone === "function") onDone();
+          return;
+        }
+
+        let delay = speed;
+        if (prev === "\n") delay = speed * 8;
+        else if (".!?".includes(prev)) delay = speed * 6;
+        else if (",;:".includes(prev)) delay = speed * 3;
+
+        setTimeout(tick, delay);
+      }
+    };
+    tick();
+  }
 
   function renderCapsule(data) {
     const params = new URLSearchParams(location.search);
@@ -458,7 +501,11 @@
     const closeOverlay = document.getElementById("closeOverlay");
 
     if (overlay && letterFull) {
-      typewriter(letterFull, letterText, 90);
+      if (closeOverlay) closeOverlay.classList.add("hidden");
+
+      typewriter(letterFull, letterText, 90, () => {
+        if (closeOverlay) closeOverlay.classList.remove("hidden");
+      });
 
       letterEl.textContent = letterText;
       if (closeOverlay) {
