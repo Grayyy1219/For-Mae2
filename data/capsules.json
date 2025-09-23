@@ -95,7 +95,7 @@
        {
       "id": 5,
       "title": "May",
-      "letter": "Mi.\niknow my time na sumosobra ako, salamuch sa pag intindi🥺",
+      "letter": "Mi.\niknow my time na sumosobra ako, salamuch sa pag intindi🥺\n\n-Grayyy❤️",
       "photos": [
         "assets\\img\\may1.jpg",
         "assets\\img\\may2.jpg",
@@ -158,10 +158,19 @@
     {
       "id": 9,
       "title": "September",
-      "letter": "",
-      "photos": [],
+      "letter": "Hello love,\nHappy Birthday sayo more birthday na magkasama tayo <3\n\n-Grayyy❤️",
+      "photos": [ 
+        "assets\\img\\sep1.jpg",
+        "assets\\img\\sep2.jpg",
+        "assets\\img\\sep3.jpg",
+        "assets\\img\\sep4.jpg",
+        "assets\\img\\sep5.jpg",
+        "assets\\img\\sep6.jpg",
+        "assets\\img\\sep7.jpg",
+        "assets\\img\\sep8.jpg",
+        "assets\\img\\sep9.jpg"],
       "voiceNote": "",
-      "surprise": "H sayo!",
+      "surprise": "H sayo!\nyes yung song is from summer that i turned pretty",
       "songsAdded": ["https://open.spotify.com/track/6oVxXO5oQ4pTpO8RSnkzvv"],
       "placesVisited": []
     },
