@@ -14,7 +14,7 @@
     homeSubhead:
       "Tara, open this month’s surprise. Mahal kita, today and always.",
     openButtonText: "Open",
-    footerText: "Happy Monthsary, Love! • Made with 💖",
+    footerText: "Happy Monthsary, Love! • Made with Grayyy",
     capsuleGreeting: "Happy Monthsary, Mi!",
     statusIcons: { unlocked: "❤️", ready: "💌", locked: "🔒" },
     statusText: { unlocked: "Opened", ready: "Ready", locked: "Coming Soon" },
@@ -111,9 +111,7 @@
   function confettiBurst() {
     const canvas = $("#confettiCanvas");
     if (!canvas) return;
-    +(
-      (+canvas.classList.add("is-active"))
-    );
+    +(+canvas.classList.add("is-active"));
 
     const ctx = canvas.getContext("2d");
     const dpr = Math.max(1, window.devicePixelRatio || 1);
@@ -144,8 +142,8 @@
     }));
 
     let t = 0;
-    const maxT = 80; 
-    const fadeFrames = 30; 
+    const maxT = 80;
+    const fadeFrames = 30;
 
     function tick() {
       t++;
@@ -174,7 +172,7 @@
         canvas.classList.remove("is-active");
         setTimeout(() => {
           ctx.clearRect(0, 0, W, H);
-        }, 400); 
+        }, 400);
       }
     }
     tick();
@@ -576,3 +574,60 @@
     });
   })();
 })();
+async function resetAppStorage() {
+  try {
+    // 1) Local/session storage
+    try {
+      localStorage.clear();
+    } catch {}
+    try {
+      sessionStorage.clear();
+    } catch {}
+
+    // If you used specific keys and want to be explicit (optional):
+    // localStorage.removeItem('mtc_capsules_override');
+
+    // 2) Cookies (best-effort: current path + root path)
+    const cookies = document.cookie.split(";").map((c) => c.trim());
+    const pathsToTry = [location.pathname, "/"];
+    const past = "Thu, 01 Jan 1970 00:00:00 GMT";
+    for (const c of cookies) {
+      const eq = c.indexOf("=");
+      const name = eq > -1 ? c.substring(0, eq) : c;
+      for (const p of pathsToTry) {
+        document.cookie = `${name}=; expires=${past}; path=${p}`;
+        document.cookie = `${name}=; expires=${past}; path=${p}; SameSite=Lax`;
+      }
+    }
+
+    // 3) Cache API (for fetch/request caches)
+    if (window.caches && caches.keys) {
+      const names = await caches.keys();
+      await Promise.all(names.map((n) => caches.delete(n)));
+    }
+
+    // 4) Service workers (if any)
+    if (navigator.serviceWorker) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+
+    // 5) Hard reload
+    location.reload();
+  } catch (e) {
+    alert("Reset failed. Please try again.");
+    console.error(e);
+  }
+}
+
+// Attach once the DOM is ready on every page
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btnReset");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      if (confirm("Clear cookies, cache, and storage for this site?")) {
+        resetAppStorage();
+      }
+    });
+  }
+});

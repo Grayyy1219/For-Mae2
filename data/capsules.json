@@ -10,10 +10,10 @@
     },
     "heartEmoji": "❤️",
     "homeHeadline": "Open this month’s capsule",
-    "homeSubhead": "Tara, open this month’s surprise. Mahal kita, today and always.",
+    "homeSubhead": "Hey there just want to make the most of every month.",
     "openButtonText": "Open",
-    "footerText": "Happy Monthsary, Love! • Made with 💖",
-    "capsuleGreeting": "Happy Monthsary, Mi!",
+    "footerText": "Happy Monthsary, Love! • Made with Grayyy",
+    "capsuleGreeting": "Happy Monthsary, Miyaaaaa!",
     "statusIcons": {
       "unlocked": "❤️",
       "ready": "💌",
@@ -27,33 +27,33 @@
       "#f472b6"
     ]
   },
- "startDate": "2022-03-24T00:00:00.000+08:00",
+  "startDate": "2022-03-24T00:00:00.000+08:00",
   "months": [
     {
       "id": 1,
-      "title": "Month 1",
-      "letter": "Mi,\n\nHappy first monthsary! Thank you for the laughs, the kilig, and every small moment we share. Here’s to many more.\n\n– Grayyy ❤️",
+      "title": "January",
+      "letter": "Mi,\n\nHappy first monthsary! Thank you for the laughs, the understanding, and every small moment we share. Here’s to many more.\n\n– Grayyy ❤️",
       "photos": [
-        "assets/sample1.jpg",
-        "assets/sample2.jpg"
+        "assets\\jan1.jpg",
+        "assets\\jan2.jpg"
       ],
       "voiceNote": "",
-      "surprise": "Coupon: Ice cream date on me 🍨",
-      "songsAdded": [
-        "https://open.spotify.com/track/04S1pkp1VaIqjg8zZqknR5/"
-      ],
-      "placesVisited": [
-        "Cafe",
-        "Park"
-      ]
+      "surprise": "Might another BGC be the solution we need?",
+      "songsAdded": [],
+      "placesVisited": []
     },
     {
       "id": 2,
-      "title": "Month 2",
-      "letter": "A sweet note for month two. 💌",
-      "photos": [],
+      "title": "February",
+      "letter": "A sweet note for month two, \"I hope we’re doing well together\"\n\n-Grayyy❤️",
+      "photos": [
+        "assets\\feb1.jpg",
+        "assets\\feb2.jpg",
+        "assets\\feb3.jpg",
+        "assets\\feb4.jpg"
+      ],
       "voiceNote": "",
-      "surprise": "Pasta night 🍝",
+      "surprise": "Let’s go to the museum?",
       "songsAdded": [],
       "placesVisited": []
     },
@@ -91,7 +91,17 @@
       "id": 6,
       "title": "Month 6",
       "letter": "",
-      "photos": [],
+      "photos": [
+        "assets\\june1.jpg",
+        "assets\\june2.jpg",
+        "assets\\june3.jpg",
+        "assets\\june4.jpg",
+        "assets\\june5.jpg",
+        "assets\\june6.jpg",
+        "assets\\june7.jpg",
+        "assets\\june8.jpg",
+        "assets\\june9.jpg"
+      ],
       "voiceNote": "",
       "surprise": "",
       "songsAdded": [],

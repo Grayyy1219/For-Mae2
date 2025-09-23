@@ -219,7 +219,7 @@ body {
 }
 
 .capsule-wrap {
-  max-width: 840px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 24px;
   display: grid;
@@ -247,6 +247,7 @@ body {
   gap: 10px;
   overflow-x: auto;
   padding-bottom: 6px;
+  flex-wrap: wrap;
 }
 .photo-strip img {
   height: 160px;
