@@ -120,12 +120,10 @@
         "assets\\img\\may1.mp4",
         "assets\\img\\may2.mp4",
         "assets\\img\\may3.mp4",
-        "assets\\img\\may4.jpg",
-        "assets\\img\\may5.jpg",
-        "assets\\img\\may6.jpg"
+        "assets\\img\\may4.jpg"
       ],
       "voiceNote": "",
-      "surprise": "hindi din ako mag sasawa sayo:>",
+      "surprise": "hindi din ako mag sasawa sayo:> sana ganto ka ulit ka sabik mag send ng tiktoks vid mo sakin",
       "songsAdded": ["https://open.spotify.com/track/1qrpoAMXodY6895hGKoUpA"],
       "placesVisited": ["KKV Cubao"]
     },
@@ -152,14 +150,15 @@
     {
       "id": 7,
       "title": "July",
-      "letter": "",
+      "letter": "Mi,\nagain I hope we’re doing well together even madalas tayo mag away \n\n-Grayyy❤️",
       "photos": [
         "assets\\img\\july1.mp4",
         "assets\\img\\july2.jpg",
         "assets\\img\\july3.jpg",
         "assets\\img\\july4.jpg",
         "assets\\img\\july5.jpg",
-        "assets\\img\\july6.jpg"],
+        "assets\\img\\july6.jpg"
+      ],
       "voiceNote": "",
       "surprise": "",
       "songsAdded": ["https://open.spotify.com/track/1BxfuPKGuaTgP7aM0Bbdwr?si=e7dc814100b241dc"],
@@ -169,7 +168,18 @@
       "id": 8,
       "title": "August",
       "letter": "",
-      "photos": [],
+      "photos": [
+        "assets\\img\\aug1.mp4",
+        "assets\\img\\aug1.jpg",
+        "assets\\img\\aug2.jpg",
+        "assets\\img\\aug3.jpg",
+        "assets\\img\\aug4.jpg",
+        "assets\\img\\aug5.jpg",
+        "assets\\img\\aug6.jpg",
+        "assets\\img\\aug1.png",
+        "assets\\img\\aug2.png",
+        "assets\\img\\aug3.png"
+      ],
       "voiceNote": "",
       "surprise": "",
       "songsAdded": ["https://open.spotify.com/track/3hUxzQpSfdDqwM3ZTFQY0K"],
