@@ -207,7 +207,7 @@
       if (!m.unlockDate) {
         const lastDay = new Date(year, i + 1, 0).getDate();
         const day = Math.min(anchorDay, lastDay);
-        const d = new Date(year, i, day, 12, 0, 0, 0);
+        const d = new Date(year, i, day, 0, 0, 1, 0);
         m.unlockDate = d.toISOString();
       }
       return m;
