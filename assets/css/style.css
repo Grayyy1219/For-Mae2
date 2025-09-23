@@ -281,7 +281,7 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 100;
+  z-index: 100000000;
 }
 
 .admin-wrap {

@@ -409,7 +409,7 @@
     });
   }
 
-  function typewriter(el, text, speed = 50) {
+  function typewriter(el, text, speed = 90) {
     el.textContent = "";
     let i = 0;
     const tick = () => {
@@ -458,7 +458,7 @@
     const closeOverlay = document.getElementById("closeOverlay");
 
     if (overlay && letterFull) {
-      typewriter(letterFull, letterText, 60);
+      typewriter(letterFull, letterText, 90);
 
       letterEl.textContent = letterText;
       if (closeOverlay) {
