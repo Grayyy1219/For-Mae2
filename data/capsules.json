@@ -35,10 +35,21 @@
       "letter": "Mi,\nHappy monthsary! Thank you for the laughs, the understanding, and every small moment we share. Here’s to many more.\n\n– Grayyy ❤️",
       "photos": [
         "assets\\img\\jan1.jpg",
-        "assets\\img\\jan2.jpg"
+        "assets\\img\\jan2.jpg",
+        "assets\\img\\jan3.jpg",
+        "assets\\img\\jan4.jpg",
+        "assets\\img\\jan5.jpg",
+        "assets\\img\\jan6.jpg",
+        "assets\\img\\jan7.jpg",
+        "assets\\img\\jan8.jpg",
+        "assets\\img\\jan9.jpg",
+        "assets\\img\\jan10.jpg",
+        "assets\\img\\jan11.jpg",
+        "assets\\img\\jan12.jpg",
+        "assets\\img\\jan13.jpg"
       ],
       "voiceNote": "",
-      "surprise": "Might another BGC be the solution we need?",
+      "surprise": "Let’s go to the museum? Next month?",
       "songsAdded": ["https://open.spotify.com/track/0GxW5K0qzrq7L1jwSY5OmY?si=1776b11fc8324170"],
       "placesVisited": ["BGC"]
     },
@@ -62,9 +73,9 @@
         "assets\\img\\feb13.jpg"
       ],
       "voiceNote": "",
-      "surprise": "Let’s go to the museum?",
+      "surprise": "Might another BGC be the solution we need?",
       "songsAdded": ["https://open.spotify.com/track/0ug5NqcwcFR2xrfTkc7k8e"],
-      "placesVisited": ["KKV Cubao"]
+      "placesVisited": []
     },
     {
       "id": 3,
@@ -106,9 +117,9 @@
       "title": "May",
       "letter": "Mi.\niknow my time na sumosobra ako, salamuch sa pag intindi🥺\n\n-Grayyy❤️",
       "photos": [
-        "assets\\img\\may1.jpg",
-        "assets\\img\\may2.jpg",
-        "assets\\img\\may3.jpg",
+        "assets\\img\\may1.mp4",
+        "assets\\img\\may2.mp4",
+        "assets\\img\\may3.mp4",
         "assets\\img\\may4.jpg",
         "assets\\img\\may5.jpg",
         "assets\\img\\may6.jpg"
@@ -116,7 +127,7 @@
       "voiceNote": "",
       "surprise": "hindi din ako mag sasawa sayo:>",
       "songsAdded": ["https://open.spotify.com/track/1qrpoAMXodY6895hGKoUpA"],
-      "placesVisited": [""]
+      "placesVisited": ["KKV Cubao"]
     },
     {
       "id": 6,
