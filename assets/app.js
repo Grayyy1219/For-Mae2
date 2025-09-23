@@ -409,14 +409,20 @@
     });
   }
 
-  function typewriter(el, text, speed = 14) {
+  function typewriter(el, text, speed = 50) {
     el.textContent = "";
     let i = 0;
     const tick = () => {
       if (i <= text.length) {
         el.textContent = text.slice(0, i);
+        const prev = text[i - 1] || "";
         i++;
-        setTimeout(tick, text[i - 1] === "\n" ? speed * 4 : speed);
+        let delay = speed;
+        if (prev === "\n") delay = speed * 8;
+        else if (".!?".includes(prev)) delay = speed * 6;
+        else if (",;:".includes(prev)) delay = speed * 3;
+
+        setTimeout(tick, delay);
       }
     };
     tick();
@@ -452,7 +458,7 @@
     const closeOverlay = document.getElementById("closeOverlay");
 
     if (overlay && letterFull) {
-      typewriter(letterFull, letterText, 12);
+      typewriter(letterFull, letterText, 60);
 
       letterEl.textContent = letterText;
       if (closeOverlay) {
