@@ -586,7 +586,6 @@
 
     let url =
       songs.find((u) => u.includes("open.spotify.com/track")) || songs[0] || "";
-
     if (url) {
       if (!/open\.spotify\.com\/embed\/track/.test(url)) {
         url = url.replace(
