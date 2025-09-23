@@ -3,10 +3,10 @@
   --panel: #141824;
   --text: #e9ecf3;
   --muted: #9aa3b2;
-  --accent: #8b5cf6; 
-  --accent-2: #c4b5fd; 
+  --accent: #8b5cf6;
+  --accent-2: #c4b5fd;
   --ring-track: #2a2f3f;
-  --ring-fill: #a78bfa; 
+  --ring-fill: #a78bfa;
 }
 * {
   box-sizing: border-box;
@@ -253,10 +253,10 @@ body {
 }
 
 .photo-strip video {
-    height: 200px;
-    width: auto;
-    border-radius: 10px;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+  height: 200px;
+  width: auto;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
 }
 .surprise {
   background: #121525;
@@ -290,7 +290,7 @@ body {
   transition: opacity 0.8s ease;
 }
 .confetti-canvas.is-active {
-  opacity: 1;
+  opacity: 0.5;
 }
 
 .admin-wrap {
@@ -325,7 +325,9 @@ body {
 .hidden {
   display: none !important;
 }
-
+.music-embed.hidden {
+  display: none;
+}
 .overlay {
   position: fixed;
   inset: 0;
@@ -342,7 +344,7 @@ body {
 }
 .overlay-card {
   position: relative;
-  width: min(900px, 92vw);
+  width: min(550px, 92vw);
   max-height: min(80vh, 900px);
   overflow: auto;
   background: #0b0f1e;

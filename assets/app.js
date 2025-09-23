@@ -107,6 +107,18 @@
       setTimeout(() => ctx.close(), 300);
     } catch {}
   }
+  function drawHeart(ctx, size, color) {
+    const s = size;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, -0.25 * s);
+    ctx.bezierCurveTo(0, -0.5 * s, -0.5 * s, -0.5 * s, -0.5 * s, -0.1 * s);
+    ctx.bezierCurveTo(-0.5 * s, 0.3 * s, 0, 0.55 * s, 0, 0.8 * s);
+    ctx.bezierCurveTo(0, 0.55 * s, 0.5 * s, 0.3 * s, 0.5 * s, -0.1 * s);
+    ctx.bezierCurveTo(0.5 * s, -0.5 * s, 0, -0.5 * s, 0, -0.25 * s);
+    ctx.closePath();
+    ctx.fill();
+  }
 
   function confettiBurst() {
     const canvas = $("#confettiCanvas");
@@ -130,24 +142,32 @@
       "#f472b6",
     ];
 
-    const parts = Array.from({ length: 160 }, () => ({
-      x: Math.random() * W,
-      y: -20 + Math.random() * 20,
-      vx: -2 + Math.random() * 4,
-      vy: 1 + Math.random() * 3,
-      s: 6 + Math.random() * 8,
-      rot: Math.random() * Math.PI,
-      vr: -0.2 + Math.random() * 0.4,
-      col: colors[(Math.random() * colors.length) | 0],
-    }));
+    const initial = 80;
+    const parts = Array.from({ length: initial }, () => ({}));
+    const emitFor = 180;
+    const perFrame = 2;
 
     let t = 0;
-    const maxT = 80;
-    const fadeFrames = 30;
+    const maxT = 160;
+    const fadeFrames = 80;
 
     function tick() {
       t++;
       ctx.clearRect(0, 0, W, H);
+      if (t < emitFor) {
+        for (let k = 0; k < perFrame; k++) {
+          parts.push({
+            x: Math.random() * W,
+            y: -20 + Math.random() * 20,
+            vx: -2 + Math.random() * 4,
+            vy: 0.6 + Math.random() * 1.6,
+            s: 8 + Math.random() * 10,
+            rot: Math.random() * Math.PI,
+            vr: -0.15 + Math.random() * 0.3,
+            col: colors[(Math.random() * colors.length) | 0],
+          });
+        }
+      }
 
       const alpha = t <= maxT ? 1 : Math.max(0, 1 - (t - maxT) / fadeFrames);
       ctx.globalAlpha = alpha;
@@ -155,13 +175,14 @@
       for (const p of parts) {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.03;
+        p.vy += 0.115;
+        p.vx *= 0.995;
+        p.vy *= 0.997;
         p.rot += p.vr;
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot);
-        ctx.fillStyle = p.col;
-        ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+        drawHeart(ctx, p.s, p.col);
         ctx.restore();
       }
 
@@ -515,34 +536,33 @@
       typewriter(letterEl, letterText);
     }
 
-const strip = $("#photos");
-strip.innerHTML = "";
+    const strip = $("#photos");
+    strip.innerHTML = "";
 
-(month.photos || []).forEach((src) => {
-  const isVideo = /\.mp4(\?|#|$)/i.test(src);
+    (month.photos || []).forEach((src) => {
+      const isVideo = /\.mp4(\?|#|$)/i.test(src);
 
-  if (isVideo) {
-    const v = document.createElement("video");
-    v.src = src;
-    v.loop = true;
-    v.autoplay = true;   // auto-play the loop
-    v.muted = true;      // required for autoplay on most browsers
-    v.playsInline = true; // iOS inline playback
-    v.preload = "metadata";
-    // v.controls = true; // uncomment if you want controls
-    v.className = "media";
-    strip.appendChild(v);
-  } else {
-    const img = document.createElement("img");
-    img.loading = "lazy";
-    img.decoding = "async";
-    img.src = src;
-    img.alt = "Photo";
-    img.className = "media";
-    strip.appendChild(img);
-  }
-});
+      if (isVideo) {
+        const v = document.createElement("video");
+        v.src = src;
+        v.loop = true;
+        v.autoplay = true;
+        v.muted = true;
+        v.playsInline = true;
+        v.preload = "metadata";
 
+        v.className = "media";
+        strip.appendChild(v);
+      } else {
+        const img = document.createElement("img");
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.src = src;
+        img.alt = "Photo";
+        img.className = "media";
+        strip.appendChild(img);
+      }
+    });
 
     const audio = $("#voice");
     if (month.voiceNote) {
@@ -559,10 +579,30 @@ strip.innerHTML = "";
       0,
       Math.floor((now().getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
     );
-    const songs = data.months.reduce(
-      (acc, m) => acc + (m.songsAdded || []).length,
-      0
-    );
+
+    const songs = month.songsAdded || [];
+    const musicEmbed = document.getElementById("musicEmbed");
+    const musicFrame = document.getElementById("musicFrame");
+
+    let url =
+      songs.find((u) => u.includes("open.spotify.com/track")) || songs[0] || "";
+
+    if (url) {
+      if (!/open\.spotify\.com\/embed\/track/.test(url)) {
+        url = url.replace(
+          "open.spotify.com/track",
+          "open.spotify.com/embed/track"
+        );
+      }
+
+      const sep = url.includes("?") ? "&" : "?";
+      if (musicFrame) musicFrame.src = url + sep + "utm_source=gen&autoplay=1";
+      if (musicEmbed) musicEmbed.classList.remove("hidden");
+    } else {
+      if (musicEmbed) musicEmbed.classList.add("hidden");
+      if (musicFrame) musicFrame.removeAttribute("src");
+    }
+
     const places = data.months.reduce(
       (acc, m) => acc + (m.placesVisited || []).length,
       0
@@ -594,7 +634,6 @@ strip.innerHTML = "";
 })();
 async function resetAppStorage() {
   try {
-    // 1) Local/session storage
     try {
       localStorage.clear();
     } catch {}
@@ -602,10 +641,6 @@ async function resetAppStorage() {
       sessionStorage.clear();
     } catch {}
 
-    // If you used specific keys and want to be explicit (optional):
-    // localStorage.removeItem('mtc_capsules_override');
-
-    // 2) Cookies (best-effort: current path + root path)
     const cookies = document.cookie.split(";").map((c) => c.trim());
     const pathsToTry = [location.pathname, "/"];
     const past = "Thu, 01 Jan 1970 00:00:00 GMT";
@@ -618,19 +653,16 @@ async function resetAppStorage() {
       }
     }
 
-    // 3) Cache API (for fetch/request caches)
     if (window.caches && caches.keys) {
       const names = await caches.keys();
       await Promise.all(names.map((n) => caches.delete(n)));
     }
 
-    // 4) Service workers (if any)
     if (navigator.serviceWorker) {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.unregister()));
     }
 
-    // 5) Hard reload
     location.reload();
   } catch (e) {
     alert("Reset failed. Please try again.");
@@ -638,7 +670,6 @@ async function resetAppStorage() {
   }
 }
 
-// Attach once the DOM is ready on every page
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btnReset");
   if (btn) {

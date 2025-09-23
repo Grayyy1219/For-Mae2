@@ -32,14 +32,14 @@
     {
       "id": 1,
       "title": "January",
-      "letter": "Mi,\nHappy first monthsary! Thank you for the laughs, the understanding, and every small moment we share. Here’s to many more.\n\n– Grayyy ❤️",
+      "letter": "Mi,\nHappy monthsary! Thank you for the laughs, the understanding, and every small moment we share. Here’s to many more.\n\n– Grayyy ❤️",
       "photos": [
-        "assets\\jan1.jpg",
-        "assets\\jan2.jpg"
+        "assets\\img\\jan1.jpg",
+        "assets\\img\\jan2.jpg"
       ],
       "voiceNote": "",
       "surprise": "Might another BGC be the solution we need?",
-      "songsAdded": [],
+      "songsAdded": ["https://open.spotify.com/track/0GxW5K0qzrq7L1jwSY5OmY?si=1776b11fc8324170"],
       "placesVisited": ["BGC"]
     },
     {
@@ -47,10 +47,10 @@
       "title": "February",
       "letter": "Mi,\nA sweet note for month two, \"I hope we’re doing well together\"\n\n-Grayyy❤️",
       "photos": [
-        "assets\\feb1.jpg",
-        "assets\\feb2.jpg",
-        "assets\\feb3.jpg",
-        "assets\\feb4.jpg"
+        "assets\\img\\feb1.jpg",
+        "assets\\img\\feb2.jpg",
+        "assets\\img\\feb3.jpg",
+        "assets\\img\\feb4.jpg"
       ],
       "voiceNote": "",
       "surprise": "Let’s go to the museum?",
@@ -62,13 +62,13 @@
       "title": "March",
       "letter": "Hello Mi!\nI’ve continue working this website for you. sakit na ulo ko huhu, but it’s worth it hope you love it!. Happy Anniversary.\n\n-Grayyy❤️",
       "photos": [
-        "assets\\march1.jpg",
-        "assets\\march2.jpg",
-        "assets\\march3.jpg",
-        "assets\\march4.jpg",
-        "assets\\march5.jpg",
-        "assets\\march6.jpg",
-        "assets\\march7.jpg"
+        "assets\\img\\march1.jpg",
+        "assets\\img\\march2.jpg",
+        "assets\\img\\march3.jpg",
+        "assets\\img\\march4.jpg",
+        "assets\\img\\march5.jpg",
+        "assets\\img\\march6.jpg",
+        "assets\\img\\march7.jpg"
       ],
       "voiceNote": "",
       "surprise": "Documentation nalang then ggraduate na tayo :>",
@@ -91,12 +91,12 @@
       "title": "May",
       "letter": "Mi,\nI love Ice skating with you, steady hearts. Maybe we have our problems, but I still choose you. Always.\n\n-Grayyy❤️",
       "photos": [
-        "assets\\may1.jpg",
-        "assets\\may2.jpg",
-        "assets\\may3.jpg",
-        "assets\\may4.jpg",
-        "assets\\may5.jpg",
-        "assets\\may6.jpg"
+        "assets\\img\\may1.jpg",
+        "assets\\img\\may2.jpg",
+        "assets\\img\\may3.jpg",
+        "assets\\img\\may4.jpg",
+        "assets\\img\\may5.jpg",
+        "assets\\img\\may6.jpg"
       ],
       "voiceNote": "",
       "surprise": "I hope we can do this again :<",
@@ -108,15 +108,15 @@
       "title": "June",
       "letter": "Mi,\nI hope we can keep things just like this.\n\n-Grayyy❤️",
       "photos": [
-        "assets\\june1.mp4",
-        "assets\\june2.jpg",
-        "assets\\june3.jpg",
-        "assets\\june4.jpg",
-        "assets\\june5.jpg",
-        "assets\\june6.jpg",
-        "assets\\june7.jpg",
-        "assets\\june8.jpg",
-        "assets\\june9.jpg"
+        "assets\\img\\june1.mp4",
+        "assets\\img\\june2.jpg",
+        "assets\\img\\june3.jpg",
+        "assets\\img\\june4.jpg",
+        "assets\\img\\june5.jpg",
+        "assets\\img\\june6.jpg",
+        "assets\\img\\june7.jpg",
+        "assets\\img\\june8.jpg",
+        "assets\\img\\june9.jpg"
       ],
       "voiceNote": "",
       "surprise": "Happy?",
@@ -127,10 +127,16 @@
       "id": 7,
       "title": "July",
       "letter": "",
-      "photos": [],
+      "photos": [
+        "assets\\img\\july1.mp4",
+        "assets\\img\\july2.jpg",
+        "assets\\img\\july3.jpg",
+        "assets\\img\\july4.jpg",
+        "assets\\img\\july5.jpg",
+        "assets\\img\\july6.jpg"],
       "voiceNote": "",
       "surprise": "",
-      "songsAdded": [],
+      "songsAdded": ["https://open.spotify.com/track/1BxfuPKGuaTgP7aM0Bbdwr?si=e7dc814100b241dc"],
       "placesVisited": []
     },
     {
