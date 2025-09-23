@@ -32,7 +32,7 @@
     {
       "id": 1,
       "title": "January",
-      "letter": "Mi,\n\nHappy first monthsary! Thank you for the laughs, the understanding, and every small moment we share. Here’s to many more.\n\n– Grayyy ❤️",
+      "letter": "Mi,\nHappy first monthsary! Thank you for the laughs, the understanding, and every small moment we share. Here’s to many more.\n\n– Grayyy ❤️",
       "photos": [
         "assets\\jan1.jpg",
         "assets\\jan2.jpg"
@@ -40,12 +40,12 @@
       "voiceNote": "",
       "surprise": "Might another BGC be the solution we need?",
       "songsAdded": [],
-      "placesVisited": []
+      "placesVisited": ["BGC"]
     },
     {
       "id": 2,
       "title": "February",
-      "letter": "A sweet note for month two, \"I hope we’re doing well together\"\n\n-Grayyy❤️",
+      "letter": "Mi,\nA sweet note for month two, \"I hope we’re doing well together\"\n\n-Grayyy❤️",
       "photos": [
         "assets\\feb1.jpg",
         "assets\\feb2.jpg",
@@ -55,21 +55,30 @@
       "voiceNote": "",
       "surprise": "Let’s go to the museum?",
       "songsAdded": [],
-      "placesVisited": []
+      "placesVisited": ["KKV Cubao"]
     },
     {
       "id": 3,
-      "title": "Month 3",
-      "letter": "Quarter-year love note.",
-      "photos": [],
+      "title": "March",
+      "letter": "Hello Mi!\nI’ve continue working this website for you. sakit na ulo ko huhu, but it’s worth it hope you love it!. Happy Anniversary.\n\n-Grayyy❤️",
+      "photos": [
+        "assets\\march1.jpg",
+        "assets\\march2.jpg",
+        "assets\\march3.jpg",
+        "assets\\march4.jpg",
+        "assets\\march5.jpg",
+        "assets\\march6.jpg",
+        "assets\\march7.jpg"
+      ],
       "voiceNote": "",
-      "surprise": "Sunset walk 🌅",
+      "surprise": "Documentation nalang then ggraduate na tayo :>",
       "songsAdded": [],
-      "placesVisited": []
+      "placesVisited": ["BSU"]
     },
+ 
     {
       "id": 4,
-      "title": "Month 4",
+      "title": "April",
       "letter": "",
       "photos": [],
       "voiceNote": "",
@@ -77,22 +86,29 @@
       "songsAdded": [],
       "placesVisited": []
     },
-    {
+       {
       "id": 5,
-      "title": "Month 5",
-      "letter": "",
-      "photos": [],
+      "title": "May",
+      "letter": "Mi,\nI love Ice skating with you, steady hearts. Maybe we have our problems, but I still choose you. Always.\n\n-Grayyy❤️",
+      "photos": [
+        "assets\\may1.jpg",
+        "assets\\may2.jpg",
+        "assets\\may3.jpg",
+        "assets\\may4.jpg",
+        "assets\\may5.jpg",
+        "assets\\may6.jpg"
+      ],
       "voiceNote": "",
-      "surprise": "",
+      "surprise": "I hope we can do this again :<",
       "songsAdded": [],
-      "placesVisited": []
+      "placesVisited": ["SM Mega Mall"]
     },
     {
       "id": 6,
-      "title": "Month 6",
-      "letter": "",
+      "title": "June",
+      "letter": "Mi,\nI hope we can keep things just like this.\n\n-Grayyy❤️",
       "photos": [
-        "assets\\june1.jpg",
+        "assets\\june1.mp4",
         "assets\\june2.jpg",
         "assets\\june3.jpg",
         "assets\\june4.jpg",
@@ -103,13 +119,13 @@
         "assets\\june9.jpg"
       ],
       "voiceNote": "",
-      "surprise": "",
+      "surprise": "Happy?",
       "songsAdded": [],
       "placesVisited": []
     },
     {
       "id": 7,
-      "title": "Month 7",
+      "title": "July",
       "letter": "",
       "photos": [],
       "voiceNote": "",
@@ -119,7 +135,7 @@
     },
     {
       "id": 8,
-      "title": "Month 8",
+      "title": "August",
       "letter": "",
       "photos": [],
       "voiceNote": "",
@@ -129,7 +145,7 @@
     },
     {
       "id": 9,
-      "title": "Month 9",
+      "title": "September",
       "letter": "",
       "photos": [],
       "voiceNote": "",
