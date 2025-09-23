@@ -1,20 +1,15 @@
-/* Base layout */
 :root {
   --bg: #0f1115;
   --panel: #141824;
   --text: #e9ecf3;
   --muted: #9aa3b2;
-  --accent: #8b5cf6; /* primary purple */
-  --accent-2: #c4b5fd; /* light purple */
+  --accent: #8b5cf6; 
+  --accent-2: #c4b5fd; 
   --ring-track: #2a2f3f;
-  --ring-fill: #a78bfa; /* ring progress purple */
+  --ring-fill: #a78bfa; 
 }
 * {
   box-sizing: border-box;
-}
-html,
-body {
-  height: 100%;
 }
 body {
   margin: 0;
@@ -219,7 +214,7 @@ body {
 }
 
 .capsule-wrap {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
   display: grid;
@@ -233,6 +228,7 @@ body {
 .capsule-header h1 {
   margin: 0;
 }
+
 .typewriter {
   white-space: pre-wrap;
   line-height: 1.6;
@@ -250,10 +246,17 @@ body {
   flex-wrap: wrap;
 }
 .photo-strip img {
-  height: 160px;
+  height: 200px;
   width: auto;
   border-radius: 10px;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+
+.photo-strip video {
+    height: 200px;
+    width: auto;
+    border-radius: 10px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
 }
 .surprise {
   background: #121525;

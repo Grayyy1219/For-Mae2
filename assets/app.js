@@ -515,16 +515,34 @@
       typewriter(letterEl, letterText);
     }
 
-    const strip = $("#photos");
-    strip.innerHTML = "";
-    (month.photos || []).forEach((src) => {
-      const img = document.createElement("img");
-      img.loading = "lazy";
-      img.decoding = "async";
-      img.src = src;
-      img.alt = "Photo";
-      strip.appendChild(img);
-    });
+const strip = $("#photos");
+strip.innerHTML = "";
+
+(month.photos || []).forEach((src) => {
+  const isVideo = /\.mp4(\?|#|$)/i.test(src);
+
+  if (isVideo) {
+    const v = document.createElement("video");
+    v.src = src;
+    v.loop = true;
+    v.autoplay = true;   // auto-play the loop
+    v.muted = true;      // required for autoplay on most browsers
+    v.playsInline = true; // iOS inline playback
+    v.preload = "metadata";
+    // v.controls = true; // uncomment if you want controls
+    v.className = "media";
+    strip.appendChild(v);
+  } else {
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.src = src;
+    img.alt = "Photo";
+    img.className = "media";
+    strip.appendChild(img);
+  }
+});
+
 
     const audio = $("#voice");
     if (month.voiceNote) {
