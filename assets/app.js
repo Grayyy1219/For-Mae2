@@ -519,22 +519,25 @@
     const letterFull = document.getElementById("letterFull");
     const closeOverlay = document.getElementById("closeOverlay");
 
-    if (overlay && letterFull) {
-      if (closeOverlay) closeOverlay.classList.add("hidden");
-
-      typewriter(letterFull, letterText, 90, () => {
-        if (closeOverlay) closeOverlay.classList.remove("hidden");
-      });
-
-      letterEl.textContent = letterText;
-      if (closeOverlay) {
-        closeOverlay.onclick = () => {
-          overlay.classList.add("hidden");
-        };
+    let startedTyping = false;
+    const startTyping = () => {
+      if (startedTyping) return;
+      startedTyping = true;
+      if (overlay && letterFull) {
+        if (closeOverlay) closeOverlay.classList.add("hidden");
+        typewriter(letterFull, letterText, 90, () => {
+          if (closeOverlay) closeOverlay.classList.remove("hidden");
+        });
+        letterEl.textContent = letterText;
+        if (closeOverlay) {
+          closeOverlay.onclick = () => {
+            overlay.classList.add("hidden");
+          };
+        }
+      } else {
+        typewriter(letterEl, letterText);
       }
-    } else {
-      typewriter(letterEl, letterText);
-    }
+    };
 
     const strip = $("#photos");
     strip.innerHTML = "";
@@ -582,24 +585,36 @@
 
     const songs = month.songsAdded || [];
     const musicEmbed = document.getElementById("musicEmbed");
-    const musicFrame = document.getElementById("musicFrame");
+    const mount = document.getElementById("spotifyMount");
 
-    let url =
-      songs.find((u) => u.includes("open.spotify.com/track")) || songs[0] || "";
-    if (url) {
-      if (!/open\.spotify\.com\/embed\/track/.test(url)) {
-        url = url.replace(
-          "open.spotify.com/track",
-          "open.spotify.com/embed/track"
-        );
-      }
+    const sp = songs.find((u) => /open\.spotify\.com\/track\//.test(u));
+    let trackId = null;
+    if (sp) {
+      const m = sp.match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
+      trackId = m && m[1];
+    }
 
-      const sep = url.includes("?") ? "&" : "?";
-      if (musicFrame) musicFrame.src = url + sep + "utm_source=gen&autoplay=1";
+    if (trackId && mount) {
       if (musicEmbed) musicEmbed.classList.remove("hidden");
+
+      window.__initSpotifyEmbed = (IFrameAPI) => {
+        IFrameAPI.createController(
+          mount,
+          { uri: `spotify:track:${trackId}`, width: "100%", height: 152 },
+          (EmbedController) => {
+            EmbedController.addListener("playback_started", startTyping);
+            EmbedController.addListener("playback_update", (e) => {
+              if (!e.data.isPaused) startTyping();
+            });
+          }
+        );
+      };
+
+      if (window.__SpotifyIFrameAPI) {
+        window.__initSpotifyEmbed(window.__SpotifyIFrameAPI);
+      }
     } else {
-      if (musicEmbed) musicEmbed.classList.add("hidden");
-      if (musicFrame) musicFrame.removeAttribute("src");
+      startTyping();
     }
 
     const places = data.months.reduce(
