@@ -376,6 +376,31 @@ body {
 .overlay-close:hover {
   background: #2a3046;
 }
+.overlay-skip {
+  position: absolute;
+  top: 8px;
+  right: 52px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: #1f2436;
+  color: var(--text);
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.overlay-skip:hover {
+  background: #2a3046;
+  transform: translateY(-1px);
+}
+.overlay-skip svg {
+  width: 18px;
+  height: 18px;
+}
 .typewriter-large {
   min-height: 10px;
   font-size: 18px;

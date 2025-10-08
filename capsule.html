@@ -20,7 +20,7 @@
     <script defer src="assets/app.js"></script>
   </head>
   <body data-page="capsule">
-    <div id="letterOverlay" class="overlay">
+    <div id="letterOverlay" class="overlay hidden">
       <div class="overlay-card">
         <button
           id="closeOverlay"
@@ -28,6 +28,19 @@
           aria-label="Close letter"
         >
           ✕
+        </button>
+        <button
+          id="skipOverlay"
+          class="overlay-skip hidden"
+          type="button"
+          aria-label="Skip letter animation"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M5 5.75a.75.75 0 0 1 1.2-.6l7.05 5.64a1 1 0 0 1 0 1.52L6.2 17.94a.75.75 0 0 1-1.2-.6zM13 5.75a.75.75 0 0 1 1.2-.6l7.05 5.64a1 1 0 0 1 0 1.52l-7.05 5.63a.75.75 0 0 1-1.2-.6z"
+              fill="currentColor"
+            />
+          </svg>
         </button>
         <div class="overlay-header">Happy Monthsary, Mi!</div>
         <div id="letterFull" class="typewriter typewriter-large"></div>

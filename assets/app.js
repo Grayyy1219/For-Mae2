@@ -413,7 +413,7 @@
           confettiBurst();
           softBeep();
           setTimeout(() => {
-            window.location.href = `capsule.html?m=${currentOpenable.id}`;
+            window.location.href = `capsule.html?m=${currentOpenable.id}&auto=open`;
           }, 250);
         };
       } else {
@@ -442,52 +442,47 @@
         saveUnlocked(unlocked);
         confettiBurst();
         softBeep();
-        window.location.href = `capsule.html?m=${id}`;
+        window.location.href = `capsule.html?m=${id}&auto=open`;
       });
     });
   }
 
-  function typewriter(el, text, speed = 90) {
-    el.textContent = "";
-    let i = 0;
-    const tick = () => {
-      if (i <= text.length) {
-        el.textContent = text.slice(0, i);
-        const prev = text[i - 1] || "";
-        i++;
-        let delay = speed;
-        if (prev === "\n") delay = speed * 8;
-        else if (".!?".includes(prev)) delay = speed * 6;
-        else if (",;:".includes(prev)) delay = speed * 3;
-
-        setTimeout(tick, delay);
-      }
-    };
-    tick();
-  }
   function typewriter(el, text, speed = 90, onDone) {
     el.textContent = "";
     let i = 0;
-    const tick = () => {
-      if (i <= text.length) {
-        el.textContent = text.slice(0, i);
-        const prev = text[i - 1] || "";
-        i++;
+    let timeoutId = null;
+    let finished = false;
 
-        if (i > text.length) {
-          if (typeof onDone === "function") onDone();
-          return;
-        }
-
-        let delay = speed;
-        if (prev === "\n") delay = speed * 8;
-        else if (".!?".includes(prev)) delay = speed * 6;
-        else if (",;:".includes(prev)) delay = speed * 3;
-
-        setTimeout(tick, delay);
-      }
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      el.textContent = text;
+      if (typeof onDone === "function") onDone();
     };
+
+    const tick = () => {
+      if (finished) return;
+      el.textContent = text.slice(0, i);
+      const prev = text[i - 1] || "";
+      i++;
+
+      if (i > text.length) {
+        finish();
+        return;
+      }
+
+      let delay = speed;
+      if (prev === "\n") delay = speed * 8;
+      else if (".!?".includes(prev)) delay = speed * 6;
+      else if (",;:".includes(prev)) delay = speed * 3;
+
+      timeoutId = setTimeout(tick, delay);
+    };
+
     tick();
+
+    return { skip: finish };
   }
 
   function renderCapsule(data) {
@@ -518,26 +513,65 @@
     const overlay = document.getElementById("letterOverlay");
     const letterFull = document.getElementById("letterFull");
     const closeOverlay = document.getElementById("closeOverlay");
+    const shouldShowOverlay = params.get("auto") === "open";
+    const skipOverlay = document.getElementById("skipOverlay");
+
+    if (overlay) {
+      overlay.classList.toggle("hidden", !shouldShowOverlay);
+    }
+
+    if (skipOverlay) {
+      skipOverlay.classList.toggle("hidden", !shouldShowOverlay);
+    }
+
+    if (letterEl) {
+      letterEl.textContent = letterText;
+    }
+
+    const finishOverlay = () => {
+      if (!shouldShowOverlay) return;
+      if (closeOverlay) closeOverlay.classList.remove("hidden");
+      if (skipOverlay) skipOverlay.classList.add("hidden");
+    };
 
     let startedTyping = false;
+    let controller = null;
     const startTyping = () => {
       if (startedTyping) return;
       startedTyping = true;
       if (overlay && letterFull) {
-        if (closeOverlay) closeOverlay.classList.add("hidden");
-        typewriter(letterFull, letterText, 90, () => {
-          if (closeOverlay) closeOverlay.classList.remove("hidden");
-        });
-        letterEl.textContent = letterText;
         if (closeOverlay) {
           closeOverlay.onclick = () => {
             overlay.classList.add("hidden");
+            finishOverlay();
           };
+        }
+
+        if (shouldShowOverlay) {
+          if (closeOverlay) closeOverlay.classList.add("hidden");
+
+          controller = typewriter(letterFull, letterText, 90, finishOverlay);
+        } else {
+          letterFull.textContent = letterText;
+          finishOverlay();
         }
       } else {
         typewriter(letterEl, letterText);
+        finishOverlay();
       }
     };
+
+    if (skipOverlay) {
+      skipOverlay.onclick = () => {
+        if (!startedTyping) startTyping();
+        if (controller && typeof controller.skip === "function") {
+          controller.skip();
+        } else if (letterFull) {
+          letterFull.textContent = letterText;
+        }
+        finishOverlay();
+      };
+    }
 
     const strip = $("#photos");
     strip.innerHTML = "";
