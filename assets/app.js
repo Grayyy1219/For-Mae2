@@ -517,8 +517,82 @@
     const shouldShowOverlay = params.get("auto") === "open";
     const skipOverlay = document.getElementById("skipOverlay");
 
+    let overlayCloseListener = null;
+    let overlayCloseFallback = null;
+
+    const cleanupOverlayClose = () => {
+      if (overlay && overlayCloseListener) {
+        overlay.removeEventListener("transitionend", overlayCloseListener);
+      }
+      if (overlayCloseFallback) {
+        clearTimeout(overlayCloseFallback);
+      }
+      overlayCloseListener = null;
+      overlayCloseFallback = null;
+    };
+
+    const finalizeOverlayHide = () => {
+      if (!overlay) return;
+      cleanupOverlayClose();
+      overlay.classList.remove("is-visible");
+      overlay.classList.add("hidden");
+      overlay.classList.remove("is-closing");
+    };
+
+    const hideOverlay = ({ instant } = {}) => {
+      if (!overlay) return;
+      overlay.classList.remove("is-visible");
+
+      if (instant || overlay.classList.contains("hidden")) {
+        finalizeOverlayHide();
+        return;
+      }
+
+      overlay.classList.add("is-closing");
+      cleanupOverlayClose();
+
+      overlayCloseListener = (event) => {
+        if (event.target !== overlay || event.propertyName !== "opacity") {
+          return;
+        }
+        cleanupOverlayClose();
+        if (overlay.classList.contains("is-visible")) {
+          overlay.classList.remove("is-closing");
+          return;
+        }
+        finalizeOverlayHide();
+      };
+
+      overlay.addEventListener("transitionend", overlayCloseListener);
+
+      overlayCloseFallback = setTimeout(() => {
+        cleanupOverlayClose();
+        if (overlay.classList.contains("is-visible")) {
+          overlay.classList.remove("is-closing");
+          return;
+        }
+        finalizeOverlayHide();
+      }, 340);
+    };
+
+    const showOverlay = () => {
+      if (!overlay) return;
+      cleanupOverlayClose();
+      overlay.classList.remove("hidden", "is-closing");
+      overlay.classList.remove("is-visible");
+      requestAnimationFrame(() => {
+        if (!overlay.classList.contains("hidden")) {
+          overlay.classList.add("is-visible");
+        }
+      });
+    };
+
     if (overlay) {
-      overlay.classList.toggle("hidden", !shouldShowOverlay);
+      if (shouldShowOverlay) {
+        showOverlay();
+      } else {
+        hideOverlay({ instant: true });
+      }
     }
 
     if (skipOverlay) {
@@ -543,7 +617,7 @@
       if (overlay && letterFull) {
         if (closeOverlay) {
           closeOverlay.onclick = () => {
-            overlay.classList.add("hidden");
+            hideOverlay();
             finishOverlay();
           };
         }
@@ -649,7 +723,6 @@
         attemptSpotifyPlay();
       };
 
-      overlay.addEventListener("mouseenter", triggerPlay);
       overlay.addEventListener("touchstart", triggerPlay, { passive: true });
 
       const watchOverlayState = () => {
