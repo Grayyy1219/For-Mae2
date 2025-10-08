@@ -513,6 +513,7 @@
     const overlay = document.getElementById("letterOverlay");
     const letterFull = document.getElementById("letterFull");
     const closeOverlay = document.getElementById("closeOverlay");
+    const autoplayHint = document.getElementById("autoplayHint");
     const shouldShowOverlay = params.get("auto") === "open";
     const skipOverlay = document.getElementById("skipOverlay");
 
@@ -628,6 +629,43 @@
       trackId = m && m[1];
     }
 
+    let spotifyController = null;
+    const hideAutoplayHint = () => {
+      if (autoplayHint) autoplayHint.classList.add("hidden");
+    };
+    const attemptSpotifyPlay = () => {
+      if (!spotifyController || !overlay || overlay.classList.contains("hidden")) {
+        return;
+      }
+      try {
+        spotifyController.play();
+      } catch (err) {
+        console.error("Failed to start Spotify playback", err);
+      }
+    };
+
+    if (overlay) {
+      const triggerPlay = () => {
+        attemptSpotifyPlay();
+      };
+
+      overlay.addEventListener("mouseenter", triggerPlay);
+      overlay.addEventListener("touchstart", triggerPlay, { passive: true });
+
+      const watchOverlayState = () => {
+        if (!overlay.classList.contains("hidden")) {
+          attemptSpotifyPlay();
+        }
+      };
+
+      if (typeof MutationObserver !== "undefined") {
+        const observer = new MutationObserver(watchOverlayState);
+        observer.observe(overlay, { attributes: true, attributeFilter: ["class"] });
+      }
+
+      watchOverlayState();
+    }
+
     if (trackId && mount) {
       if (musicEmbed) musicEmbed.classList.remove("hidden");
 
@@ -636,9 +674,17 @@
           mount,
           { uri: `spotify:track:${trackId}`, width: "100%", height: 152 },
           (EmbedController) => {
-            EmbedController.addListener("playback_started", startTyping);
+            spotifyController = EmbedController;
+            attemptSpotifyPlay();
+            EmbedController.addListener("playback_started", () => {
+              hideAutoplayHint();
+              startTyping();
+            });
             EmbedController.addListener("playback_update", (e) => {
-              if (!e.data.isPaused) startTyping();
+              if (!e.data.isPaused) {
+                hideAutoplayHint();
+                startTyping();
+              }
             });
           }
         );
