@@ -380,12 +380,12 @@ body {
   position: absolute;
   top: 8px;
   right: 52px;
-  width: 36px;
+  width: 56px;
   height: 36px;
   border: 0;
   background: #1f2436;
   color: var(--text);
-  border-radius: 50%;
+  border-radius: 20px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
