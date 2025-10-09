@@ -29,14 +29,21 @@ body {
   top: 0;
   z-index: 30;
 }
-.site-footer {
+.site-footer,
+.site-footer-index {
   position: sticky;
   bottom: 0;
   padding: 12px 20px;
   background: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(6px);
 }
-
+.site-footer-index {
+  display: flex;
+  position: static;
+  margin-top: 32px;
+  justify-content: center;
+  background: transparent;
+}
 .site-footer p {
   margin: 0 0 8px;
   font-size: 24px;
