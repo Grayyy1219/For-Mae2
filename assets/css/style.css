@@ -18,8 +18,7 @@ body {
   background: radial-gradient(1200px 800px at 80% 0%, #1a2030, #0f1115 60%);
   color: var(--text);
 }
-.site-header,
-.site-footer {
+.site-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -31,10 +30,16 @@ body {
   z-index: 30;
 }
 .site-footer {
-  position: static;
-  margin-top: 32px;
-  justify-content: center;
-  background: transparent;
+  position: sticky;
+  bottom: 0;
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(6px);
+}
+
+.site-footer p {
+  margin: 0 0 8px;
+  font-size: 24px;
 }
 .brand {
   font-weight: 700;
