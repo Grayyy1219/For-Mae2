@@ -518,9 +518,8 @@
     const skipOverlay = document.getElementById("skipOverlay");
 
     const highlightSongsStat = () => {
-      const statValue = document.getElementById("statSongs");
-      if (!statValue) return;
-      const statCard = statValue.closest(".stat-card") || statValue;
+      const statCard = document.getElementById("footerSpotifyCard");
+      if (!statCard) return;
 
       statCard.classList.remove("stat-highlight");
       // Force reflow so the animation can restart if triggered repeatedly.
@@ -537,128 +536,11 @@
     };
 
     const animateSpotifyFlyout = () => {
-      const musicEmbed = document.getElementById("musicEmbed");
-      const statValue = document.getElementById("statSongs");
-      if (!musicEmbed || !statValue || musicEmbed.classList.contains("hidden")) {
+      const statCard = document.getElementById("footerSpotifyCard");
+      if (!statCard || statCard.classList.contains("hidden")) {
         return 0;
       }
-
-      const iframe = musicEmbed.querySelector("iframe");
-      const sourceEl = iframe || musicEmbed;
-      if (!sourceEl) return 0;
-
-      const sourceRect = sourceEl.getBoundingClientRect();
-      const targetRect = statValue.getBoundingClientRect();
-
-      if (!sourceRect.width || !sourceRect.height) return 0;
-
-      const ghost = document.createElement("div");
-      ghost.className = "spotify-fly-ghost";
-      ghost.style.position = "fixed";
-      ghost.style.top = `${sourceRect.top}px`;
-      ghost.style.left = `${sourceRect.left}px`;
-      ghost.style.width = `${sourceRect.width}px`;
-      ghost.style.height = `${sourceRect.height}px`;
-      ghost.style.transform = "translate3d(0, 0, 0) scale(1)";
-      ghost.style.opacity = "1";
-      ghost.style.pointerEvents = "none";
-      ghost.style.zIndex = "400";
-      ghost.style.overflow = "hidden";
-      ghost.style.willChange = "transform, opacity";
-      const embedStyles = window.getComputedStyle(musicEmbed);
-      const radius = embedStyles.borderRadius && embedStyles.borderRadius !== "0px"
-        ? embedStyles.borderRadius
-        : "16px";
-      ghost.style.borderRadius = radius;
-      ghost.style.background =
-        embedStyles.backgroundColor && embedStyles.backgroundColor !== "rgba(0, 0, 0, 0)"
-          ? embedStyles.backgroundColor
-          : "#0b0f1e";
-
-      const content = sourceEl.cloneNode(true);
-      if (content) {
-        if (content.tagName === "IFRAME") {
-          content.style.width = "100%";
-          content.style.height = "100%";
-          content.removeAttribute("id");
-        }
-        content.removeAttribute("id");
-        if (content.querySelectorAll) {
-          content.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
-        }
-        ghost.appendChild(content);
-      }
-
-      document.body.appendChild(ghost);
-
-      const sourceCenterX = sourceRect.left + sourceRect.width / 2;
-      const sourceCenterY = sourceRect.top + sourceRect.height / 2;
-      const targetCenterX = targetRect.left + targetRect.width / 2;
-      const targetCenterY = targetRect.top + targetRect.height / 2;
-
-      const translateX = targetCenterX - sourceCenterX;
-      const translateY = targetCenterY - sourceCenterY;
-
-      const widthRatio = targetRect.width / sourceRect.width || 0;
-      const heightRatio = targetRect.height / sourceRect.height || 0;
-      const scale = Math.max(Math.min(widthRatio, heightRatio, 0.55), 0.25);
-
-      const duration = 1100;
-      const cleanup = (() => {
-        let done = false;
-        return () => {
-          if (done) return;
-          done = true;
-          ghost.remove();
-        };
-      })();
-
-      if (typeof ghost.animate === "function") {
-        const verticalDirection = translateY >= 0 ? 1 : -1;
-        const arcLift = Math.min(Math.max(Math.abs(translateY) * 0.25, 60), 160);
-        const midY = translateY - arcLift * verticalDirection;
-        const midX = translateX * 0.55;
-        const endScale = scale;
-        const midScale = Math.min(1.05, Math.max((1 + endScale) / 2, endScale + 0.15));
-
-        const animation = ghost.animate(
-          [
-            { transform: "translate3d(0, 0, 0) scale(1)", opacity: 1 },
-            {
-              transform: `translate3d(${midX}px, ${midY}px, 0) scale(${midScale})`,
-              opacity: 0.85,
-              offset: 0.55,
-            },
-            {
-              transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${endScale})`,
-              opacity: 0.08,
-            },
-          ],
-          {
-            duration,
-            easing: "cubic-bezier(0.22, 0.61, 0.36, 1)",
-            fill: "forwards",
-          }
-        );
-
-        animation.onfinish = cleanup;
-        animation.oncancel = cleanup;
-      } else {
-        ghost.style.transition = `transform ${duration}ms cubic-bezier(0.22, 0.61, 0.36, 1), opacity ${duration}ms ease`;
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            ghost.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
-            ghost.style.opacity = "0.15";
-          });
-        });
-
-        ghost.addEventListener("transitionend", cleanup, { once: true });
-      }
-
-      setTimeout(cleanup, duration + 300);
-
-      return duration;
+      return 0;
     };
 
     if (overlay) {
@@ -768,8 +650,19 @@
     const songs = month.songsAdded || [];
     const musicEmbed = document.getElementById("musicEmbed");
     const mount = document.getElementById("spotifyMount");
+    const footerSpotifyCard = document.getElementById("footerSpotifyCard");
 
-    const sp = songs.find((u) => /open\.spotify\.com\/track\//.test(u));
+    const parsedSongs = songs.map((url) => {
+      const match = url.match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
+      return {
+        url,
+        trackId: match ? match[1] : null,
+      };
+    });
+
+    const validTracks = parsedSongs.filter((song) => !!song.trackId);
+
+    const sp = validTracks.length ? validTracks[0].url : null;
     let trackId = null;
     if (sp) {
       const m = sp.match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
@@ -819,7 +712,16 @@
       watchOverlayState();
     }
 
+    if (footerSpotifyCard) {
+      footerSpotifyCard.classList.toggle("hidden", !validTracks.length);
+    }
+
+    if (!validTracks.length && musicEmbed) {
+      musicEmbed.classList.add("hidden");
+    }
+
     if (trackId && mount) {
+      mount.innerHTML = "";
       if (musicEmbed) musicEmbed.classList.remove("hidden");
 
       window.__initSpotifyEmbed = (IFrameAPI) => {
@@ -847,6 +749,7 @@
         window.__initSpotifyEmbed(window.__SpotifyIFrameAPI);
       }
     } else {
+      hideAutoplayHint();
       startTyping();
     }
 
@@ -855,7 +758,6 @@
       0
     );
     $("#statDays").textContent = String(daysTogether);
-    $("#statSongs").textContent = String(songs);
     $("#statPlaces").textContent = String(places);
 
     $("#backHome").addEventListener(

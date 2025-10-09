@@ -45,14 +45,9 @@
         <div class="overlay-header">Happy Monthsary, Mi!</div>
         <div id="letterFull" class="typewriter typewriter-large"></div>
 
-        <div
-          id="musicEmbed"
-          style="margin-top: 10px"
-          class="music-embed hidden"
-        >
-          <div id="spotifyMount" style="width: 100%; height: 152px"></div>
-        </div>
-        <p id="autoplayHint" class="text-sm opacity-70">Press <b>Play</b></p>
+        <p id="autoplayHint" class="text-sm opacity-70">
+          Press <b>Play</b> on the footer player
+        </p>
       </div>
     </div>
 
@@ -100,9 +95,13 @@
             <div class="label">Days Together</div>
             <div id="statDays" class="value">0</div>
           </div>
-          <div class="stat-card">
-            <div class="label">Songs Added</div>
-            <div id="statSongs" class="value" style="font-size: 12px">0</div>
+          <div class="stat-card hidden footer-spotify-card" id="footerSpotifyCard">
+            <div
+              id="musicEmbed"
+              class="song-embed song-embed--footer music-embed hidden"
+            >
+              <div id="spotifyMount" class="song-embed__mount"></div>
+            </div>
           </div>
           <div class="stat-card">
             <div class="label">Places Visited</div>
