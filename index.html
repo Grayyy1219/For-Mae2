@@ -10,6 +10,7 @@
     />
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <link rel="preload" href="assets/soft-pop.mp3" as="audio" />
+    <link rel="preload" href="assets/audio/Mine.mp3" as="audio" />
     <link rel="stylesheet" href="assets/css/style.css" />
     <script defer src="assets/app.js"></script>
   </head>
@@ -17,6 +18,19 @@
     <header class="site-header">
       <div class="brand">❤️ Monthsary Time-Capsule</div>
       <nav class="nav">
+        <div class="audio-toggle" role="presentation">
+          <span class="audio-toggle__label">Music</span>
+          <label class="toggle-switch" for="bgAudioToggle">
+            <input
+              type="checkbox"
+              id="bgAudioToggle"
+              aria-label="Toggle background music"
+            />
+            <span class="toggle-track">
+              <span class="toggle-thumb"></span>
+            </span>
+          </label>
+        </div>
         <a href="qr.html">QR</a>
         <a href="" id="btnReset" title="Clear cookies & cache">Reset</a>
       </nav>
@@ -54,6 +68,13 @@
       <small>Happy Monthsary, Love! • Made with Grayyy</small>
     </footer>
 
+    <audio
+      id="bgAudio"
+      class="sr-only"
+      src="assets/audio/Mine.mp3"
+      preload="auto"
+      loop
+    ></audio>
     <audio id="sfxOpen" src="assets/soft-pop.mp3" preload="auto"></audio>
     <canvas
       id="confettiCanvas"
