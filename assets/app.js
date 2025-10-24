@@ -94,9 +94,11 @@
   }
   function loadAudioPreference() {
     try {
-      return localStorage.getItem(STORAGE_AUDIO_PREF) === "1";
+      const stored = localStorage.getItem(STORAGE_AUDIO_PREF);
+      if (stored === null) return true;
+      return stored === "1";
     } catch {
-      return false;
+      return true;
     }
   }
 
