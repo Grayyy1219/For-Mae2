@@ -6,14 +6,17 @@
     <title>Admin • Monthsary</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="assets/app.js"></script>
     <style>
       .gate {
         max-width: 520px;
         margin: 12vh auto;
-        background: #0b0f1e;
-        border: 1px solid #202539;
-        border-radius: 14px;
-        padding: 16px;
+        background: rgba(11, 15, 30, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 24px 50px rgba(8, 10, 16, 0.45);
+        backdrop-filter: blur(14px);
       }
       .gate h1 {
         margin: 8px 0 10px;
@@ -27,9 +30,10 @@
         min-width: 240px;
         padding: 10px;
         border-radius: 10px;
-        border: 1px solid #202539;
-        background: #0b0f1e;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(11, 15, 30, 0.6);
         color: #e9ecf3;
+        backdrop-filter: blur(6px);
       }
       details.setup {
         margin-top: 14px;
@@ -86,7 +90,7 @@
       }
     </style>
   </head>
-  <body>
+  <body data-page="admin">
     <div class="gate">
       <h1>Admin Unlock</h1>
       <p class="hint">Enter your passphrase to unlock the Admin.</p>
@@ -170,6 +174,12 @@
                 <label>Open Button<input id="s_openButtonText" type="text" /></label>
                 <label>Footer Text<input id="s_footerText" type="text" /></label>
                 <label>Capsule Greeting<input id="s_capsuleGreeting" type="text" /></label>
+                <label>Background Style
+                  <select id="s_mediaBackgroundMode">
+                    <option value="collage">Collage</option>
+                    <option value="slideshow">Slideshow</option>
+                  </select>
+                </label>
                 <label>Icon: Unlocked
                   <div class="row">
                     <input id="s_icon_unlocked" type="text" placeholder="Emoji or image URL/data URI" style="flex:1" />
@@ -229,7 +239,10 @@
             <pre class="hint" id="status"></pre>
           </main>
         `;
+        const existingBg = document.querySelector(".media-bg");
         document.body.innerHTML = html;
+        document.body.setAttribute("data-page", "admin");
+        if (existingBg) document.body.prepend(existingBg);
 
         const STORAGE_OVERRIDE = "mtc_capsules_override";
         const $ = (s, el = document) => el.querySelector(s);
@@ -238,6 +251,11 @@
         const hide = (id) =>
           (document.getElementById(id).style.display = "none");
         let state = null;
+        const refreshBackground = () => {
+          if (window.__initMediaBackground && state) {
+            window.__initMediaBackground(state);
+          }
+        };
         function toCSV(arr) {
           return (arr || []).join(", ");
         }
@@ -311,6 +329,11 @@
           $("#s_openButtonText").value = s.openButtonText || "";
           $("#s_footerText").value = s.footerText || "";
           $("#s_capsuleGreeting").value = s.capsuleGreeting || "";
+          const bgSel = $("#s_mediaBackgroundMode");
+          if (bgSel)
+            bgSel.value = s.mediaBackgroundMode === "slideshow"
+              ? "slideshow"
+              : "collage";
           $("#s_icon_unlocked").value = s.statusIcons?.unlocked || "";
           $("#s_icon_ready").value = s.statusIcons?.ready || "";
           $("#s_icon_locked").value = s.statusIcons?.locked || "";
@@ -332,6 +355,7 @@
           s.openButtonText = $("#s_openButtonText").value.trim();
           s.footerText = $("#s_footerText").value.trim();
           s.capsuleGreeting = $("#s_capsuleGreeting").value.trim();
+          s.mediaBackgroundMode = $("#s_mediaBackgroundMode").value;
           s.statusIcons = s.statusIcons || {};
           s.statusIcons.unlocked = $("#s_icon_unlocked").value.trim();
           s.statusIcons.ready = $("#s_icon_ready").value.trim();
@@ -346,6 +370,7 @@
               "Applied settings, but failed saving override: " + e.message
             );
           }
+          refreshBackground();
         }
         function populateMonthSelect() {
           const sel = $("#c_id");
@@ -398,6 +423,7 @@
               "Saved month " + id + ", but failed saving override: " + e.message
             );
           }
+          refreshBackground();
         }
         async function fetchCurrent() {
           try {
@@ -425,6 +451,7 @@
           fillSettingsForm(state);
           populateMonthSelect();
           fillCapsuleForm($("#c_id").value || 1);
+          refreshBackground();
         }
         document.addEventListener("click", (e) => {
           if (e.target.id === "btnFetch") fetchCurrent();
@@ -433,6 +460,7 @@
               syncFromEditor();
               localStorage.setItem(STORAGE_OVERRIDE, JSON.stringify(state));
               status("Saved override to localStorage.");
+              refreshBackground();
             } catch (err) {
               status("JSON error: " + err.message);
             }
@@ -449,6 +477,7 @@
               a.click();
               URL.revokeObjectURL(a.href);
               status("Exported file.");
+              refreshBackground();
             } catch (err) {
               status("Export error: " + err.message);
             }
@@ -549,6 +578,7 @@
                 fillSettingsForm(state);
                 populateMonthSelect();
                 fillCapsuleForm($("#c_id").value || 1);
+                refreshBackground();
               } catch (err) {
                 $("#editor").value = r.result;
                 status("Loaded file, but JSON parse error: " + err.message);
