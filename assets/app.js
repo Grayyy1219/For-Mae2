@@ -2,6 +2,7 @@
   const PAGE = document.body.getAttribute("data-page") || "home";
   const STORAGE_UNLOCKED = "mtc_unlocked_months";
   const STORAGE_OVERRIDE = "mtc_capsules_override";
+  const STORAGE_AUDIO_PREF = "mtc_bg_audio_enabled";
   let CURRENT_SETTINGS = null;
 
   const DEFAULT_SETTINGS = {
@@ -89,7 +90,58 @@
   function saveUnlocked(set) {
     localStorage.setItem(STORAGE_UNLOCKED, JSON.stringify(Array.from(set)));
   }
+function loadAudioPreference() {
+    try {
+      return localStorage.getItem(STORAGE_AUDIO_PREF) === "1";
+    } catch {
+      return false;
+    }
+  }
 
+  function saveAudioPreference(enabled) {
+    try {
+      localStorage.setItem(STORAGE_AUDIO_PREF, enabled ? "1" : "0");
+    } catch {}
+  }
+
+  function setupAudioToggle() {
+    const toggle = document.getElementById("bgAudioToggle");
+    const container = toggle ? toggle.closest(".audio-toggle") : null;
+    const audio = document.getElementById("bgAudio");
+    if (!toggle || !audio) return;
+
+    audio.volume = 0.4;
+
+    const updateVisual = (enabled) => {
+      if (container) container.classList.toggle("is-active", enabled);
+    };
+
+    const applyState = (enabled, { persist = true } = {}) => {
+      updateVisual(enabled);
+      if (persist) saveAudioPreference(enabled);
+
+      if (enabled) {
+        const playPromise = audio.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => {
+            toggle.checked = false;
+            updateVisual(false);
+            saveAudioPreference(false);
+          });
+        }
+      } else {
+        audio.pause();
+      }
+    };
+
+    const initial = loadAudioPreference();
+    toggle.checked = initial;
+    applyState(initial, { persist: false });
+
+    toggle.addEventListener("change", () => {
+      applyState(toggle.checked);
+    });
+  }
   function softBeep() {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -770,6 +822,8 @@
     const data = ensureUnlockDates(await loadData());
     CURRENT_SETTINGS = mergeSettings(data.settings);
     applySettings(CURRENT_SETTINGS);
+    setupAudioToggle();
+
     if (PAGE === "home") renderHome(data);
     if (PAGE === "capsule") renderCapsule(data);
 
