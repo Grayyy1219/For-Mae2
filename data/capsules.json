@@ -19,13 +19,7 @@
       "ready": "💌",
       "locked": "🔒"
     },
-    "confettiColors": [
-      "#8b5cf6",
-      "#a78bfa",
-      "#c4b5fd",
-      "#60a5fa",
-      "#f472b6"
-    ]
+    "confettiColors": ["#8b5cf6", "#a78bfa", "#c4b5fd", "#60a5fa", "#f472b6"]
   },
   "startDate": "2022-03-24T00:00:00.000+08:00",
   "months": [
@@ -45,7 +39,9 @@
       ],
       "voiceNote": "",
       "surprise": "Let’s go to the museum? Next month?",
-      "songsAdded": ["https://open.spotify.com/track/0GxW5K0qzrq7L1jwSY5OmY?si=1776b11fc8324170"],
+      "songsAdded": [
+        "https://open.spotify.com/track/0GxW5K0qzrq7L1jwSY5OmY?si=1776b11fc8324170"
+      ],
       "placesVisited": ["BGC"]
     },
     {
@@ -90,7 +86,7 @@
       "songsAdded": ["https://open.spotify.com/track/1fzAuUVbzlhZ1lJAx9PtY6"],
       "placesVisited": ["BSU"]
     },
- 
+
     {
       "id": 4,
       "title": "April",
@@ -101,13 +97,14 @@
         "assets\\img\\apr3.jpg",
         "assets\\img\\apr4.jpg",
         "assets\\img\\apr5.jpg",
-        "assets\\img\\apr6.jpg"],
+        "assets\\img\\apr6.jpg"
+      ],
       "voiceNote": "",
       "surprise": "I hope we can do this again :<",
       "songsAdded": ["https://open.spotify.com/track/1u8c2t2Cy7UBoG4ArRcF5g"],
       "placesVisited": ["SM Mega Mall"]
     },
-       {
+    {
       "id": 5,
       "title": "May",
       "letter": "Mi.\niknow my time na sumosobra ako, salamuch sa pag intindi🥺\n\n-Grayyy❤️",
@@ -156,7 +153,9 @@
       ],
       "voiceNote": "",
       "surprise": "",
-      "songsAdded": ["https://open.spotify.com/track/1BxfuPKGuaTgP7aM0Bbdwr?si=e7dc814100b241dc"],
+      "songsAdded": [
+        "https://open.spotify.com/track/1BxfuPKGuaTgP7aM0Bbdwr?si=e7dc814100b241dc"
+      ],
       "placesVisited": []
     },
     {
@@ -184,7 +183,7 @@
       "id": 9,
       "title": "September",
       "letter": "Hello love,\nBelated Happy Birthday sayo more birthday na magkasama tayo <3\nAlso Happy Monthsary date later or this weekend?\n\n-Grayyy❤️",
-      "photos": [ 
+      "photos": [
         "assets\\img\\sep1.jpg",
         "assets\\img\\sep2.jpg",
         "assets\\img\\sep3.jpg",
@@ -193,7 +192,8 @@
         "assets\\img\\sep6.jpg",
         "assets\\img\\sep7.jpg",
         "assets\\img\\sep8.jpg",
-        "assets\\img\\sep9.jpg"],
+        "assets\\img\\sep9.jpg"
+      ],
       "voiceNote": "",
       "surprise": "H sayo!\nyes yung song is from summer that i turned pretty",
       "songsAdded": ["https://open.spotify.com/track/6oVxXO5oQ4pTpO8RSnkzvv"],
@@ -203,10 +203,17 @@
       "id": 10,
       "title": "Month 10",
       "letter": "",
-      "photos": [],
+      "photos": [
+        "assets\\img\\oct (1).jpg",
+        "assets\\img\\oct (2).jpg",
+        "assets\\img\\oct (1).mp4",
+        "assets\\img\\oct (2).mp4"
+      ],
       "voiceNote": "",
       "surprise": "",
-      "songsAdded": [],
+      "songsAdded": [
+        "https://open.spotify.com/track/1dGr1c8CrMLDpV6mPbImSI?si=90b2367bc36a473a"
+      ],
       "placesVisited": []
     },
     {
