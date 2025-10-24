@@ -355,6 +355,89 @@ function loadAudioPreference() {
     }
   }
 
+  const MEDIA_EXT_VIDEO = /\.(mp4|webm|ogg)(\?.*)?$/i;
+
+  function normalizeMediaSrc(src) {
+    if (typeof src !== "string") return "";
+    return src.replace(/\\\\/g, "/").trim();
+  }
+
+  function collectMediaSources(data) {
+    const seen = new Set();
+    if (!data || !Array.isArray(data.months)) return [];
+    data.months.forEach((month) => {
+      if (!month || !Array.isArray(month.photos)) return;
+      month.photos.forEach((raw) => {
+        const normalized = normalizeMediaSrc(raw);
+        if (!normalized) return;
+        if (!seen.has(normalized)) seen.add(normalized);
+      });
+    });
+    return Array.from(seen);
+  }
+
+  function initMediaBackground(data) {
+    if (PAGE !== "home") return;
+    const sources = collectMediaSources(data);
+    if (!sources.length) return;
+
+    let container = document.querySelector(".media-bg");
+    if (!container) {
+      container = document.createElement("div");
+      container.className = "media-bg";
+
+      const grid = document.createElement("div");
+      grid.className = "media-bg__grid";
+      container.appendChild(grid);
+
+      const overlay = document.createElement("div");
+      overlay.className = "media-bg__overlay";
+      container.appendChild(overlay);
+
+      document.body.prepend(container);
+    }
+
+    const grid = container.querySelector(".media-bg__grid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    sources.forEach((src) => {
+      const item = document.createElement("div");
+      item.className = "media-bg__item";
+
+      const isVideo = MEDIA_EXT_VIDEO.test(src);
+      const media = document.createElement(isVideo ? "video" : "img");
+      media.className = "media-bg__media";
+      media.setAttribute("aria-hidden", "true");
+
+      media.addEventListener("error", () => {
+        item.remove();
+      });
+
+      if (isVideo) {
+        media.src = src;
+        media.autoplay = true;
+        media.loop = true;
+        media.muted = true;
+        media.playsInline = true;
+        media.preload = "auto";
+        media.addEventListener("loadeddata", () => {
+          if (typeof media.play === "function") {
+            media.play().catch(() => {});
+          }
+        });
+      } else {
+        media.src = src;
+        media.loading = "lazy";
+        media.decoding = "async";
+        media.alt = "";
+      }
+
+      item.appendChild(media);
+      grid.appendChild(item);
+    });
+  }
+
   function iconFor(val) {
     try {
       if (!val) return "";
@@ -824,7 +907,10 @@ function loadAudioPreference() {
     applySettings(CURRENT_SETTINGS);
     setupAudioToggle();
 
-    if (PAGE === "home") renderHome(data);
+    if (PAGE === "home") {
+      initMediaBackground(data);
+      renderHome(data);
+    }
     if (PAGE === "capsule") renderCapsule(data);
 
     $$('a[href$="admin.html"]').forEach((a) => {
