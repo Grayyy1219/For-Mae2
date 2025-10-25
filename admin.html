@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <link rel="stylesheet" href="assets/css/style.css" />
     <script defer src="assets/app.js"></script>
+    <script type="module" src="assets/admin.js"></script>
     <style>
       .gate {
         max-width: 520px;
@@ -88,6 +89,80 @@
         width: 100%;
         min-height: 40px;
       }
+      .form-grid textarea {
+        resize: vertical;
+      }
+      .form-grid label .helper-text {
+        display: block;
+      }
+      .contribute-card {
+        background: rgba(13, 18, 34, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 18px;
+        display: grid;
+        gap: 16px;
+      }
+      .contribute-card__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 14px;
+      }
+      .contribute-card__header h3 {
+        margin: 0;
+      }
+      .capsule-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(139, 92, 246, 0.2);
+        color: var(--accent-2);
+        font-weight: 600;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .helper-text {
+        font-size: 12px;
+        color: #9aa3b2;
+      }
+      .feedback {
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+      .feedback.success {
+        background: rgba(34, 197, 94, 0.14);
+        border: 1px solid rgba(74, 222, 128, 0.35);
+        color: #bbf7d0;
+      }
+      .feedback.feedback-error {
+        background: rgba(239, 68, 68, 0.14);
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        color: #fecaca;
+      }
+      .feedback ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+      .input-error {
+        border-color: rgba(248, 113, 113, 0.8);
+        box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.35);
+      }
+      .contribute-actions {
+        justify-content: flex-start;
+      }
+      .contribute-actions .btn {
+        min-width: 160px;
+      }
+      .small-note {
+        font-size: 12px;
+        color: #7f8a9d;
+        margin: 0;
+      }
     </style>
   </head>
   <body data-page="admin">
@@ -157,6 +232,7 @@
             <div class="tabs">
               <button class="tab active" data-tab="settings">Settings</button>
               <button class="tab" data-tab="capsule">Capsule</button>
+              <button class="tab" data-tab="contribute">Contribute</button>
               <button class="tab" data-tab="json">JSON</button>
             </div>
             <section id="tab-settings">
@@ -232,6 +308,131 @@
                 <button id="applyCapsule" class="btn">Save Month</button>
               </div>
             </section>
+            <section id="tab-contribute" style="display:none">
+              <div class="contribute-card">
+                <div class="contribute-card__header">
+                  <div>
+                    <h3>Share a Capsule</h3>
+                    <p class="hint">
+                      Capture a new milestone and generate an updated JSON file you can
+                      send to the maintainer.
+                    </p>
+                  </div>
+                  <span class="capsule-badge" id="nextCapsuleId">#1</span>
+                </div>
+                <form
+                  id="capsuleContributionForm"
+                  class="form-grid"
+                  novalidate
+                >
+                  <label
+                    >Title
+                    <input
+                      id="contribTitle"
+                      type="text"
+                      placeholder="e.g. August Adventures"
+                      required
+                    />
+                  </label>
+                  <label
+                    >Unlock Date
+                    <input id="contribUnlockDate" type="datetime-local" required />
+                  </label>
+                  <label style="grid-column: 1 / -1"
+                    >Description / Letter
+                    <textarea
+                      id="contribDescription"
+                      rows="5"
+                      placeholder="Write your heartfelt message or summary here"
+                      required
+                    ></textarea>
+                    <span class="helper-text"
+                      >This becomes the capsule letter visitors will read.</span
+                    >
+                  </label>
+                  <label style="grid-column: 1 / -1"
+                    >Media URLs
+                    <textarea
+                      id="contribMedia"
+                      rows="4"
+                      placeholder="assets/img/photo1.jpg&#10;https://example.com/video.mp4"
+                      required
+                    ></textarea>
+                    <span class="helper-text"
+                      >Add one URL per line. Supports images, GIFs, and MP4 clips.</span
+                    >
+                  </label>
+                  <label
+                    >Surprise Detail
+                    <input
+                      id="contribSurprise"
+                      type="text"
+                      placeholder="Optional surprise or plan"
+                    />
+                  </label>
+                  <label
+                    >Voice Note URL
+                    <input
+                      id="contribVoice"
+                      type="url"
+                      placeholder="https://..."
+                    />
+                  </label>
+                  <label style="grid-column: 1 / -1"
+                    >Songs Added
+                    <textarea
+                      id="contribSongs"
+                      rows="3"
+                      placeholder="https://open.spotify.com/track/..."
+                    ></textarea>
+                    <span class="helper-text"
+                      >Paste Spotify, Apple Music, or YouTube links — one per line.</span
+                    >
+                  </label>
+                  <label style="grid-column: 1 / -1"
+                    >Places Visited
+                    <textarea
+                      id="contribPlaces"
+                      rows="3"
+                      placeholder="Baguio&#10;Tagaytay"
+                    ></textarea>
+                    <span class="helper-text"
+                      >List memorable locations, one per line.</span
+                    >
+                  </label>
+                </form>
+                <div id="contribFeedback" class="feedback hidden" role="status"></div>
+                <div
+                  id="contribErrors"
+                  class="feedback feedback-error hidden"
+                  role="alert"
+                ></div>
+                <div class="row contribute-actions">
+                  <button type="submit" form="capsuleContributionForm" class="btn">
+                    Add Capsule
+                  </button>
+                  <button
+                    type="reset"
+                    form="capsuleContributionForm"
+                    class="btn btn-secondary"
+                    id="capsuleFormReset"
+                  >
+                    Clear
+                  </button>
+                  <a
+                    id="downloadUpdatedJson"
+                    class="btn btn-secondary hidden"
+                    download
+                  >
+                    Download updated JSON
+                  </a>
+                </div>
+                <p class="small-note">
+                  Download the file after submitting and send it to the site maintainer
+                  so it can be merged into the live capsule data.
+                </p>
+              </div>
+            </section>
             <section id="tab-json" style="display:none">
               <h3>Raw JSON</h3>
             </section>
@@ -243,6 +444,7 @@
         document.body.innerHTML = html;
         document.body.setAttribute("data-page", "admin");
         if (existingBg) document.body.prepend(existingBg);
+        document.dispatchEvent(new CustomEvent("admin:rendered"));
 
         const STORAGE_OVERRIDE = "mtc_capsules_override";
         const $ = (s, el = document) => el.querySelector(s);
@@ -251,6 +453,15 @@
         const hide = (id) =>
           (document.getElementById(id).style.display = "none");
         let state = null;
+        let contributionHooks = null;
+        const notifyContribution = () => {
+          if (
+            contributionHooks &&
+            typeof contributionHooks.emitStateChange === "function"
+          ) {
+            contributionHooks.emitStateChange();
+          }
+        };
         const refreshBackground = () => {
           if (window.__initMediaBackground && state) {
             window.__initMediaBackground(state);
@@ -315,6 +526,41 @@
             status("JSON parse error: " + e.message);
           }
         }
+        const applyStateUpdate = (nextState, message) => {
+          state = nextState;
+          syncEditor();
+          populateMonthSelect();
+          const select = $("#c_id");
+          let selectedId = select ? select.value : "";
+          if (!selectedId && state?.months?.length) {
+            selectedId = state.months[0].id;
+            if (select) select.value = selectedId;
+          }
+          if (selectedId) {
+            fillCapsuleForm(selectedId);
+          }
+          try {
+            localStorage.setItem(STORAGE_OVERRIDE, JSON.stringify(state));
+            status(
+              message || "Updated data and saved override to localStorage."
+            );
+          } catch (e) {
+            status(
+              (message || "Updated data") +
+                ", but failed saving override: " +
+                e.message
+            );
+          }
+          refreshBackground();
+          notifyContribution();
+        };
+        if (window.__setupCapsuleContribution) {
+          contributionHooks = window.__setupCapsuleContribution({
+            getState: () => state,
+            updateState: applyStateUpdate,
+            status,
+          });
+        }
         function fillSettingsForm(obj) {
           const s = (obj && obj.settings) || {};
           $("#s_siteTitle").value = s.siteTitle || "";
@@ -371,6 +617,7 @@
             );
           }
           refreshBackground();
+          notifyContribution();
         }
         function populateMonthSelect() {
           const sel = $("#c_id");
@@ -424,6 +671,7 @@
             );
           }
           refreshBackground();
+          notifyContribution();
         }
         async function fetchCurrent() {
           try {
@@ -452,6 +700,7 @@
           populateMonthSelect();
           fillCapsuleForm($("#c_id").value || 1);
           refreshBackground();
+          notifyContribution();
         }
         document.addEventListener("click", (e) => {
           if (e.target.id === "btnFetch") fetchCurrent();
@@ -461,6 +710,7 @@
               localStorage.setItem(STORAGE_OVERRIDE, JSON.stringify(state));
               status("Saved override to localStorage.");
               refreshBackground();
+              notifyContribution();
             } catch (err) {
               status("JSON error: " + err.message);
             }
@@ -478,6 +728,7 @@
               URL.revokeObjectURL(a.href);
               status("Exported file.");
               refreshBackground();
+              notifyContribution();
             } catch (err) {
               status("Export error: " + err.message);
             }
@@ -509,6 +760,7 @@
             if (tab === "settings") {
               show("tab-settings");
               hide("tab-capsule");
+              hide("tab-contribute");
               hide("tab-json");
               $("#editor").style.display = "none";
               $("#status").style.display = "none";
@@ -516,13 +768,24 @@
             if (tab === "capsule") {
               hide("tab-settings");
               show("tab-capsule");
+              hide("tab-contribute");
               hide("tab-json");
               $("#editor").style.display = "none";
               $("#status").style.display = "none";
             }
+            if (tab === "contribute") {
+              hide("tab-settings");
+              hide("tab-capsule");
+              show("tab-contribute");
+              hide("tab-json");
+              $("#editor").style.display = "none";
+              $("#status").style.display = "none";
+              notifyContribution();
+            }
             if (tab === "json") {
               hide("tab-settings");
               hide("tab-capsule");
+              hide("tab-contribute");
               show("tab-json");
               $("#editor").style.display = "block";
               $("#status").style.display = "block";
@@ -579,6 +842,7 @@
                 populateMonthSelect();
                 fillCapsuleForm($("#c_id").value || 1);
                 refreshBackground();
+                notifyContribution();
               } catch (err) {
                 $("#editor").value = r.result;
                 status("Loaded file, but JSON parse error: " + err.message);
