@@ -31,6 +31,10 @@
             </span>
           </label>
         </div>
+        <button id="btnPatchNotes" class="nav-timeline" type="button">
+          <span class="nav-timeline__dot"></span>
+          <span class="nav-timeline__label">Patch notes</span>
+        </button>
         <a href="qr.html">QR</a>
         <a href="" id="btnReset" title="Clear cookies & cache">Reset</a>
       </nav>
@@ -85,5 +89,36 @@
       class="confetti-canvas"
       aria-hidden="true"
     ></canvas>
+
+    <div class="media-modal patch-modal" id="patchModal" aria-hidden="true">
+      <div class="media-modal__backdrop patch-modal__backdrop"></div>
+      <div
+        class="media-modal__dialog patch-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="patchModalTitle"
+        tabindex="-1"
+      >
+        <header class="patch-modal__header">
+          <div>
+            <p class="patch-modal__eyebrow">Release updates</p>
+            <h2 class="patch-modal__title" id="patchModalTitle">Patch notes</h2>
+            <p class="patch-modal__subtitle">
+              A quick timeline of the latest tweaks and improvements.
+            </p>
+          </div>
+          <button
+            class="media-modal__close patch-modal__close"
+            type="button"
+            aria-label="Close patch notes"
+          >
+            ×
+          </button>
+        </header>
+        <div class="patch-modal__body">
+          <div class="patch-timeline" id="patchTimeline"></div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

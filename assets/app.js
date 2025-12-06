@@ -62,6 +62,8 @@
     return d;
   };
 
+  let PATCH_NOTES_CACHE = null;
+
   function escapeHTML(str) {
     return String(str || "").replace(/[&<>"']/g, (c) => {
       const map = {
@@ -303,6 +305,25 @@
       months,
       settings: DEFAULT_SETTINGS,
     };
+  }
+
+  async function loadPatchNotes() {
+    if (PATCH_NOTES_CACHE) return PATCH_NOTES_CACHE;
+
+    try {
+      const res = await fetch("data/patch-notes.json", { cache: "no-store" });
+      if (res.ok) {
+        const json = await res.json();
+        const notes = Array.isArray(json?.notes) ? json.notes : [];
+        PATCH_NOTES_CACHE = notes;
+        return notes;
+      }
+    } catch (err) {
+      console.error("Failed to load patch notes", err);
+    }
+
+    PATCH_NOTES_CACHE = [];
+    return PATCH_NOTES_CACHE;
   }
 
   function ensureUnlockDates(data) {
@@ -868,7 +889,6 @@
       mediaModal.classList.remove("is-loading");
       mediaModal.setAttribute("aria-hidden", "true");
     }
-    document.body.classList.remove("has-modal-open");
   }
 
   function setMediaModalLoading(modal, { isLoading, title, subtitle } = {}) {
@@ -979,7 +999,6 @@
       }
     };
 
-    document.body.classList.add("has-modal-open");
     modal.classList.add("is-visible");
     modal.setAttribute("aria-hidden", "false");
     modal.focus({ preventScroll: true });
@@ -1026,7 +1045,6 @@
     if (titleEl) titleEl.textContent = title;
     if (subtitleEl) subtitleEl.textContent = subtitle;
 
-    document.body.classList.add("has-modal-open");
     modal.classList.add("is-visible");
     modal.classList.toggle("is-single", mediaModalSlides.length <= 1);
     modal.setAttribute("aria-hidden", "false");
@@ -1290,6 +1308,89 @@
     tick();
 
     return { skip: finish };
+  }
+
+  function formatPatchDate(dateStr) {
+    if (!dateStr) return "Date TBA";
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return "Date TBA";
+    return d.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  function renderPatchNotesTimeline(notes) {
+    const wrap = document.getElementById("patchTimeline");
+    if (!wrap) return;
+
+    if (!Array.isArray(notes) || !notes.length) {
+      wrap.innerHTML =
+        '<div class="patch-empty">Patch notes are on their way.</div>';
+      return;
+    }
+
+    wrap.innerHTML = notes
+      .map((note) => {
+        const version = escapeHTML(note.version || "1.0.0");
+        const date = formatPatchDate(note.date);
+        const title = escapeHTML(note.title || "Update");
+        const changes = (note.changes || [])
+          .map((item) => `<li>${escapeHTML(item)}</li>`)
+          .join("");
+
+        return `
+          <div class="patch-item">
+            <div class="patch-item__marker" aria-hidden="true"></div>
+            <div>
+              <div class="patch-item__meta">
+                <span class="patch-item__version">v${version}</span>
+                <span>${escapeHTML(date)}</span>
+              </div>
+              <div class="patch-item__title">${title}</div>
+              ${changes ? `<ul class="patch-item__changes">${changes}</ul>` : ""}
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function setupPatchNotesModal() {
+    const modal = document.getElementById("patchModal");
+    const openBtn = document.getElementById("btnPatchNotes");
+    if (!modal || !openBtn) return;
+
+    const closeBtn = modal.querySelector(".patch-modal__close");
+    const backdrop = modal.querySelector(".patch-modal__backdrop");
+    const dialog = modal.querySelector(".patch-modal__dialog");
+
+    const close = () => {
+      modal.classList.remove("is-visible");
+      modal.setAttribute("aria-hidden", "true");
+    };
+
+    const open = async () => {
+      const notes = await loadPatchNotes();
+      renderPatchNotesTimeline(notes);
+      modal.classList.add("is-visible");
+      modal.setAttribute("aria-hidden", "false");
+      if (dialog && typeof dialog.focus === "function") {
+        dialog.focus({ preventScroll: true });
+      }
+    };
+
+    openBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      open();
+    });
+
+    [closeBtn, backdrop].forEach((el) => el && el.addEventListener("click", close));
+
+    modal.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") close();
+    });
   }
 
   function renderCapsule(data) {
@@ -1608,6 +1709,7 @@
     }
     if (PAGE === "home") {
       renderHome(data);
+      setupPatchNotesModal();
     }
     if (PAGE === "capsule") renderCapsule(data);
     if (PAGE === "qr") {
