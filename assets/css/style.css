@@ -389,10 +389,13 @@ body[data-page="admin"] .media-bg__slide.is-active .media-bg__media {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
 }
 
-
 .progress-marker::before {
   inset: -5px;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.18), transparent 60%);
+  background: radial-gradient(
+    circle,
+    rgba(167, 139, 250, 0.18),
+    transparent 60%
+  );
   filter: blur(6px);
   opacity: 0.55;
   z-index: -1;
@@ -403,7 +406,7 @@ body[data-page="admin"] .media-bg__slide.is-active .media-bg__media {
   outline-offset: 4px;
 }
 .progress-marker.is-unlocked {
-  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  /* background: linear-gradient(135deg, var(--accent-2), var(--accent)); */
   border-color: rgba(255, 255, 255, 0.65);
   opacity: 1;
   box-shadow: 0 8px 22px rgba(139, 92, 246, 0.35),
@@ -418,12 +421,16 @@ body[data-page="admin"] .media-bg__slide.is-active .media-bg__media {
   border-color: rgba(139, 92, 246, 0.5);
 }
 .progress-marker.is-unlocked::before {
-  background: radial-gradient(circle, rgba(196, 181, 253, 0.6), transparent 62%);
+  background: radial-gradient(
+    circle,
+    rgba(196, 181, 253, 0.6),
+    transparent 62%
+  );
 }
 .progress-marker.is-ready {
   background: linear-gradient(135deg, #1a2236, #0f1524);
   border-color: rgba(167, 139, 250, 0.85);
-  opacity: 1;
+  opacity: 0.3;
   box-shadow: 0 7px 20px rgba(167, 139, 250, 0.3),
     0 0 0 1px rgba(167, 139, 250, 0.2);
 }
@@ -432,11 +439,19 @@ body[data-page="admin"] .media-bg__slide.is-active .media-bg__media {
   text-shadow: 0 6px 14px rgba(196, 181, 253, 0.4);
 }
 .progress-marker.is-ready::after {
-  background: radial-gradient(circle at 40% 35%, var(--accent-2), var(--accent));
+  background: radial-gradient(
+    circle at 40% 35%,
+    var(--accent-2),
+    var(--accent)
+  );
   border-color: rgba(196, 181, 253, 0.55);
 }
 .progress-marker.is-ready::before {
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.4), transparent 62%);
+  background: radial-gradient(
+    circle,
+    rgba(167, 139, 250, 0.4),
+    transparent 62%
+  );
 }
 .progress-marker.is-locked {
   opacity: 0.12;
@@ -610,7 +625,11 @@ body[data-page="admin"] .media-bg__slide.is-active .media-bg__media {
   display: grid;
   place-items: center;
   gap: 10px;
-  background: radial-gradient(circle at 20% 20%, rgba(167, 139, 250, 0.14), transparent),
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(167, 139, 250, 0.14),
+      transparent
+    ),
     radial-gradient(circle at 80% 0%, rgba(244, 114, 182, 0.14), transparent),
     linear-gradient(180deg, rgba(10, 12, 20, 0.94), rgba(6, 8, 13, 0.96));
   color: #e9ecff;
@@ -657,7 +676,12 @@ body[data-page="admin"] .media-bg__slide.is-active .media-bg__media {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent 40%, rgba(255, 255, 255, 0.04));
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.04),
+    transparent 40%,
+    rgba(255, 255, 255, 0.04)
+  );
   opacity: 0.35;
   pointer-events: none;
 }
