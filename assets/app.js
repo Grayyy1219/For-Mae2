@@ -594,11 +594,16 @@
       const start = data.startDate ? parseISO(data.startDate) : now();
       const unlock = parseISO(m.unlockDate);
       const months = monthCountSince(start, unlock);
+      const monthName = unlock.toLocaleDateString(undefined, {
+        month: "long",
+      });
+      const displayOrder = ordinal(months + 1);
+
       if (months > 0 && months % 12 === 0) {
         const years = Math.floor(months / 12);
-        return `${ordinal(years)} Anniversary`;
+        return `${monthName} “${ordinal(years)} Anniversary”`;
       }
-      return `${ordinal(months)} month`;
+      return `${monthName} “${displayOrder}”`;
     } catch {
       return m.title || "Month";
     }
