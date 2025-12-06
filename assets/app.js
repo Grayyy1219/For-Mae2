@@ -62,6 +62,19 @@
     return d;
   };
 
+  function escapeHTML(str) {
+    return String(str || "").replace(/[&<>"']/g, (c) => {
+      const map = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      };
+      return map[c] || c;
+    });
+  }
+
   function formatCountdown(ms) {
     if (ms <= 0) return "00:00:00";
     const totalSec = Math.floor(ms / 1000);
@@ -591,29 +604,507 @@
     }
   }
 
+  let activeProgressMarker = null;
+  let progressTooltip = null;
+
+  function ensureProgressTooltip() {
+    if (!progressTooltip) {
+      progressTooltip = document.createElement("div");
+      progressTooltip.id = "progressTooltip";
+      progressTooltip.className = "progress-tooltip";
+      progressTooltip.setAttribute("role", "tooltip");
+      progressTooltip.setAttribute("aria-hidden", "true");
+      document.body.appendChild(progressTooltip);
+    }
+    return progressTooltip;
+  }
+
+  function hideProgressTooltip() {
+    const tooltip = ensureProgressTooltip();
+    tooltip.classList.remove("is-visible");
+    tooltip.dataset.placement = "";
+    tooltip.setAttribute("aria-hidden", "true");
+    if (activeProgressMarker) {
+      activeProgressMarker.removeAttribute("aria-describedby");
+    }
+    activeProgressMarker = null;
+    document.removeEventListener("pointerdown", handleOutsideTooltip, true);
+    document.removeEventListener("scroll", hideProgressTooltip, true);
+  }
+
+  function handleOutsideTooltip(event) {
+    const tooltip = ensureProgressTooltip();
+    if (
+      activeProgressMarker &&
+      !activeProgressMarker.contains(event.target) &&
+      !tooltip.contains(event.target)
+    ) {
+      hideProgressTooltip();
+    }
+  }
+
+  function positionProgressTooltip(marker, tooltip) {
+    const rect = marker.getBoundingClientRect();
+    const tipRect = tooltip.getBoundingClientRect();
+    let left = rect.left + rect.width / 2 - tipRect.width / 2;
+    let top = rect.top - tipRect.height - 12;
+    let placement = "top";
+
+    if (top < 8) {
+      top = rect.bottom + 12;
+      placement = "bottom";
+    }
+
+    left = Math.max(8, Math.min(left, window.innerWidth - tipRect.width - 8));
+
+    tooltip.style.left = `${left + window.scrollX}px`;
+    tooltip.style.top = `${top + window.scrollY}px`;
+    tooltip.dataset.placement = placement;
+  }
+
+  function showProgressTooltip(marker) {
+    const tooltip = ensureProgressTooltip();
+    const title = marker.dataset.title || `Month ${marker.dataset.month || ""}`;
+    const status = marker.dataset.statusLabel || marker.dataset.status || "";
+    const unlockLabel = marker.dataset.unlockLabel || "";
+    const detail = marker.dataset.detail || "";
+
+    const safeTitle = escapeHTML(title);
+    const safeStatus = escapeHTML(status);
+    const safeUnlock = escapeHTML(unlockLabel);
+    const safeDetail = escapeHTML(detail);
+
+    tooltip.innerHTML = `
+      <div class="progress-tooltip__title">${safeTitle}</div>
+      <div class="progress-tooltip__meta">
+        <span class="progress-tooltip__badge">${safeStatus}</span>
+        ${unlockLabel ? `<span class="progress-tooltip__separator">•</span> <span>${safeUnlock}</span>` : ""}
+      </div>
+      ${detail ? `<div class="progress-tooltip__detail">${safeDetail}</div>` : ""}
+    `;
+
+    tooltip.classList.add("is-visible");
+    tooltip.setAttribute("aria-hidden", "false");
+    activeProgressMarker = marker;
+    marker.setAttribute("aria-describedby", tooltip.id);
+
+    requestAnimationFrame(() => positionProgressTooltip(marker, tooltip));
+
+    document.addEventListener("pointerdown", handleOutsideTooltip, true);
+    document.addEventListener("scroll", hideProgressTooltip, true);
+  }
+
+  let mediaModal = null;
+  let mediaModalTimer = null;
+  let mediaModalSlides = [];
+  let mediaModalIndex = 0;
+  const mediaSlidesCache = new Map();
+
+  function ensureMediaModal() {
+    if (mediaModal) return mediaModal;
+
+    const modal = document.createElement("div");
+    modal.className = "media-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("tabindex", "-1");
+    modal.innerHTML = `
+      <div class="media-modal__backdrop"></div>
+      <div class="media-modal__dialog">
+        <button class="media-modal__close" type="button" aria-label="Close preview">×</button>
+        <div class="media-modal__header">
+          <div class="media-modal__title">Month preview</div>
+          <div class="media-modal__subtitle">Little memories from this capsule</div>
+        </div>
+        <div class="media-modal__slider">
+          <div class="media-modal__slides" role="list"></div>
+          <div class="media-modal__loading" aria-live="polite">
+            <div class="media-modal__loading-spinner" aria-hidden="true"></div>
+            <div class="media-modal__loading-title">Loading memories…</div>
+            <div class="media-modal__loading-subtitle">Preparing your capsule.</div>
+          </div>
+          <button class="media-modal__nav media-modal__nav--prev" type="button" aria-label="Previous memory">‹</button>
+          <button class="media-modal__nav media-modal__nav--next" type="button" aria-label="Next memory">›</button>
+        </div>
+        <div class="media-modal__controls">
+          <a class="btn btn-primary media-modal__open" href="#">Open this month</a>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const close = () => hideMediaModal();
+    modal.querySelector(".media-modal__close").addEventListener("click", close);
+    modal
+      .querySelector(".media-modal__backdrop")
+      .addEventListener("click", close);
+
+    modal.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") hideMediaModal();
+      if (e.key === "ArrowRight") stepMediaSlide(1);
+      if (e.key === "ArrowLeft") stepMediaSlide(-1);
+    });
+
+    modal
+      .querySelector(".media-modal__nav--prev")
+      .addEventListener("click", () => stepMediaSlide(-1));
+    modal
+      .querySelector(".media-modal__nav--next")
+      .addEventListener("click", () => stepMediaSlide(1));
+
+    mediaModal = modal;
+    return mediaModal;
+  }
+
+  function stopMediaTimer() {
+    if (mediaModalTimer) {
+      clearInterval(mediaModalTimer);
+      mediaModalTimer = null;
+    }
+  }
+
+  function primeMediaSource(src) {
+    if (!src) return;
+    if (MEDIA_EXT_VIDEO.test(src)) {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.muted = true;
+      video.playsInline = true;
+      video.src = src;
+    } else {
+      const img = new Image();
+      img.decoding = "async";
+      img.loading = "lazy";
+      img.src = src;
+    }
+  }
+
+  function getSlidesTemplate(month) {
+    if (mediaSlidesCache.has(month.id)) {
+      return mediaSlidesCache.get(month.id);
+    }
+
+    const sources = Array.isArray(month.photos)
+      ? month.photos.map(normalizeMediaSrc).filter(Boolean)
+      : [];
+
+    const slidesHtml = sources
+      .map((src, i) => {
+        const safeSrc = escapeHTML(src);
+        const isVideo = MEDIA_EXT_VIDEO.test(src);
+        if (isVideo) {
+          return `
+            <div class="media-modal__slide" role="listitem" data-index="${i}">
+              <video src="${safeSrc}" preload="metadata" loop muted playsinline></video>
+            </div>
+          `;
+        }
+        return `
+          <div class="media-modal__slide" role="listitem" data-index="${i}">
+            <img src="${safeSrc}" alt="Memory preview" loading="lazy" decoding="async" />
+          </div>
+        `;
+      })
+      .join("");
+
+    const cacheEntry = { slidesHtml, sources };
+    mediaSlidesCache.set(month.id, cacheEntry);
+
+    if (sources.length) primeMediaSource(sources[0]);
+
+    return cacheEntry;
+  }
+
+  function primeMonthSlides(month) {
+    if (!month) return;
+    getSlidesTemplate(month);
+  }
+
+  function setActiveMediaSlide(idx) {
+    if (!mediaModalSlides.length) return;
+    mediaModalSlides.forEach((slide, i) => {
+      slide.classList.toggle("is-active", i === idx);
+      slide.setAttribute("aria-hidden", i === idx ? "false" : "true");
+      const vid = slide.querySelector("video");
+      if (vid) {
+        if (i === idx) {
+          vid.currentTime = 0;
+          vid.play().catch(() => {});
+        } else {
+          vid.pause();
+        }
+      }
+    });
+    mediaModalIndex = idx;
+  }
+
+  function stepMediaSlide(delta) {
+    if (!mediaModalSlides.length) return;
+    const next = (mediaModalIndex + delta + mediaModalSlides.length) %
+      mediaModalSlides.length;
+    setActiveMediaSlide(next);
+    stopMediaTimer();
+    mediaModalTimer = window.setInterval(() => {
+      setActiveMediaSlide((mediaModalIndex + 1) % mediaModalSlides.length);
+    }, 2000);
+  }
+
+  function hideMediaModal() {
+    stopMediaTimer();
+    if (mediaModal) {
+      mediaModal.classList.remove("is-visible");
+      mediaModal.classList.remove("is-loading");
+      mediaModal.setAttribute("aria-hidden", "true");
+    }
+    document.body.classList.remove("has-modal-open");
+  }
+
+  function setMediaModalLoading(modal, { isLoading, title, subtitle } = {}) {
+    if (!modal) return;
+    modal.classList.toggle("is-loading", !!isLoading);
+    const slider = modal.querySelector(".media-modal__slider");
+    if (slider) slider.setAttribute("aria-busy", isLoading ? "true" : "false");
+
+    const loaderTitle = modal.querySelector(".media-modal__loading-title");
+    const loaderSubtitle = modal.querySelector(".media-modal__loading-subtitle");
+    if (loaderTitle && title) loaderTitle.textContent = title;
+    if (loaderSubtitle) {
+      loaderSubtitle.textContent = subtitle || "Preparing memories…";
+    }
+
+    const cta = modal.querySelector(".media-modal__open");
+    if (cta) {
+      cta.setAttribute("aria-disabled", isLoading ? "true" : "false");
+      cta.tabIndex = isLoading ? -1 : 0;
+    }
+
+    modal
+      .querySelectorAll(".media-modal__nav")
+      .forEach((nav) => (nav.disabled = !!isLoading));
+  }
+
+  function showMediaModal(month, data, options = {}) {
+    const { deferSlides = false, loadingSubtitle } = options;
+    const modal = ensureMediaModal();
+    const slidesWrap = modal.querySelector(".media-modal__slides");
+    const titleEl = modal.querySelector(".media-modal__title");
+    const cta = modal.querySelector(".media-modal__open");
+    const subtitleEl = modal.querySelector(".media-modal__subtitle");
+
+    let slidesRendered = false;
+
+    stopMediaTimer();
+
+    const title = displayTitleForMonth(month, data);
+    const subtitle = loadingSubtitle || "Preparing memories…";
+    const unlockHref = `capsule.html?m=${month.id}&auto=open`;
+
+    slidesWrap.innerHTML = "";
+    mediaModalSlides = [];
+    mediaModalIndex = 0;
+
+    titleEl.textContent = title;
+    if (subtitleEl) subtitleEl.textContent = "Little memories from this capsule";
+    cta.setAttribute("href", unlockHref);
+
+    setMediaModalLoading(modal, {
+      isLoading: true,
+      title,
+      subtitle,
+    });
+
+    const renderSlides = () => {
+      if (slidesRendered) return;
+      slidesRendered = true;
+
+      if (!mediaModal || !mediaModal.classList.contains("is-visible")) return;
+
+      mediaModalSlides = [];
+
+      const { slidesHtml, sources } = getSlidesTemplate(month);
+
+      if (!sources.length) {
+        slidesWrap.innerHTML = "";
+        const empty = document.createElement("div");
+        empty.className = "media-modal__empty";
+        empty.textContent = "No memories added yet.";
+        slidesWrap.appendChild(empty);
+      } else {
+        slidesWrap.innerHTML = slidesHtml;
+        mediaModalSlides = Array.from(
+          slidesWrap.querySelectorAll(".media-modal__slide")
+        );
+      }
+
+      setMediaModalLoading(modal, { isLoading: false });
+
+      if (mediaModalSlides.length) {
+        setActiveMediaSlide(0);
+        stopMediaTimer();
+        mediaModalTimer = window.setInterval(() => {
+          setActiveMediaSlide((mediaModalIndex + 1) % mediaModalSlides.length);
+        }, 2000);
+      }
+    };
+
+    document.body.classList.add("has-modal-open");
+    modal.classList.add("is-visible");
+    modal.setAttribute("aria-hidden", "false");
+    modal.focus({ preventScroll: true });
+
+    if (!deferSlides) {
+      requestAnimationFrame(renderSlides);
+    }
+
+    return { renderSlides };
+  }
+
+  function flashMarkerLoading(marker) {
+    if (!marker || marker.classList.contains("is-loading")) return;
+    marker.classList.add("is-loading");
+    marker.setAttribute("aria-busy", "true");
+    window.setTimeout(() => {
+      marker.classList.remove("is-loading");
+      marker.removeAttribute("aria-busy");
+    }, 850);
+  }
+
+  function attachMarkerInteractions(marker, month, data, { isOpenable, unlockMs }) {
+    const show = () => {
+      primeMonthSlides(month);
+      showProgressTooltip(marker);
+    };
+    const hide = () => hideProgressTooltip();
+
+    marker.addEventListener("pointerenter", show);
+    marker.addEventListener("pointerleave", hide);
+    marker.addEventListener("focus", show);
+    marker.addEventListener("blur", hide);
+    marker.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") hide();
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        if (!isOpenable) {
+          flashMarkerLoading(marker);
+          const modalState = showMediaModal(month, data, {
+            deferSlides: true,
+            loadingSubtitle: marker.dataset.unlockLabel,
+          });
+          const waitMs = Math.max(0, unlockMs - now().getTime());
+          window.setTimeout(() => modalState.renderSlides(), waitMs || 0);
+          return;
+        }
+        const modalState = showMediaModal(month, data, {
+          loadingSubtitle: "Preparing your memories…",
+        });
+        modalState.renderSlides();
+      }
+    });
+    marker.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "touch") {
+        show();
+      }
+    });
+    marker.addEventListener("click", () => {
+      show();
+      if (!isOpenable) {
+        flashMarkerLoading(marker);
+        const modalState = showMediaModal(month, data, {
+          deferSlides: true,
+          loadingSubtitle: marker.dataset.unlockLabel,
+        });
+        const waitMs = Math.max(0, unlockMs - now().getTime());
+        window.setTimeout(() => modalState.renderSlides(), waitMs || 0);
+        return;
+      }
+      const modalState = showMediaModal(month, data, {
+        loadingSubtitle: "Preparing your memories…",
+      });
+      modalState.renderSlides();
+    });
+  }
+
+  function renderProgressMarkers(monthStates, data) {
+    const container = $("#progressMarkers");
+    if (!container || !monthStates.length) return;
+    hideProgressTooltip();
+    container.innerHTML = "";
+
+    const angleStep = 360 / monthStates.length;
+
+    monthStates.forEach(({ month, status, unlockDate, unlockMs, isOpenable }, index) => {
+      const marker = document.createElement("button");
+      marker.type = "button";
+      marker.className = `progress-marker is-${status.toLowerCase()}`;
+      marker.style.setProperty("--angle", `${index * angleStep - 90}deg`);
+      const statusKey = status.toLowerCase();
+      const symbol =
+        iconFor((CURRENT_SETTINGS.statusIcons || {})[statusKey]) || "✦";
+      marker.innerHTML = `
+        <span class="progress-marker__glow" aria-hidden="true"></span>
+        <span class="progress-marker__icon" aria-hidden="true">${symbol}</span>
+        <span class="progress-marker__spinner" aria-hidden="true"></span>
+      `;
+
+      const unlockLabel = isOpenable
+        ? "Ready to open"
+        : `Opens ${unlockDate.toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+          })}`;
+
+      const detailSource = month.surprise || month.letter || "";
+      const detail = detailSource.length > 140
+        ? detailSource.slice(0, 137) + "…"
+        : detailSource;
+
+      marker.dataset.title = displayTitleForMonth(month, data);
+      marker.dataset.status = status;
+      marker.dataset.statusLabel = statusTextFor(status);
+      marker.dataset.unlockLabel = unlockLabel;
+      marker.dataset.month = String(index + 1);
+      marker.dataset.ready = String(isOpenable);
+      marker.dataset.unlockMs = String(unlockMs);
+      if (detail) marker.dataset.detail = detail;
+
+      marker.setAttribute(
+        "aria-label",
+        `${marker.dataset.title}: ${marker.dataset.statusLabel}. ${unlockLabel}`
+      );
+
+      attachMarkerInteractions(marker, month, data, { isOpenable, unlockMs });
+      container.appendChild(marker);
+    });
+  }
+
   function renderHome(data) {
     const unlocked = loadUnlocked();
     setRingProgress(unlocked.size);
 
     const monthsGrid = $("#monthsGrid");
     monthsGrid.innerHTML = "";
-    const n = data.months.length;
     let nextUnlockMs = Infinity;
     let currentOpenable = null;
     const nowMs = now().getTime();
 
-    data.months.forEach((m) => {
-      const unlockMs = parseISO(m.unlockDate).getTime();
+    const monthStates = data.months.map((m) => {
+      const unlockDate = parseISO(m.unlockDate);
+      const unlockMs = unlockDate.getTime();
       const isUnlocked = unlocked.has(m.id);
       const isOpenable = nowMs >= unlockMs;
       const status = isUnlocked ? "Unlocked" : isOpenable ? "Ready" : "Locked";
+      return { month: m, unlockDate, unlockMs, isUnlocked, isOpenable, status };
+    });
+
+    monthStates.forEach(({ month, unlockMs, isUnlocked, isOpenable, status }) => {
       if (!isUnlocked && isOpenable && currentOpenable === null)
-        currentOpenable = m;
+        currentOpenable = month;
       if (!isOpenable) nextUnlockMs = Math.min(nextUnlockMs, unlockMs - nowMs);
 
       const card = document.createElement("div");
       card.className = "month-card" + (isOpenable ? "" : " locked");
-      const title = displayTitleForMonth(m, data);
+      const title = displayTitleForMonth(month, data);
       card.innerHTML = `
         <div class="month-title">${title}</div>
         <div class="pill">${
@@ -624,16 +1115,22 @@
             : iconFor(CURRENT_SETTINGS.statusIcons.locked)
         } ${statusTextFor(status)}</div>
         <div class="month-actions">
-          <button class="btn btn-secondary" data-open="${m.id}" ${
+          <button class="btn btn-secondary" data-open="${month.id}" ${
         isOpenable ? "" : "disabled"
       }>Open</button>
-          <a class="btn view" href="capsule.html?m=${m.id}" ${
+          <a class="btn view" href="capsule.html?m=${month.id}" ${
         isOpenable ? "" : 'tabindex="-1" aria-disabled="true"'
       }>View</a>
         </div>
       `;
       monthsGrid.appendChild(card);
     });
+
+    renderProgressMarkers(monthStates, data);
+
+    if (currentOpenable) {
+      primeMonthSlides(currentOpenable);
+    }
 
     const btn = $("#openCurrent");
     if (btn) {
