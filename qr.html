@@ -7,7 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
-  <body>
+  <body data-page="qr">
     <main class="qr-wrap">
       <h1>QR Code</h1>
       <p class="hint">If the QR code doesn’t work on mobile or iPad, please use the link
@@ -38,6 +38,7 @@ For best viewing, open on laptop/PC.
         <button class="btn" onclick="window.print()">Print</button>
       </div>
     </main>
+    <script defer src="assets/app.js"></script>
     <script>
       const input = document.getElementById("url");
       const img = document.getElementById("qr");

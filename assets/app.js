@@ -700,6 +700,35 @@
   let mediaModalIndex = 0;
   const mediaSlidesCache = new Map();
 
+  function buildSlidesFromSources(rawSources) {
+    const sources = (rawSources || [])
+      .map(normalizeMediaSrc)
+      .filter(Boolean);
+
+    const slidesHtml = sources
+      .map((src, i) => {
+        const safeSrc = escapeHTML(src);
+        const isVideo = MEDIA_EXT_VIDEO.test(src);
+
+        if (isVideo) {
+          return `
+            <div class="media-modal__slide" role="listitem" data-index="${i}">
+              <video src="${safeSrc}" preload="metadata" loop muted playsinline controls></video>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="media-modal__slide" role="listitem" data-index="${i}">
+            <img src="${safeSrc}" alt="Memory preview" loading="lazy" decoding="async" />
+          </div>
+        `;
+      })
+      .join("");
+
+    return { slidesHtml, sources };
+  }
+
   function ensureMediaModal() {
     if (mediaModal) return mediaModal;
 
@@ -785,33 +814,10 @@
       return mediaSlidesCache.get(month.id);
     }
 
-    const sources = Array.isArray(month.photos)
-      ? month.photos.map(normalizeMediaSrc).filter(Boolean)
-      : [];
-
-    const slidesHtml = sources
-      .map((src, i) => {
-        const safeSrc = escapeHTML(src);
-        const isVideo = MEDIA_EXT_VIDEO.test(src);
-        if (isVideo) {
-          return `
-            <div class="media-modal__slide" role="listitem" data-index="${i}">
-              <video src="${safeSrc}" preload="metadata" loop muted playsinline></video>
-            </div>
-          `;
-        }
-        return `
-          <div class="media-modal__slide" role="listitem" data-index="${i}">
-            <img src="${safeSrc}" alt="Memory preview" loading="lazy" decoding="async" />
-          </div>
-        `;
-      })
-      .join("");
-
-    const cacheEntry = { slidesHtml, sources };
+    const cacheEntry = buildSlidesFromSources(month.photos);
     mediaSlidesCache.set(month.id, cacheEntry);
 
-    if (sources.length) primeMediaSource(sources[0]);
+    if (cacheEntry.sources.length) primeMediaSource(cacheEntry.sources[0]);
 
     return cacheEntry;
   }
@@ -884,12 +890,30 @@
       .forEach((nav) => (nav.disabled = !!isLoading));
   }
 
+  function setMediaModalCTA(modal, { href, label, hidden } = {}) {
+    const controls = modal.querySelector(".media-modal__controls");
+    const cta = modal.querySelector(".media-modal__open");
+    if (!controls || !cta) return;
+
+    controls.classList.toggle("is-hidden", !!hidden);
+
+    if (hidden) {
+      cta.setAttribute("aria-disabled", "true");
+      cta.tabIndex = -1;
+      return;
+    }
+
+    cta.setAttribute("aria-disabled", "false");
+    cta.tabIndex = 0;
+    cta.textContent = label || "Open this month";
+    cta.setAttribute("href", href || "#");
+  }
+
   function showMediaModal(month, data, options = {}) {
     const { deferSlides = false, loadingSubtitle } = options;
     const modal = ensureMediaModal();
     const slidesWrap = modal.querySelector(".media-modal__slides");
     const titleEl = modal.querySelector(".media-modal__title");
-    const cta = modal.querySelector(".media-modal__open");
     const subtitleEl = modal.querySelector(".media-modal__subtitle");
 
     let slidesRendered = false;
@@ -906,7 +930,7 @@
 
     titleEl.textContent = title;
     if (subtitleEl) subtitleEl.textContent = "Little memories from this capsule";
-    cta.setAttribute("href", unlockHref);
+    setMediaModalCTA(modal, { href: unlockHref, label: "Open this month" });
 
     setMediaModalLoading(modal, {
       isLoading: true,
@@ -937,6 +961,8 @@
         );
       }
 
+      modal.classList.toggle("is-single", mediaModalSlides.length <= 1);
+
       setMediaModalLoading(modal, { isLoading: false });
 
       if (mediaModalSlides.length) {
@@ -958,6 +984,52 @@
     }
 
     return { renderSlides };
+  }
+
+  function showInlineMediaPreview({
+    title = "Preview",
+    subtitle = "Tap or click to explore",
+    sources = [],
+    startIndex = 0,
+  } = {}) {
+    const modal = ensureMediaModal();
+    const slidesWrap = modal.querySelector(".media-modal__slides");
+    const titleEl = modal.querySelector(".media-modal__title");
+    const subtitleEl = modal.querySelector(".media-modal__subtitle");
+
+    stopMediaTimer();
+
+    const { slidesHtml, sources: normalized } = buildSlidesFromSources(sources);
+    slidesWrap.innerHTML = slidesHtml;
+    mediaModalSlides = Array.from(slidesWrap.querySelectorAll(".media-modal__slide"));
+    mediaModalIndex = Math.max(0, Math.min(startIndex, mediaModalSlides.length - 1));
+
+    if (normalized.length) {
+      primeMediaSource(normalized[mediaModalIndex] || normalized[0]);
+    }
+
+    if (!mediaModalSlides.length) {
+      const empty = document.createElement("div");
+      empty.className = "media-modal__empty";
+      empty.textContent = "No media to preview just yet.";
+      slidesWrap.appendChild(empty);
+    }
+
+    setMediaModalLoading(modal, { isLoading: false, title, subtitle });
+    setMediaModalCTA(modal, { hidden: true });
+
+    if (titleEl) titleEl.textContent = title;
+    if (subtitleEl) subtitleEl.textContent = subtitle;
+
+    document.body.classList.add("has-modal-open");
+    modal.classList.add("is-visible");
+    modal.classList.toggle("is-single", mediaModalSlides.length <= 1);
+    modal.setAttribute("aria-hidden", "false");
+    modal.focus({ preventScroll: true });
+
+    if (mediaModalSlides.length) {
+      setActiveMediaSlide(mediaModalIndex);
+    }
   }
 
   function flashMarkerLoading(marker) {
@@ -1336,8 +1408,10 @@
     const strip = $("#photos");
     strip.innerHTML = "";
 
-    (month.photos || []).forEach((src) => {
-      const isVideo = /\.mp4(\?|#|$)/i.test(src);
+    const photoSources = buildSlidesFromSources(month.photos).sources;
+
+    photoSources.forEach((src) => {
+      const isVideo = MEDIA_EXT_VIDEO.test(src);
 
       if (isVideo) {
         const v = document.createElement("video");
@@ -1348,7 +1422,8 @@
         v.playsInline = true;
         v.preload = "metadata";
 
-        v.className = "media";
+        v.className = "media media-clickable";
+        v.dataset.source = src;
         strip.appendChild(v);
       } else {
         const img = document.createElement("img");
@@ -1356,9 +1431,30 @@
         img.decoding = "async";
         img.src = src;
         img.alt = "Photo";
-        img.className = "media";
+        img.className = "media media-clickable";
+        img.dataset.source = src;
         strip.appendChild(img);
       }
+    });
+
+    strip.addEventListener("click", (e) => {
+      const media = e.target.closest(".media");
+      if (!media) return;
+
+      const clickedSrc = normalizeMediaSrc(
+        media.dataset.source || media.currentSrc || media.src || ""
+      );
+      const startIndex = Math.max(
+        0,
+        photoSources.findIndex((src) => src === clickedSrc)
+      );
+
+      showInlineMediaPreview({
+        title: `${dynTitle} memories`,
+        subtitle: "Swipe or click through full-size memories.",
+        sources: photoSources,
+        startIndex,
+      });
     });
 
     const audio = $("#voice");
@@ -1509,6 +1605,23 @@
       renderHome(data);
     }
     if (PAGE === "capsule") renderCapsule(data);
+    if (PAGE === "qr") {
+      const qrImage = document.getElementById("qr");
+      const qrLabel = document.getElementById("lbl");
+      if (qrImage) {
+        qrImage.classList.add("media-clickable");
+        qrImage.addEventListener("click", () => {
+          const src = qrImage.currentSrc || qrImage.src;
+          if (!src) return;
+
+          showInlineMediaPreview({
+            title: "QR Code",
+            subtitle: qrLabel?.textContent || "Scan-ready preview",
+            sources: [src],
+          });
+        });
+      }
+    }
 
     $$('a[href$="admin.html"]').forEach((a) => {
       a.addEventListener("click", (e) => {
@@ -1519,6 +1632,7 @@
   })();
   if (typeof window !== "undefined") {
     window.__initMediaBackground = initMediaBackground;
+    window.__showInlineMediaPreview = showInlineMediaPreview;
   }
 })();
 async function resetAppStorage() {
