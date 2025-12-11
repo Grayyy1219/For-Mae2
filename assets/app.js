@@ -693,7 +693,7 @@
     const title = marker.dataset.title || `Month ${marker.dataset.month || ""}`;
     const status = marker.dataset.statusLabel || marker.dataset.status || "";
     const unlockLabel = marker.dataset.unlockLabel || "";
-    const detail = marker.dataset.detail || "";
+    const detail = marker.dataset.unlocked === "true" ? marker.dataset.detail || "" : "";
 
     const safeTitle = escapeHTML(title);
     const safeStatus = escapeHTML(status);
@@ -1128,7 +1128,7 @@
 
     const angleStep = 360 / monthStates.length;
 
-    monthStates.forEach(({ month, status, unlockDate, unlockMs, isOpenable }, index) => {
+    monthStates.forEach(({ month, status, unlockDate, unlockMs, isOpenable, prereqsMet, isTimeUnlocked, isUnlocked }, index) => {
       const marker = document.createElement("button");
       marker.type = "button";
       marker.className = `progress-marker is-${status.toLowerCase()}`;
@@ -1142,12 +1142,17 @@
         <span class="progress-marker__spinner" aria-hidden="true"></span>
       `;
 
-      const unlockLabel = isOpenable
-        ? "Ready to open"
-        : `Opens ${unlockDate.toLocaleDateString(undefined, {
+      let unlockLabel = "Ready to open";
+      if (!isOpenable) {
+        if (!prereqsMet && isTimeUnlocked) {
+          unlockLabel = "Open previous months first";
+        } else {
+          unlockLabel = `Opens ${unlockDate.toLocaleDateString(undefined, {
             month: "short",
             day: "numeric",
           })}`;
+        }
+      }
 
       const detailSource = month.surprise || month.letter || "";
       const detail = detailSource.length > 140
@@ -1159,9 +1164,10 @@
       marker.dataset.statusLabel = statusTextFor(status);
       marker.dataset.unlockLabel = unlockLabel;
       marker.dataset.month = String(index + 1);
+      marker.dataset.unlocked = String(isUnlocked);
       marker.dataset.ready = String(isOpenable);
       marker.dataset.unlockMs = String(unlockMs);
-      if (detail) marker.dataset.detail = detail;
+      if (isUnlocked && detail) marker.dataset.detail = detail;
 
       marker.setAttribute(
         "aria-label",
@@ -1183,24 +1189,40 @@
     let currentOpenable = null;
     const nowMs = now().getTime();
 
-    const monthStates = data.months.map((m) => {
+    const monthStates = data.months.map((m, idx) => {
       const unlockDate = parseISO(m.unlockDate);
       const unlockMs = unlockDate.getTime();
       const isUnlocked = unlocked.has(m.id);
-      const isOpenable = nowMs >= unlockMs;
+      const prereqsMet = data.months
+        .slice(0, idx)
+        .every((prev) => unlocked.has(prev.id));
+      const isTimeUnlocked = nowMs >= unlockMs;
+      const isOpenable = prereqsMet && isTimeUnlocked;
       const status = isUnlocked ? "Unlocked" : isOpenable ? "Ready" : "Locked";
-      return { month: m, unlockDate, unlockMs, isUnlocked, isOpenable, status };
+      return {
+        month: m,
+        unlockDate,
+        unlockMs,
+        isUnlocked,
+        isOpenable,
+        status,
+        prereqsMet,
+        isTimeUnlocked,
+      };
     });
 
-    monthStates.forEach(({ month, unlockMs, isUnlocked, isOpenable, status }) => {
-      if (!isUnlocked && isOpenable && currentOpenable === null)
-        currentOpenable = month;
-      if (!isOpenable) nextUnlockMs = Math.min(nextUnlockMs, unlockMs - nowMs);
+    monthStates.forEach(
+      ({ month, unlockMs, isUnlocked, isOpenable, status, prereqsMet, isTimeUnlocked }) => {
+        if (!isUnlocked && isOpenable && currentOpenable === null)
+          currentOpenable = month;
+        if (!isOpenable && isTimeUnlocked && !prereqsMet) return;
+        if (!isOpenable && unlockMs > nowMs)
+          nextUnlockMs = Math.min(nextUnlockMs, unlockMs - nowMs);
 
-      const card = document.createElement("div");
-      card.className = "month-card" + (isOpenable ? "" : " locked");
-      const title = displayTitleForMonth(month, data);
-      card.innerHTML = `
+        const card = document.createElement("div");
+        card.className = "month-card" + (isOpenable ? "" : " locked");
+        const title = displayTitleForMonth(month, data);
+        card.innerHTML = `
         <div class="month-title">${title}</div>
         <div class="pill">${
           status === "Unlocked"
@@ -1262,7 +1284,9 @@
 
     $$("button[data-open]").forEach((b) => {
       const id = Number(b.getAttribute("data-open"));
+      const state = monthStates.find((m) => m.month.id === id);
       b.addEventListener("click", () => {
+        if (!state || !state.isOpenable) return;
         unlocked.add(id);
         saveUnlocked(unlocked);
         confettiBurst();
@@ -1396,9 +1420,19 @@
   function renderCapsule(data) {
     const params = new URLSearchParams(location.search);
     const id = Number(params.get("m") || "1");
-    const month =
-      data.months.find((m) => Number(m.id) === id) || data.months[0];
+    const monthIndex = data.months.findIndex((m) => Number(m.id) === id);
+    const safeIndex = monthIndex >= 0 ? monthIndex : 0;
+    const month = data.months[safeIndex] || data.months[0];
     const unlocked = loadUnlocked();
+
+    const prerequisitesMet = data.months
+      .slice(0, safeIndex)
+      .every((m) => unlocked.has(m.id));
+    if (!prerequisitesMet && safeIndex > 0) {
+      alert("Please open earlier months first.");
+      window.location.replace("index.html");
+      return;
+    }
 
     const unlockTime = parseISO(month.unlockDate).getTime();
     const canOpen = now().getTime() >= unlockTime;
