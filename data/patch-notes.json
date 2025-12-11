@@ -1,33 +1,23 @@
 {
   "notes": [
     {
-      "version": "1.3.0",
-      "date": "2024-06-01",
+      "version": "1.1.1",
+      "date": "2025-12-11",
+      "title": "Sequential Unlock Logic & Spoiler-Safe Tooltips",
+      "changes": [
+        "Capsules now unlock sequentially so each month opens only after the previous one is unlocked.",
+        "Progress marker tooltips hide details for months that are still locked to avoid spoilers.",
+        "Direct access to locked capsules is blocked until prerequisite months are opened."
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "date": "2024-09-14",
       "title": "Timeline-inspired patch notes",
       "changes": [
         "Introduced a dedicated patch notes timeline with a polished modal layout.",
         "Added a header shortcut to quickly open the latest release highlights.",
         "Smoothed animations and readability for update details."
-      ]
-    },
-    {
-      "version": "1.2.0",
-      "date": "2024-05-15",
-      "title": "Media moments refresh",
-      "changes": [
-        "Refined the media viewer transitions for a softer opening experience.",
-        "Improved accessibility labels for navigation controls and buttons.",
-        "Tweaked gradients to better match the accent palette."
-      ]
-    },
-    {
-      "version": "1.1.0",
-      "date": "2024-05-01",
-      "title": "Performance & UX",
-      "changes": [
-        "Optimized loading states to keep cards and previews feeling snappy.",
-        "Standardized button styles across capsules and admin screens.",
-        "Reduced layout shifts on slower connections."
       ]
     }
   ]
