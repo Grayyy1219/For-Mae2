@@ -1,8 +1,18 @@
 {
   "notes": [
     {
-      "version": "1.1.1",
+      "version": "1.1.2",
       "date": "2025-12-11",
+      "title": "Admin UI form grouping improvements",
+      "changes": [
+        "Admin Settings tab now groups fields by branding, homepage copy, confetti palette, and CTA content for quicker edits.",
+        "Capsule editing form organizes basics, story content, media references, and optional links into labeled sections with helper text.",
+        "Contribution form groups donor basics, story, and media/link inputs to make submissions easier to understand."
+      ]
+    },
+    {
+      "version": "1.1.1",
+      "date": "2025-12-10",
       "title": "Sequential Unlock Logic & Spoiler-Safe Tooltips",
       "changes": [
         "Capsules now unlock sequentially so each month opens only after the previous one is unlocked.",

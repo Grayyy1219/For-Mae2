@@ -72,6 +72,24 @@
         gap: 10px;
         margin: 10px 0;
       }
+      .form-section {
+        background: rgba(16, 20, 36, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin: 14px 0;
+        display: grid;
+        gap: 6px;
+      }
+      .form-section__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .form-section__header h4 {
+        margin: 0;
+      }
       .form-grid label {
         display: grid;
         gap: 6px;
@@ -237,46 +255,66 @@
             </div>
             <section id="tab-settings">
               <h3>Site Settings</h3>
-              <div class="form-grid">
-                <label>Site Title<input id="s_siteTitle" type="text" /></label>
-                <label>Brand Text<input id="s_brandText" type="text" /></label>
-                <label>Favicon URL<input id="s_favicon" type="text" /></label>
-                <label>Heart Emoji<input id="s_heartEmoji" type="text" /></label>
-                <label>Accent<input id="s_theme_accent" type="color" value="#8b5cf6" /></label>
-                <label>Accent 2<input id="s_theme_accent2" type="color" value="#c4b5fd" /></label>
-                <label>Ring Fill<input id="s_theme_ringFill" type="color" value="#a78bfa" /></label>
-                <label>Home Headline<input id="s_homeHeadline" type="text" /></label>
-                <label>Home Subhead<input id="s_homeSubhead" type="text" /></label>
-                <label>Open Button<input id="s_openButtonText" type="text" /></label>
-                <label>Footer Text<input id="s_footerText" type="text" /></label>
-                <label>Capsule Greeting<input id="s_capsuleGreeting" type="text" /></label>
-                <label>Background Style
-                  <select id="s_mediaBackgroundMode">
-                    <option value="collage">Collage</option>
-                    <option value="slideshow">Slideshow</option>
-                  </select>
-                </label>
-                <label>Icon: Unlocked
-                  <div class="row">
-                    <input id="s_icon_unlocked" type="text" placeholder="Emoji or image URL/data URI" style="flex:1" />
-                    <input id="s_icon_unlocked_file" type="file" accept="image/*" style="display:none" />
-                    <button id="s_icon_unlocked_up" type="button" class="btn btn-secondary">Upload Image</button>
-                  </div>
-                </label>
-                <label>Icon: Ready
-                  <div class="row">
-                    <input id="s_icon_ready" type="text" placeholder="Emoji or image URL/data URI" style="flex:1" />
-                    <input id="s_icon_ready_file" type="file" accept="image/*" style="display:none" />
-                    <button id="s_icon_ready_up" type="button" class="btn btn-secondary">Upload Image</button>
-                  </div>
-                </label>
-                <label>Icon: Locked
-                  <div class="row">
-                    <input id="s_icon_locked" type="text" placeholder="Emoji or image URL/data URI" style="flex:1" />
-                    <input id="s_icon_locked_file" type="file" accept="image/*" style="display:none" />
-                    <button id="s_icon_locked_up" type="button" class="btn btn-secondary">Upload Image</button>
-                  </div>
-                </label>
+              <div class="form-section">
+                <div class="form-section__header">
+                  <h4>Branding</h4>
+                  <p class="helper-text">Colors, icons, and site identity</p>
+                </div>
+                <div class="form-grid">
+                  <label>Site Title<input id="s_siteTitle" type="text" /></label>
+                  <label>Brand Text<input id="s_brandText" type="text" /></label>
+                  <label>Favicon URL<input id="s_favicon" type="text" /></label>
+                  <label>Heart Emoji<input id="s_heartEmoji" type="text" /></label>
+                  <label>Accent<input id="s_theme_accent" type="color" value="#8b5cf6" /></label>
+                  <label>Accent 2<input id="s_theme_accent2" type="color" value="#c4b5fd" /></label>
+                  <label>Ring Fill<input id="s_theme_ringFill" type="color" value="#a78bfa" /></label>
+                  <label>Icon: Unlocked
+                    <div class="row">
+                      <input id="s_icon_unlocked" type="text" placeholder="Emoji or image URL/data URI" style="flex:1" />
+                      <input id="s_icon_unlocked_file" type="file" accept="image/*" style="display:none" />
+                      <button id="s_icon_unlocked_up" type="button" class="btn btn-secondary">Upload Image</button>
+                    </div>
+                  </label>
+                  <label>Icon: Ready
+                    <div class="row">
+                      <input id="s_icon_ready" type="text" placeholder="Emoji or image URL/data URI" style="flex:1" />
+                      <input id="s_icon_ready_file" type="file" accept="image/*" style="display:none" />
+                      <button id="s_icon_ready_up" type="button" class="btn btn-secondary">Upload Image</button>
+                    </div>
+                  </label>
+                  <label>Icon: Locked
+                    <div class="row">
+                      <input id="s_icon_locked" type="text" placeholder="Emoji or image URL/data URI" style="flex:1" />
+                      <input id="s_icon_locked_file" type="file" accept="image/*" style="display:none" />
+                      <button id="s_icon_locked_up" type="button" class="btn btn-secondary">Upload Image</button>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <div class="form-section">
+                <div class="form-section__header">
+                  <h4>Homepage Content</h4>
+                  <p class="helper-text">Copy and visuals visitors see first</p>
+                </div>
+                <div class="form-grid">
+                  <label>Home Headline<input id="s_homeHeadline" type="text" /></label>
+                  <label>Home Subhead<input id="s_homeSubhead" type="text" /></label>
+                  <label>Open Button<input id="s_openButtonText" type="text" /></label>
+                  <label>Footer Text<input id="s_footerText" type="text" /></label>
+                  <label>Capsule Greeting<input id="s_capsuleGreeting" type="text" /></label>
+                  <label>Background Style
+                    <select id="s_mediaBackgroundMode">
+                      <option value="collage">Collage</option>
+                      <option value="slideshow">Slideshow</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+              <div class="form-section">
+                <div class="form-section__header">
+                  <h4>Confetti Palette</h4>
+                  <p class="helper-text">Control celebratory bursts on unlock</p>
+                </div>
                 <label style="grid-column:1 / -1">Confetti Colors
                   <div id="confettiList" class="row"></div>
                   <div class="row">
@@ -294,15 +332,29 @@
               <div class="row">
                 <label style="flex:1">Month<select id="c_id" style="width:100%"></select></label>
               </div>
-              <div class="form-grid">
-                <label>Title<input id="c_title" type="text" /></label>
-                <label>Unlock Date<input id="c_unlockDate" type="datetime-local" /></label>
-                <label>Surprise<input id="c_surprise" type="text" /></label>
-                <label>Songs Added (CSV)<input id="c_songs" type="text" /></label>
-                <label>Places Visited (CSV)<input id="c_places" type="text" /></label>
-                <label>Voice Note URL<input id="c_voice" type="text" /></label>
-                <label style="grid-column:1 / -1">Letter<textarea id="c_letter" rows="6"></textarea></label>
-                <label style="grid-column:1 / -1">Photos (CSV)<input id="c_photos" type="text" placeholder="assets/p1.jpg,assets/p2.jpg" /></label>
+              <div class="form-section">
+                <div class="form-section__header">
+                  <h4>Basics</h4>
+                  <p class="helper-text">Core information about this capsule</p>
+                </div>
+                <div class="form-grid">
+                  <label>Title<input id="c_title" type="text" /></label>
+                  <label>Unlock Date<input id="c_unlockDate" type="datetime-local" /></label>
+                  <label>Surprise<input id="c_surprise" type="text" /></label>
+                </div>
+              </div>
+              <div class="form-section">
+                <div class="form-section__header">
+                  <h4>Memories & Media</h4>
+                  <p class="helper-text">Songs, places, audio notes, and photos</p>
+                </div>
+                <div class="form-grid">
+                  <label>Songs Added (CSV)<input id="c_songs" type="text" /></label>
+                  <label>Places Visited (CSV)<input id="c_places" type="text" /></label>
+                  <label>Voice Note URL<input id="c_voice" type="text" /></label>
+                  <label style="grid-column:1 / -1">Letter<textarea id="c_letter" rows="6"></textarea></label>
+                  <label style="grid-column:1 / -1">Photos (CSV)<input id="c_photos" type="text" placeholder="assets/p1.jpg,assets/p2.jpg" /></label>
+                </div>
               </div>
               <div class="row">
                 <button id="applyCapsule" class="btn">Save Month</button>
@@ -325,81 +377,101 @@
                   class="form-grid"
                   novalidate
                 >
-                  <label
-                    >Title
-                    <input
-                      id="contribTitle"
-                      type="text"
-                      placeholder="e.g. August Adventures"
-                      required
-                    />
-                  </label>
-                  <label
-                    >Unlock Date
-                    <input id="contribUnlockDate" type="datetime-local" required />
-                  </label>
-                  <label style="grid-column: 1 / -1"
-                    >Description / Letter
-                    <textarea
-                      id="contribDescription"
-                      rows="5"
-                      placeholder="Write your heartfelt message or summary here"
-                      required
-                    ></textarea>
-                    <span class="helper-text"
-                      >This becomes the capsule letter visitors will read.</span
-                    >
-                  </label>
-                  <label style="grid-column: 1 / -1"
-                    >Media URLs
-                    <textarea
-                      id="contribMedia"
-                      rows="4"
-                      placeholder="assets/img/photo1.jpg&#10;https://example.com/video.mp4"
-                      required
-                    ></textarea>
-                    <span class="helper-text"
-                      >Add one URL per line. Supports images, GIFs, and MP4 clips.</span
-                    >
-                  </label>
-                  <label
-                    >Surprise Detail
-                    <input
-                      id="contribSurprise"
-                      type="text"
-                      placeholder="Optional surprise or plan"
-                    />
-                  </label>
-                  <label
-                    >Voice Note URL
-                    <input
-                      id="contribVoice"
-                      type="url"
-                      placeholder="https://..."
-                    />
-                  </label>
-                  <label style="grid-column: 1 / -1"
-                    >Songs Added
-                    <textarea
-                      id="contribSongs"
-                      rows="3"
-                      placeholder="https://open.spotify.com/track/..."
-                    ></textarea>
-                    <span class="helper-text"
-                      >Paste Spotify, Apple Music, or YouTube links — one per line.</span
-                    >
-                  </label>
-                  <label style="grid-column: 1 / -1"
-                    >Places Visited
-                    <textarea
-                      id="contribPlaces"
-                      rows="3"
-                      placeholder="Baguio&#10;Tagaytay"
-                    ></textarea>
-                    <span class="helper-text"
-                      >List memorable locations, one per line.</span
-                    >
-                  </label>
+                  <div class="form-section" style="grid-column: 1 / -1">
+                    <div class="form-section__header">
+                      <h4>Basics</h4>
+                      <p class="helper-text">Key details for the new capsule</p>
+                    </div>
+                    <div class="form-grid">
+                      <label
+                        >Title
+                        <input
+                          id="contribTitle"
+                          type="text"
+                          placeholder="e.g. August Adventures"
+                          required
+                        />
+                      </label>
+                      <label
+                        >Unlock Date
+                        <input id="contribUnlockDate" type="datetime-local" required />
+                      </label>
+                      <label
+                        >Surprise Detail
+                        <input
+                          id="contribSurprise"
+                          type="text"
+                          placeholder="Optional surprise or plan"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  <div class="form-section" style="grid-column: 1 / -1">
+                    <div class="form-section__header">
+                      <h4>Story</h4>
+                      <p class="helper-text">Letter and context for this milestone</p>
+                    </div>
+                    <label style="grid-column: 1 / -1"
+                      >Description / Letter
+                      <textarea
+                        id="contribDescription"
+                        rows="5"
+                        placeholder="Write your heartfelt message or summary here"
+                        required
+                      ></textarea>
+                      <span class="helper-text"
+                        >This becomes the capsule letter visitors will read.</span
+                      >
+                    </label>
+                  </div>
+                  <div class="form-section" style="grid-column: 1 / -1">
+                    <div class="form-section__header">
+                      <h4>Media & Links</h4>
+                      <p class="helper-text">Everything to relive the memory</p>
+                    </div>
+                    <label style="grid-column: 1 / -1"
+                      >Media URLs
+                      <textarea
+                        id="contribMedia"
+                        rows="4"
+                        placeholder="assets/img/photo1.jpg&#10;https://example.com/video.mp4"
+                        required
+                      ></textarea>
+                      <span class="helper-text"
+                        >Add one URL per line. Supports images, GIFs, and MP4 clips.</span
+                      >
+                    </label>
+                    <label
+                      >Voice Note URL
+                      <input
+                        id="contribVoice"
+                        type="url"
+                        placeholder="https://..."
+                      />
+                    </label>
+                    <label style="grid-column: 1 / -1"
+                      >Songs Added
+                      <textarea
+                        id="contribSongs"
+                        rows="3"
+                        placeholder="https://open.spotify.com/track/..."
+                      ></textarea>
+                      <span class="helper-text"
+                        >Paste Spotify, Apple Music, or YouTube links — one per line.</span
+                      >
+                    </label>
+                    <label style="grid-column: 1 / -1"
+                      >Places Visited
+                      <textarea
+                        id="contribPlaces"
+                        rows="3"
+                        placeholder="Baguio&#10;Tagaytay"
+                      ></textarea>
+                      <span class="helper-text"
+                        >List memorable locations, one per line.</span
+                      >
+                    </label>
+                  </div>
                 </form>
                 <div id="contribFeedback" class="feedback hidden" role="status"></div>
                 <div
