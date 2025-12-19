@@ -586,6 +586,12 @@ body[data-page="admin"] .media-bg__slide.is-active .media-bg__media {
   font-size: 13px;
   line-height: 1.4;
 }
+.progress-tooltip__song {
+  margin-top: 6px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.4;
+}
 .progress-tooltip__badge {
   padding: 2px 6px;
   border-radius: 999px;
@@ -1157,6 +1163,32 @@ body[data-page="admin"] .media-bg__slide.is-active .media-bg__media {
   display: grid;
   gap: 4px;
   text-align: center;
+}
+.capsule-nav {
+  width: 100%;
+  margin-top: 10px;
+}
+.capsule-nav--sides {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.capsule-nav-button {
+  background: transparent;
+  border: 1px solid #2a2f3f;
+  color: var(--text);
+  padding: 6px 12px;
+  font-weight: 600;
+  box-shadow: none;
+}
+.capsule-nav-button:hover {
+  transform: none;
+  box-shadow: none;
+  background: #1b1f30;
+}
+.capsule-nav-button:disabled {
+  opacity: 0.45;
 }
 .capsule-header h1 {
   margin: 0;

@@ -77,6 +77,27 @@
     });
   }
 
+  const songTitleCache = new Map();
+
+  async function fetchSongTitle(url) {
+    if (!url) return "";
+    if (songTitleCache.has(url)) return songTitleCache.get(url);
+
+    let title = "";
+    try {
+      const res = await fetch(
+        `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        title = data.title || "";
+      }
+    } catch {}
+
+    songTitleCache.set(url, title);
+    return title;
+  }
+
   function formatCountdown(ms) {
     if (ms <= 0) return "00:00:00";
     const totalSec = Math.floor(ms / 1000);
@@ -694,11 +715,13 @@
     const status = marker.dataset.statusLabel || marker.dataset.status || "";
     const unlockLabel = marker.dataset.unlockLabel || "";
     const detail = marker.dataset.unlocked === "true" ? marker.dataset.detail || "" : "";
+    const songLabel = marker.dataset.songLabel || "";
 
     const safeTitle = escapeHTML(title);
     const safeStatus = escapeHTML(status);
     const safeUnlock = escapeHTML(unlockLabel);
     const safeDetail = escapeHTML(detail);
+    const safeSong = escapeHTML(songLabel ? `Song: ${songLabel}` : "");
 
     tooltip.innerHTML = `
       <div class="progress-tooltip__title">${safeTitle}</div>
@@ -706,6 +729,7 @@
         <span class="progress-tooltip__badge">${safeStatus}</span>
         ${unlockLabel ? `<span class="progress-tooltip__separator">•</span> <span>${safeUnlock}</span>` : ""}
       </div>
+      ${songLabel ? `<div class="progress-tooltip__song">${safeSong}</div>` : ""}
       ${detail ? `<div class="progress-tooltip__detail">${safeDetail}</div>` : ""}
     `;
 
@@ -1120,6 +1144,20 @@
     });
   }
 
+  function hydrateMarkerSongLabel(marker, month) {
+    const songs = (month.songsAdded || []).filter(Boolean);
+    if (!songs.length) return;
+
+    Promise.all(songs.map((song) => fetchSongTitle(song))).then((titles) => {
+      const cleaned = titles.filter(Boolean);
+      if (!cleaned.length) return;
+      marker.dataset.songLabel = cleaned.join(", ");
+      if (activeProgressMarker === marker) {
+        showProgressTooltip(marker);
+      }
+    });
+  }
+
   function renderProgressMarkers(monthStates, data) {
     const container = $("#progressMarkers");
     if (!container || !monthStates.length) return;
@@ -1158,7 +1196,6 @@
       const detail = detailSource.length > 140
         ? detailSource.slice(0, 137) + "…"
         : detailSource;
-
       marker.dataset.title = displayTitleForMonth(month, data);
       marker.dataset.status = status;
       marker.dataset.statusLabel = statusTextFor(status);
@@ -1175,6 +1212,7 @@
       );
 
       attachMarkerInteractions(marker, month, data, { isOpenable, unlockMs });
+      hydrateMarkerSongLabel(marker, month);
       container.appendChild(marker);
     });
   }
@@ -1725,6 +1763,48 @@
     );
     $("#statDays").textContent = String(daysTogether);
     $("#statPlaces").textContent = String(places);
+
+    const configureNavButton = (button, targetIndex, label) => {
+      if (!button) return;
+      if (targetIndex < 0 || targetIndex >= data.months.length) {
+        button.disabled = true;
+        button.setAttribute("aria-disabled", "true");
+        return;
+      }
+
+      const targetMonth = data.months[targetIndex];
+      const targetTitle = displayTitleForMonth(targetMonth, data);
+      const prereqsReady = data.months
+        .slice(0, targetIndex)
+        .every((m) => unlocked.has(m.id));
+
+      button.textContent = label;
+      button.title = prereqsReady
+        ? `Go to ${targetTitle}`
+        : "Open previous months first";
+      button.setAttribute("aria-label", `${label} ${targetTitle}`);
+      button.disabled = !prereqsReady;
+      button.setAttribute("aria-disabled", String(!prereqsReady));
+
+      if (prereqsReady) {
+        button.onclick = () => {
+          window.location.href = `capsule.html?m=${targetMonth.id}`;
+        };
+      } else {
+        button.onclick = null;
+      }
+    };
+
+    configureNavButton(
+      document.getElementById("prevMonth"),
+      safeIndex - 1,
+      "⟵ Prev"
+    );
+    configureNavButton(
+      document.getElementById("nextMonth"),
+      safeIndex + 1,
+      "Next ⟶"
+    );
 
     $("#backHome").addEventListener(
       "click",
