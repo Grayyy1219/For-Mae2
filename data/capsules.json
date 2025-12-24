@@ -228,12 +228,23 @@
     },
     {
       "id": 12,
-      "title": "Month 12",
-      "letter": "",
-      "photos": [],
-      "voiceNote": "",
+      "title": "Last Month",
+      "unlockDate": "2025-12-24T11:48:00.000Z",
+      "letter": "Happy monthsary, Mi.\n\nThis month has been a lot. I don't always think rationally, but having you around that day helps me reframe the situation. Not every day is a perfect day, but it's good enough, and it's nice to be with you.\n\nI've realized over the past month how much I trust you and how I rely on you when things get complicated. Not too much, though, because I still do that. But I appreciate it when we don't have to say too much to each other, even when we don't know exactly what happened. \n\nAnother month with you, Mi. Happy monthsary. I'm glad we have this. I'm glad we have this not so much stable but we are still figuring it out month by month. :>",
+      "photos": [
+        "assets\\img\\dec (1).jpg",
+        "assets\\img\\dec (2).mp4",
+        "assets\\img\\dec (3).mp4",
+        "assets\\img\\dec (4).mp4",
+        "assets\\img\\dec (5).mp4",
+        "assets\\img\\dec (6).mp4",
+        "assets\\img\\dec (7).mp4"
+      ],
       "surprise": "",
-      "songsAdded": [],
+      "voiceNote": "",
+      "songsAdded": [
+        "https://open.spotify.com/track/4NAmRvqSITAAzKWnC8yRq3?si=4d7a05cf56f34c6e"
+      ],
       "placesVisited": []
     }
   ]
