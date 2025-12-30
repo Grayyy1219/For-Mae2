@@ -1,4 +1,4 @@
-import { database, ref, set } from "./firebase.js";
+import { database, firebaseConfig, ref, set } from "./firebase.js";
 
 (() => {
   let stateApi = null;
@@ -132,14 +132,18 @@ import { database, ref, set } from "./firebase.js";
 
       setFirebaseFeedback("Uploading data to Firebase…");
       let patchNotes = null;
-
-      try {
-        const res = await fetch("data/patch-notes.json", { cache: "no-store" });
-        if (res.ok) {
-          patchNotes = await res.json();
+      const databaseUrl = firebaseConfig?.databaseURL;
+      if (databaseUrl) {
+        try {
+          const res = await fetch(`${databaseUrl}/patchNotes.json`, {
+            cache: "no-store",
+          });
+          if (res.ok) {
+            patchNotes = await res.json();
+          }
+        } catch {
+          patchNotes = null;
         }
-      } catch {
-        patchNotes = null;
       }
 
       try {

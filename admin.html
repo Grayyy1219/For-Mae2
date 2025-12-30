@@ -533,6 +533,8 @@
         document.dispatchEvent(new CustomEvent("admin:rendered"));
 
         const STORAGE_OVERRIDE = "mtc_capsules_override";
+        const FIREBASE_DB_URL =
+          "https://for-mae-default-rtdb.asia-southeast1.firebasedatabase.app";
         const $ = (s, el = document) => el.querySelector(s);
         const status = (msg) => ($("#status").textContent = msg);
         const show = (id) => (document.getElementById(id).style.display = "");
@@ -770,13 +772,13 @@
               );
               status("Loaded local override");
             } else {
-              const res = await fetch("data/capsules.json", {
+              const res = await fetch(`${FIREBASE_DB_URL}/capsules.json`, {
                 cache: "no-store",
               });
-              if (!res.ok) throw new Error("Failed to fetch file");
+              if (!res.ok) throw new Error("Failed to fetch Firebase data");
               const json = await res.json();
               $("#editor").value = JSON.stringify(json, null, 2);
-              status("Loaded data/capsules.json");
+              status("Loaded Firebase capsules");
             }
           } catch (e) {
             status("Error: " + e.message);

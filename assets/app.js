@@ -3,6 +3,8 @@
   const STORAGE_UNLOCKED = "mtc_unlocked_months";
   const STORAGE_OVERRIDE = "mtc_capsules_override";
   const STORAGE_AUDIO_PREF = "mtc_bg_audio_enabled";
+  const FIREBASE_DB_URL =
+    "https://for-mae-default-rtdb.asia-southeast1.firebasedatabase.app";
   let CURRENT_SETTINGS = null;
 
   const DEFAULT_SETTINGS = {
@@ -78,6 +80,19 @@
   }
 
   const songTitleCache = new Map();
+
+  async function fetchFirebaseJSON(path) {
+    if (!FIREBASE_DB_URL) return null;
+    try {
+      const res = await fetch(`${FIREBASE_DB_URL}/${path}.json`, {
+        cache: "no-store",
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  }
 
   async function fetchSongTitle(url) {
     if (!url) return "";
@@ -298,8 +313,8 @@
     } catch {}
 
     try {
-      const res = await fetch("data/capsules.json", { cache: "no-store" });
-      if (res.ok) return await res.json();
+      const firebaseData = await fetchFirebaseJSON("capsules");
+      if (firebaseData) return firebaseData;
     } catch {}
 
     const today = new Date();
@@ -332,15 +347,18 @@
     if (PATCH_NOTES_CACHE) return PATCH_NOTES_CACHE;
 
     try {
-      const res = await fetch("data/patch-notes.json", { cache: "no-store" });
-      if (res.ok) {
-        const json = await res.json();
-        const notes = Array.isArray(json?.notes) ? json.notes : [];
+     const firebaseNotes = await fetchFirebaseJSON("patchNotes");
+      if (firebaseNotes) {
+        const notes = Array.isArray(firebaseNotes?.notes)
+          ? firebaseNotes.notes
+          : Array.isArray(firebaseNotes)
+            ? firebaseNotes
+            : [];
         PATCH_NOTES_CACHE = notes;
         return notes;
       }
     } catch (err) {
-      console.error("Failed to load patch notes", err);
+       console.error("Failed to load patch notes from Firebase", err);
     }
 
     PATCH_NOTES_CACHE = [];
@@ -498,7 +516,7 @@
       container.appendChild(overlay);
 
       document.body.prepend(container);
-      } else {
+    } else {
       if (!container.querySelector(".media-bg__grid")) {
         const grid = document.createElement("div");
         grid.className = "media-bg__grid";
@@ -518,19 +536,19 @@
       }
     }
 
-       container.dataset.mode = mode;
+    container.dataset.mode = mode;
 
-     const grid = container.querySelector(".media-bg__grid");
+    const grid = container.querySelector(".media-bg__grid");
     const slideshow = container.querySelector(".media-bg__slideshow");
     if (grid) grid.innerHTML = "";
     if (slideshow) slideshow.innerHTML = "";
 
-       if (mediaBgTimer) {
+    if (mediaBgTimer) {
       clearInterval(mediaBgTimer);
       mediaBgTimer = null;
     }
 
-       if (mode === "slideshow") {
+    if (mode === "slideshow") {
       if (!slideshow) return;
       const slides = [];
       sources.forEach((src) => {
@@ -560,7 +578,8 @@
                 }
               };
               if (vid.readyState >= 2) playVideo();
-              else vid.addEventListener("loadeddata", playVideo, { once: true });
+              else
+                vid.addEventListener("loadeddata", playVideo, { once: true });
             } else {
               try {
                 vid.pause();
@@ -568,7 +587,7 @@
             }
           }
         });
-       };
+      };
 
       let current = 0;
       activate(current);
@@ -714,7 +733,8 @@
     const title = marker.dataset.title || `Month ${marker.dataset.month || ""}`;
     const status = marker.dataset.statusLabel || marker.dataset.status || "";
     const unlockLabel = marker.dataset.unlockLabel || "";
-    const detail = marker.dataset.unlocked === "true" ? marker.dataset.detail || "" : "";
+    const detail =
+      marker.dataset.unlocked === "true" ? marker.dataset.detail || "" : "";
     const songLabel = marker.dataset.songLabel || "";
 
     const safeTitle = escapeHTML(title);
@@ -727,10 +747,20 @@
       <div class="progress-tooltip__title">${safeTitle}</div>
       <div class="progress-tooltip__meta">
         <span class="progress-tooltip__badge">${safeStatus}</span>
-        ${unlockLabel ? `<span class="progress-tooltip__separator">•</span> <span>${safeUnlock}</span>` : ""}
+        ${
+          unlockLabel
+            ? `<span class="progress-tooltip__separator">•</span> <span>${safeUnlock}</span>`
+            : ""
+        }
       </div>
-      ${songLabel ? `<div class="progress-tooltip__song">${safeSong}</div>` : ""}
-      ${detail ? `<div class="progress-tooltip__detail">${safeDetail}</div>` : ""}
+      ${
+        songLabel ? `<div class="progress-tooltip__song">${safeSong}</div>` : ""
+      }
+      ${
+        detail
+          ? `<div class="progress-tooltip__detail">${safeDetail}</div>`
+          : ""
+      }
     `;
 
     tooltip.classList.add("is-visible");
@@ -751,9 +781,7 @@
   const mediaSlidesCache = new Map();
 
   function buildSlidesFromSources(rawSources) {
-    const sources = (rawSources || [])
-      .map(normalizeMediaSrc)
-      .filter(Boolean);
+    const sources = (rawSources || []).map(normalizeMediaSrc).filter(Boolean);
 
     const slidesHtml = sources
       .map((src, i) => {
@@ -897,7 +925,8 @@
 
   function stepMediaSlide(delta) {
     if (!mediaModalSlides.length) return;
-    const next = (mediaModalIndex + delta + mediaModalSlides.length) %
+    const next =
+      (mediaModalIndex + delta + mediaModalSlides.length) %
       mediaModalSlides.length;
     setActiveMediaSlide(next);
     stopMediaTimer();
@@ -922,7 +951,9 @@
     if (slider) slider.setAttribute("aria-busy", isLoading ? "true" : "false");
 
     const loaderTitle = modal.querySelector(".media-modal__loading-title");
-    const loaderSubtitle = modal.querySelector(".media-modal__loading-subtitle");
+    const loaderSubtitle = modal.querySelector(
+      ".media-modal__loading-subtitle"
+    );
     if (loaderTitle && title) loaderTitle.textContent = title;
     if (loaderSubtitle) {
       loaderSubtitle.textContent = subtitle || "Preparing memories…";
@@ -978,7 +1009,8 @@
     mediaModalIndex = 0;
 
     titleEl.textContent = title;
-    if (subtitleEl) subtitleEl.textContent = "Little memories from this capsule";
+    if (subtitleEl)
+      subtitleEl.textContent = "Little memories from this capsule";
     setMediaModalCTA(modal, { href: unlockHref, label: "Open this month" });
 
     setMediaModalLoading(modal, {
@@ -1049,8 +1081,13 @@
 
     const { slidesHtml, sources: normalized } = buildSlidesFromSources(sources);
     slidesWrap.innerHTML = slidesHtml;
-    mediaModalSlides = Array.from(slidesWrap.querySelectorAll(".media-modal__slide"));
-    mediaModalIndex = Math.max(0, Math.min(startIndex, mediaModalSlides.length - 1));
+    mediaModalSlides = Array.from(
+      slidesWrap.querySelectorAll(".media-modal__slide")
+    );
+    mediaModalIndex = Math.max(
+      0,
+      Math.min(startIndex, mediaModalSlides.length - 1)
+    );
 
     if (normalized.length) {
       primeMediaSource(normalized[mediaModalIndex] || normalized[0]);
@@ -1089,7 +1126,12 @@
     }, 850);
   }
 
-  function attachMarkerInteractions(marker, month, data, { isOpenable, unlockMs }) {
+  function attachMarkerInteractions(
+    marker,
+    month,
+    data,
+    { isOpenable, unlockMs }
+  ) {
     const show = () => {
       primeMonthSlides(month);
       showProgressTooltip(marker);
@@ -1166,55 +1208,70 @@
 
     const angleStep = 360 / monthStates.length;
 
-    monthStates.forEach(({ month, status, unlockDate, unlockMs, isOpenable, prereqsMet, isTimeUnlocked, isUnlocked }, index) => {
-      const marker = document.createElement("button");
-      marker.type = "button";
-      marker.className = `progress-marker is-${status.toLowerCase()}`;
-      marker.style.setProperty("--angle", `${index * angleStep - 90}deg`);
-      const statusKey = status.toLowerCase();
-      const symbol =
-        iconFor((CURRENT_SETTINGS.statusIcons || {})[statusKey]) || "✦";
-      marker.innerHTML = `
+    monthStates.forEach(
+      (
+        {
+          month,
+          status,
+          unlockDate,
+          unlockMs,
+          isOpenable,
+          prereqsMet,
+          isTimeUnlocked,
+          isUnlocked,
+        },
+        index
+      ) => {
+        const marker = document.createElement("button");
+        marker.type = "button";
+        marker.className = `progress-marker is-${status.toLowerCase()}`;
+        marker.style.setProperty("--angle", `${index * angleStep - 90}deg`);
+        const statusKey = status.toLowerCase();
+        const symbol =
+          iconFor((CURRENT_SETTINGS.statusIcons || {})[statusKey]) || "✦";
+        marker.innerHTML = `
         <span class="progress-marker__glow" aria-hidden="true"></span>
         <span class="progress-marker__icon" aria-hidden="true">${symbol}</span>
         <span class="progress-marker__spinner" aria-hidden="true"></span>
       `;
 
-      let unlockLabel = "Ready to open";
-      if (!isOpenable) {
-        if (!prereqsMet && isTimeUnlocked) {
-          unlockLabel = "Open previous months first";
-        } else {
-          unlockLabel = `Opens ${unlockDate.toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
-          })}`;
+        let unlockLabel = "Ready to open";
+        if (!isOpenable) {
+          if (!prereqsMet && isTimeUnlocked) {
+            unlockLabel = "Open previous months first";
+          } else {
+            unlockLabel = `Opens ${unlockDate.toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            })}`;
+          }
         }
+
+        const detailSource = month.surprise || month.letter || "";
+        const detail =
+          detailSource.length > 140
+            ? detailSource.slice(0, 137) + "…"
+            : detailSource;
+        marker.dataset.title = displayTitleForMonth(month, data);
+        marker.dataset.status = status;
+        marker.dataset.statusLabel = statusTextFor(status);
+        marker.dataset.unlockLabel = unlockLabel;
+        marker.dataset.month = String(index + 1);
+        marker.dataset.unlocked = String(isUnlocked);
+        marker.dataset.ready = String(isOpenable);
+        marker.dataset.unlockMs = String(unlockMs);
+        if (isUnlocked && detail) marker.dataset.detail = detail;
+
+        marker.setAttribute(
+          "aria-label",
+          `${marker.dataset.title}: ${marker.dataset.statusLabel}. ${unlockLabel}`
+        );
+
+        attachMarkerInteractions(marker, month, data, { isOpenable, unlockMs });
+        hydrateMarkerSongLabel(marker, month);
+        container.appendChild(marker);
       }
-
-      const detailSource = month.surprise || month.letter || "";
-      const detail = detailSource.length > 140
-        ? detailSource.slice(0, 137) + "…"
-        : detailSource;
-      marker.dataset.title = displayTitleForMonth(month, data);
-      marker.dataset.status = status;
-      marker.dataset.statusLabel = statusTextFor(status);
-      marker.dataset.unlockLabel = unlockLabel;
-      marker.dataset.month = String(index + 1);
-      marker.dataset.unlocked = String(isUnlocked);
-      marker.dataset.ready = String(isOpenable);
-      marker.dataset.unlockMs = String(unlockMs);
-      if (isUnlocked && detail) marker.dataset.detail = detail;
-
-      marker.setAttribute(
-        "aria-label",
-        `${marker.dataset.title}: ${marker.dataset.statusLabel}. ${unlockLabel}`
-      );
-
-      attachMarkerInteractions(marker, month, data, { isOpenable, unlockMs });
-      hydrateMarkerSongLabel(marker, month);
-      container.appendChild(marker);
-    });
+    );
   }
 
   function renderHome(data) {
@@ -1250,7 +1307,15 @@
     });
 
     monthStates.forEach(
-      ({ month, unlockMs, isUnlocked, isOpenable, status, prereqsMet, isTimeUnlocked }) => {
+      ({
+        month,
+        unlockMs,
+        isUnlocked,
+        isOpenable,
+        status,
+        prereqsMet,
+        isTimeUnlocked,
+      }) => {
         if (!isUnlocked && isOpenable && currentOpenable === null)
           currentOpenable = month;
         if (!isOpenable && isTimeUnlocked && !prereqsMet) return;
@@ -1271,15 +1336,16 @@
         } ${statusTextFor(status)}</div>
         <div class="month-actions">
           <button class="btn btn-secondary" data-open="${month.id}" ${
-        isOpenable ? "" : "disabled"
-      }>Open</button>
+          isOpenable ? "" : "disabled"
+        }>Open</button>
           <a class="btn view" href="capsule.html?m=${month.id}" ${
-        isOpenable ? "" : 'tabindex="-1" aria-disabled="true"'
-      }>View</a>
+          isOpenable ? "" : 'tabindex="-1" aria-disabled="true"'
+        }>View</a>
         </div>
       `;
-      monthsGrid.appendChild(card);
-    });
+        monthsGrid.appendChild(card);
+      }
+    );
 
     renderProgressMarkers(monthStates, data);
 
@@ -1411,7 +1477,9 @@
                 <span>${escapeHTML(date)}</span>
               </div>
               <div class="patch-item__title">${title}</div>
-              ${changes ? `<ul class="patch-item__changes">${changes}</ul>` : ""}
+              ${
+                changes ? `<ul class="patch-item__changes">${changes}</ul>` : ""
+              }
             </div>
           </div>
         `;
@@ -1448,7 +1516,9 @@
       open();
     });
 
-    [closeBtn, backdrop].forEach((el) => el && el.addEventListener("click", close));
+    [closeBtn, backdrop].forEach(
+      (el) => el && el.addEventListener("click", close)
+    );
 
     modal.addEventListener("keydown", (e) => {
       if (e.key === "Escape") close();
