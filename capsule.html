@@ -88,8 +88,23 @@
       </div>
 
       <section>
-        <h3>Letter</h3>
+        <div class="section-heading">
+          <h3>Letter</h3>
+          <div class="section-actions">
+            <button id="replayLetter" class="btn btn-secondary" type="button">
+              Replay Letter
+            </button>
+            <button id="openReplyModal" class="btn" type="button">
+              Reply
+            </button>
+          </div>
+        </div>
         <div id="letter" class="typewriter"></div>
+      </section>
+
+      <section id="repliesSection" class="hidden">
+        <h3>Replies This Month</h3>
+        <div id="repliesList" class="replies-list"></div>
       </section>
       <section>
         <h3>Photo Strip</h3>
@@ -99,6 +114,11 @@
       <section class="hidden">
         <h3>10‑sec Voice Note</h3>
         <audio id="voice" controls style="width: 100%"></audio>
+      </section>
+
+      <section id="replyVoicesSection" class="hidden">
+        <h3>Voice Mail</h3>
+        <div id="replyVoices" class="reply-voices"></div>
       </section>
 
       <section class="surprise">
@@ -134,5 +154,86 @@
       class="confetti-canvas"
       aria-hidden="true"
     ></canvas>
+
+    <div id="replyModal" class="reply-modal" aria-hidden="true" role="dialog">
+      <div class="reply-modal__backdrop" data-close="true"></div>
+      <div class="reply-modal__dialog" role="document">
+        <div class="reply-modal__header">
+          <div>
+            <div class="reply-modal__eyebrow">Reply to this capsule</div>
+            <div class="reply-modal__title">Share your thoughts</div>
+            <div class="reply-modal__subtitle">
+              Add your reply, rant, places, photos, and voice mail for this
+              month.
+            </div>
+          </div>
+          <button class="reply-modal__close" type="button" data-close="true">
+            ✕
+          </button>
+        </div>
+
+        <form id="replyForm" class="reply-form">
+          <label class="field">
+            <span class="field__label">Your name (optional)</span>
+            <input
+              id="replyName"
+              class="field__input"
+              type="text"
+              placeholder="Love, Mi"
+            />
+          </label>
+          <label class="field">
+            <span class="field__label">Reply to the letter</span>
+            <textarea
+              id="replyMessage"
+              class="field__input field__input--textarea"
+              rows="4"
+              placeholder="Write your reply..."
+              required
+            ></textarea>
+          </label>
+          <label class="field">
+            <span class="field__label">Rant for this month</span>
+            <textarea
+              id="replyRant"
+              class="field__input field__input--textarea"
+              rows="3"
+              placeholder="Share a quick rant..."
+            ></textarea>
+          </label>
+          <label class="field">
+            <span class="field__label">Place visited</span>
+            <input
+              id="replyPlace"
+              class="field__input"
+              type="text"
+              placeholder="Cafe, beach, or city"
+            />
+          </label>
+          <label class="field">
+            <span class="field__label">Image URLs (one per line)</span>
+            <textarea
+              id="replyImages"
+              class="field__input field__input--textarea"
+              rows="2"
+              placeholder="https://..."
+            ></textarea>
+          </label>
+          <label class="field">
+            <span class="field__label">Voice mail URL</span>
+            <input
+              id="replyVoice"
+              class="field__input"
+              type="url"
+              placeholder="https://...mp3"
+            />
+          </label>
+          <div class="reply-form__actions">
+            <span id="replyStatus" class="reply-form__status"></span>
+            <button class="btn" type="submit">Save Reply</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </body>
 </html>
