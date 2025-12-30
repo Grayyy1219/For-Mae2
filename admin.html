@@ -507,6 +507,20 @@
             </section>
             <section id="tab-json" style="display:none">
               <h3>Raw JSON</h3>
+              <p class="hint">
+                Push the current capsule data and patch notes to Firebase when you
+                are ready to publish updates.
+              </p>
+              <div class="row">
+                <button id="uploadFirebase" class="btn" type="button">
+                  Upload data to Firebase
+                </button>
+              </div>
+              <div
+                id="firebaseUploadStatus"
+                class="feedback hidden"
+                role="status"
+              ></div>
             </section>
             <textarea id="editor" spellcheck="false"></textarea>
             <pre class="hint" id="status"></pre>

@@ -1,3 +1,5 @@
+import { database, ref, set } from "./firebase.js";
+
 (() => {
   let stateApi = null;
   let downloadUrl = null;
@@ -83,6 +85,80 @@
     link.classList.add("hidden");
     link.removeAttribute("href");
     link.removeAttribute("download");
+  };
+
+  const setFirebaseFeedback = (message, tone = "info") => {
+    const node = document.getElementById("firebaseUploadStatus");
+    if (!node) return;
+    node.textContent = message;
+    node.classList.remove("hidden", "success", "feedback-error");
+    if (tone === "success") {
+      node.classList.add("success");
+    } else if (tone === "error") {
+      node.classList.add("feedback-error");
+    }
+  };
+
+  const attachFirebaseUpload = () => {
+    const button = document.getElementById("uploadFirebase");
+    const status = document.getElementById("firebaseUploadStatus");
+    if (!button || button.dataset.bound === "true") return;
+    button.dataset.bound = "true";
+
+    if (status) {
+      status.classList.add("hidden");
+      status.textContent = "";
+    }
+
+    button.addEventListener("click", async () => {
+      if (!stateApi || typeof stateApi.getState !== "function") {
+        setFirebaseFeedback(
+          "Capsule data is not ready yet. Load the data before uploading.",
+          "error"
+        );
+        return;
+      }
+
+      const currentState = stateApi.getState();
+      if (!currentState) {
+        setFirebaseFeedback("No capsule data found to upload.", "error");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        "This will overwrite the Firebase database root with the current capsule data and patch notes. Continue?"
+      );
+      if (!confirmed) return;
+
+      setFirebaseFeedback("Uploading data to Firebase…");
+      let patchNotes = null;
+
+      try {
+        const res = await fetch("data/patch-notes.json", { cache: "no-store" });
+        if (res.ok) {
+          patchNotes = await res.json();
+        }
+      } catch {
+        patchNotes = null;
+      }
+
+      try {
+        await set(ref(database), {
+          capsules: currentState,
+          patchNotes: patchNotes || { notes: [] },
+          updatedAt: new Date().toISOString(),
+        });
+        setFirebaseFeedback(
+          "Upload complete! Firebase now has the latest capsules and patch notes.",
+          "success"
+        );
+      } catch (err) {
+        setFirebaseFeedback(
+          `Upload failed: ${err?.message || "Unknown error"}`,
+          "error"
+        );
+      }
+    });
   };
 
   const setDownloadLink = (blob, nextId) => {
@@ -276,5 +352,6 @@
 
   document.addEventListener("admin:rendered", () => {
     attachForm();
+    attachFirebaseUpload();
   });
 })();
