@@ -52,7 +52,7 @@
     </div>
 
     <header class="site-header">
-      <div class="brand">❤️ Monthsary Time-Capsule</div>
+      <a href="index.html"><div class="brand">❤️ Monthsary Time-Capsule</div></a>
       <nav class="nav">
         <a href="index.html">Home</a>
         <a href="qr.html">QR</a>
@@ -92,11 +92,45 @@
           <h3>Letter</h3>
           <div class="section-actions">
             <button id="replayLetter" class="btn btn-secondary" type="button">
-              Replay Letter
+              <img
+                id="replayIcon"
+                src="assets/icons8-replay.png"
+                data-gif="assets/icons8-replay.gif"
+                data-static="assets/icons8-replay.png"
+                alt="Replay"
+                style="
+                  filter: invert(1) sepia(1) saturate(5000%) hue-rotate(245deg)
+                    brightness(1);
+                  mix-blend-mode: color-dodge;
+                "
+              />
             </button>
-            <button id="openReplyModal" class="btn" type="button">
-              Reply
-            </button>
+
+            <script>
+              document.addEventListener("DOMContentLoaded", () => {
+                const btn = document.getElementById("replayLetter");
+                const img = document.getElementById("replayIcon");
+
+                const gifSrc = img.dataset.gif;
+                const staticSrc = img.dataset.static;
+
+                // Ensure static image on load
+                img.src = staticSrc;
+
+                btn.addEventListener("mouseenter", () => {
+                  // Restart GIF cleanly
+                  img.src = "";
+                  img.src = gifSrc;
+                });
+
+                btn.addEventListener("mouseleave", () => {
+                  // Stop GIF immediately
+                  img.src = staticSrc;
+                });
+              });
+            </script>
+
+            <button id="openReplyModal" class="btn" type="button">Reply</button>
           </div>
         </div>
         <div id="letter" class="typewriter"></div>
@@ -133,7 +167,10 @@
             <div class="label">Days Together</div>
             <div id="statDays" class="value">0</div>
           </div>
-          <div class="stat-card hidden footer-spotify-card" id="footerSpotifyCard">
+          <div
+            class="stat-card hidden footer-spotify-card"
+            id="footerSpotifyCard"
+          >
             <div
               id="musicEmbed"
               class="song-embed song-embed--footer music-embed hidden"

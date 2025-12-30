@@ -3,6 +3,8 @@
   const STORAGE_UNLOCKED = "mtc_unlocked_months";
   const STORAGE_OVERRIDE = "mtc_capsules_override";
   const STORAGE_AUDIO_PREF = "mtc_bg_audio_enabled";
+  const STORAGE_USER_ID = "mtc_user_id";
+  const STORAGE_LAST_OPEN_MONTH = "mtc_last_open_month";
   const FIREBASE_DB_URL =
     "https://for-mae-default-rtdb.asia-southeast1.firebasedatabase.app";
   let CURRENT_SETTINGS = null;
@@ -79,6 +81,12 @@
     });
   }
 
+  const parseList = (value) =>
+    (value || "")
+      .split(/\r?\n|,/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+
   const songTitleCache = new Map();
 
   async function fetchFirebaseJSON(path) {
@@ -92,6 +100,42 @@
     } catch {
       return null;
     }
+  }
+
+  async function writeFirebaseJSON(path, payload, method = "PUT") {
+    if (!FIREBASE_DB_URL) return null;
+    try {
+      const res = await fetch(`${FIREBASE_DB_URL}/${path}.json`, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  }
+
+  function getUserId() {
+    try {
+      const stored = localStorage.getItem(STORAGE_USER_ID);
+      if (stored) return stored;
+      const id =
+        window.crypto && window.crypto.randomUUID
+          ? window.crypto.randomUUID()
+          : `user_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      localStorage.setItem(STORAGE_USER_ID, id);
+      return id;
+    } catch {
+      return `user_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    }
+  }
+
+  function saveLastOpenMonth(monthId) {
+    try {
+      localStorage.setItem(STORAGE_LAST_OPEN_MONTH, String(monthId));
+    } catch {}
   }
 
   async function fetchSongTitle(url) {
@@ -157,6 +201,33 @@
     try {
       localStorage.setItem(STORAGE_AUDIO_PREF, enabled ? "1" : "0");
     } catch {}
+  }
+
+  async function fetchRepliesForMonth(monthId) {
+    const data = await fetchFirebaseJSON(`replies/${monthId}`);
+    if (!data || typeof data !== "object") return [];
+    const replies = [];
+    Object.entries(data).forEach(([userId, entries]) => {
+      if (!entries || typeof entries !== "object") return;
+      Object.entries(entries).forEach(([replyId, reply]) => {
+        if (!reply || typeof reply !== "object") return;
+        replies.push({ id: replyId, userId, ...reply });
+      });
+    });
+    return replies.sort((a, b) => {
+      const aTime = new Date(a.createdAt || 0).getTime();
+      const bTime = new Date(b.createdAt || 0).getTime();
+      return aTime - bTime;
+    });
+  }
+
+  function normalizeReplyImages(reply) {
+    if (!reply) return [];
+    if (Array.isArray(reply.imageUrls)) {
+      return reply.imageUrls.filter(Boolean);
+    }
+    if (reply.imageUrl) return [reply.imageUrl];
+    return [];
   }
 
   function setupAudioToggle() {
@@ -347,18 +418,18 @@
     if (PATCH_NOTES_CACHE) return PATCH_NOTES_CACHE;
 
     try {
-     const firebaseNotes = await fetchFirebaseJSON("patchNotes");
+      const firebaseNotes = await fetchFirebaseJSON("patchNotes");
       if (firebaseNotes) {
         const notes = Array.isArray(firebaseNotes?.notes)
           ? firebaseNotes.notes
           : Array.isArray(firebaseNotes)
-            ? firebaseNotes
-            : [];
+          ? firebaseNotes
+          : [];
         PATCH_NOTES_CACHE = notes;
         return notes;
       }
     } catch (err) {
-       console.error("Failed to load patch notes from Firebase", err);
+      console.error("Failed to load patch notes from Firebase", err);
     }
 
     PATCH_NOTES_CACHE = [];
@@ -1459,7 +1530,9 @@
       return;
     }
 
-    wrap.innerHTML = notes
+    const orderedNotes = notes.slice().reverse();
+
+    wrap.innerHTML = orderedNotes
       .map((note) => {
         const version = escapeHTML(note.version || "1.0.0");
         const date = formatPatchDate(note.date);
@@ -1525,12 +1598,13 @@
     });
   }
 
-  function renderCapsule(data) {
+  async function renderCapsule(data) {
     const params = new URLSearchParams(location.search);
     const id = Number(params.get("m") || "1");
     const monthIndex = data.months.findIndex((m) => Number(m.id) === id);
     const safeIndex = monthIndex >= 0 ? monthIndex : 0;
     const month = data.months[safeIndex] || data.months[0];
+    const userId = getUserId();
     const unlocked = loadUnlocked();
 
     const prerequisitesMet = data.months
@@ -1550,6 +1624,12 @@
       (CURRENT_SETTINGS && CURRENT_SETTINGS.capsuleGreeting) ||
       "Happy Monthsary!";
     header.textContent = `${greet} (${dynTitle})`;
+
+    saveLastOpenMonth(month.id);
+    writeFirebaseJSON(`userCapsuleState/${userId}`, {
+      currentMonth: month.id,
+      updatedAt: new Date().toISOString(),
+    });
 
     if (!unlocked.has(month.id) && canOpen) {
       unlocked.add(month.id);
@@ -1653,12 +1733,25 @@
       };
     }
 
+    const replayButton = document.getElementById("replayLetter");
+    if (replayButton && letterEl) {
+      replayButton.onclick = () => {
+        typewriter(letterEl, letterText, 70);
+      };
+    }
+
+    const replies = await fetchRepliesForMonth(month.id);
+
     const strip = $("#photos");
     strip.innerHTML = "";
 
-    const photoSources = buildSlidesFromSources(month.photos).sources;
+    const replyImages = replies.flatMap((reply) => normalizeReplyImages(reply));
+    const combinedPhotos = Array.from(
+      new Set([...(month.photos || []), ...replyImages])
+    );
+    const photoSources = buildSlidesFromSources(combinedPhotos).sources;
 
-    photoSources.forEach((src) => {
+    const appendMedia = (src) => {
       const isVideo = MEDIA_EXT_VIDEO.test(src);
 
       if (isVideo) {
@@ -1683,8 +1776,18 @@
         img.dataset.source = src;
         strip.appendChild(img);
       }
-    });
+    };
 
+    photoSources.forEach((src) => {
+      appendMedia(src);
+    });
+    const addReplyPhotos = (urls) => {
+      urls.forEach((src) => {
+        if (!src || photoSources.includes(src)) return;
+        photoSources.push(src);
+        appendMedia(src);
+      });
+    };
     strip.addEventListener("click", (e) => {
       const media = e.target.closest(".media");
       if (!media) return;
@@ -1712,6 +1815,89 @@
     } else {
       audio.style.display = "none";
     }
+
+    const repliesSection = $("#repliesSection");
+    const repliesList = $("#repliesList");
+    const replyVoicesSection = $("#replyVoicesSection");
+    const replyVoices = $("#replyVoices");
+
+    const renderRepliesUI = (items) => {
+      if (repliesSection && repliesList) {
+        if (items.length) {
+          repliesSection.classList.remove("hidden");
+          repliesList.innerHTML = items
+            .map((reply) => {
+              const name = escapeHTML(reply.name || "Anonymous");
+              const replyText = escapeHTML(reply.reply || "");
+              const rantText = escapeHTML(reply.rant || "");
+              const placeText = escapeHTML(reply.placeVisited || "");
+              const createdAt = reply.createdAt
+                ? new Date(reply.createdAt).toLocaleString()
+                : "Just now";
+              const imageCount = normalizeReplyImages(reply).length;
+              const voiceUrl = reply.voiceUrl || "";
+
+              return `
+                <article class="reply-card">
+                  <div class="reply-card__meta">
+                    <span>${name}</span>
+                    <span>${escapeHTML(createdAt)}</span>
+                  </div>
+                  ${
+                    replyText
+                      ? `<div class="reply-card__body">${replyText}</div>`
+                      : ""
+                  }
+                  ${
+                    rantText
+                      ? `<div>
+                      <div class="reply-card__title">Rant</div>
+                      <div class="reply-card__body">${rantText}</div>
+                    </div>`
+                      : ""
+                  }
+                  ${
+                    placeText
+                      ? `<div class="reply-card__badge">📍 ${placeText}</div>`
+                      : ""
+                  }
+                  ${
+                    imageCount
+                      ? `<div class="reply-card__badge">🖼️ ${imageCount} photo${
+                          imageCount > 1 ? "s" : ""
+                        }</div>`
+                      : ""
+                  }
+                  ${
+                    voiceUrl
+                      ? `<div class="reply-card__badge">🎙️ Voice mail</div>`
+                      : ""
+                  }
+                </article>
+              `;
+            })
+            .join("");
+        } else {
+          repliesSection.classList.add("hidden");
+          repliesList.innerHTML = "";
+        }
+      }
+
+      if (replyVoicesSection && replyVoices) {
+        const voiceUrls = items.map((reply) => reply.voiceUrl).filter(Boolean);
+        if (voiceUrls.length) {
+          replyVoicesSection.classList.remove("hidden");
+          replyVoices.innerHTML = voiceUrls
+            .map((url) => `<audio controls src="${escapeHTML(url)}"></audio>`)
+            .join("");
+        } else {
+          replyVoicesSection.classList.add("hidden");
+          replyVoices.innerHTML = "";
+        }
+      }
+    };
+
+    renderRepliesUI(replies);
 
     $("#surprise").textContent = month.surprise || "";
 
@@ -1834,6 +2020,98 @@
     $("#statDays").textContent = String(daysTogether);
     $("#statPlaces").textContent = String(places);
 
+    const replyModal = document.getElementById("replyModal");
+    const openReplyModal = document.getElementById("openReplyModal");
+    const replyForm = document.getElementById("replyForm");
+    const replyStatus = document.getElementById("replyStatus");
+
+    const closeReplyModal = () => {
+      if (!replyModal) return;
+      replyModal.classList.remove("is-visible");
+      replyModal.setAttribute("aria-hidden", "true");
+    };
+
+    const openReplyModalFn = () => {
+      if (!replyModal) return;
+      replyModal.classList.add("is-visible");
+      replyModal.setAttribute("aria-hidden", "false");
+      const messageInput = document.getElementById("replyMessage");
+      if (messageInput) messageInput.focus();
+    };
+
+    if (openReplyModal) {
+      openReplyModal.addEventListener("click", openReplyModalFn);
+    }
+
+    if (replyModal) {
+      replyModal.addEventListener("click", (e) => {
+        if (e.target && e.target.dataset.close === "true") {
+          closeReplyModal();
+        }
+      });
+      replyModal.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeReplyModal();
+      });
+    }
+
+    if (replyForm) {
+      replyForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (replyStatus) replyStatus.textContent = "Saving...";
+
+        const nameInput = document.getElementById("replyName");
+        const messageInput = document.getElementById("replyMessage");
+        const rantInput = document.getElementById("replyRant");
+        const placeInput = document.getElementById("replyPlace");
+        const imagesInput = document.getElementById("replyImages");
+        const voiceInput = document.getElementById("replyVoice");
+
+        const replyText = messageInput?.value.trim() || "";
+        if (!replyText) {
+          if (replyStatus) replyStatus.textContent = "Please add a reply.";
+          return;
+        }
+
+        const payload = {
+          name: nameInput?.value.trim() || "",
+          reply: replyText,
+          rant: rantInput?.value.trim() || "",
+          placeVisited: placeInput?.value.trim() || "",
+          imageUrls: parseList(imagesInput?.value || ""),
+          voiceUrl: voiceInput?.value.trim() || "",
+          createdAt: new Date().toISOString(),
+        };
+
+        const res = await writeFirebaseJSON(
+          `replies/${month.id}/${userId}`,
+          payload,
+          "POST"
+        );
+
+        if (!res) {
+          if (replyStatus)
+            replyStatus.textContent = "Failed to save. Try again.";
+          return;
+        }
+
+        replies.push(payload);
+        replies.sort((a, b) => {
+          const aTime = new Date(a.createdAt || 0).getTime();
+          const bTime = new Date(b.createdAt || 0).getTime();
+          return aTime - bTime;
+        });
+        renderRepliesUI(replies);
+        addReplyPhotos(payload.imageUrls || []);
+
+        if (replyForm) replyForm.reset();
+        if (replyStatus) replyStatus.textContent = "Saved!";
+        setTimeout(() => {
+          if (replyStatus) replyStatus.textContent = "";
+        }, 2000);
+        closeReplyModal();
+      });
+    }
+
     const configureNavButton = (button, targetIndex, label) => {
       if (!button) return;
       if (targetIndex < 0 || targetIndex >= data.months.length) {
@@ -1895,7 +2173,7 @@
       renderHome(data);
       setupPatchNotesModal();
     }
-    if (PAGE === "capsule") renderCapsule(data);
+    if (PAGE === "capsule") await renderCapsule(data);
     if (PAGE === "qr") {
       const qrImage = document.getElementById("qr");
       const qrLabel = document.getElementById("lbl");
