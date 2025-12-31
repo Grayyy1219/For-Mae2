@@ -751,13 +751,12 @@
   function ensureUnlockDates(data) {
     const start = data.startDate ? parseISO(data.startDate) : now();
     const anchorDay = start.getDate();
-    const today = now();
-    const year = today.getFullYear();
+    const baseYear = start.getFullYear();
     data.months = (data.months || []).map((m, i) => {
       if (!m.unlockDate) {
-        const lastDay = new Date(year, i + 1, 0).getDate();
+        const lastDay = new Date(baseYear, i + 1, 0).getDate();
         const day = Math.min(anchorDay, lastDay);
-        const d = new Date(year, i, day, 0, 0, 1, 0);
+        const d = new Date(baseYear, i, day, 0, 0, 1, 0);
         m.unlockDate = d.toISOString();
       }
       return m;
@@ -2399,11 +2398,21 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     }
 
     const btn = $("#openCurrent");
-    const yearEndAvailable = isYearEndDay();
+    const allMonthsUnlocked = monthStates.every((state) => state.isUnlocked);
+    const yearEndAvailable = isYearEndDay() || allMonthsUnlocked;
+    const yearLabel = (() => {
+      try {
+        return data.startDate
+          ? parseISO(data.startDate).getFullYear()
+          : now().getFullYear();
+      } catch {
+        return now().getFullYear();
+      }
+    })();
     if (btn) {
       if (yearEndAvailable) {
         btn.disabled = false;
-        btn.textContent = "Open Wrapped 2025";
+        btn.textContent = `Open Wrapped 2025`;
         btn.onclick = () => showYearbook(data);
       } else if (currentOpenable) {
         btn.disabled = false;
