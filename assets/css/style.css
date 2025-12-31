@@ -420,7 +420,7 @@ header a {
   background: radial-gradient(circle at 30% 25%, #2b3046, #141927 60%, #0f1420);
   border: 2px solid var(--ring-track);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-  opacity: 0.22;
+  /* opacity: 0.22; */
   transform: translate(-50%, -50%) rotate(var(--angle)) translate(104px)
     rotate(calc(-1 * var(--angle)));
   transition: transform 140ms ease, box-shadow 160ms ease,
@@ -497,7 +497,7 @@ header a {
 .progress-marker.is-ready {
   background: linear-gradient(135deg, #1a2236, #0f1524);
   border-color: rgba(167, 139, 250, 0.85);
-  opacity: 0.3;
+  /* opacity: 0.3; */
   box-shadow: 0 7px 20px rgba(167, 139, 250, 0.3),
     0 0 0 1px rgba(167, 139, 250, 0.2);
 }
@@ -735,7 +735,7 @@ header a {
   background: #0c111c;
   border: 1px solid #242b3d;
   border-radius: 16px;
-  padding: 18px;
+  overflow: auto;
   width: min(680px, 92vw);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
   color: #e7ecff;

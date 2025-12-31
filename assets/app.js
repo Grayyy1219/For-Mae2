@@ -5,9 +5,14 @@
   const STORAGE_AUDIO_PREF = "mtc_bg_audio_enabled";
   const STORAGE_USER_ID = "mtc_user_id";
   const STORAGE_LAST_OPEN_MONTH = "mtc_last_open_month";
+  const STORAGE_DISPLAY_NAME = "mtc_display_name";
+  const STORAGE_AUTH_SESSION = "mtc_auth_session";
   const FIREBASE_DB_URL =
     "https://for-mae-default-rtdb.asia-southeast1.firebasedatabase.app";
   let CURRENT_SETTINGS = null;
+  let ACTIVE_PROFILE = null;
+  let PROFILE_SYNC_TIMER = null;
+  let CURRENT_CAPSULE_MONTH = null;
 
   const DEFAULT_SETTINGS = {
     siteTitle: "Time-Capsule",
@@ -132,10 +137,11 @@
     }
   }
 
-  function saveLastOpenMonth(monthId) {
+  function saveLastOpenMonth(monthId, { sync = true } = {}) {
     try {
       localStorage.setItem(STORAGE_LAST_OPEN_MONTH, String(monthId));
     } catch {}
+    if (sync) scheduleProfileSync();
   }
 
   async function fetchSongTitle(url) {
@@ -184,8 +190,9 @@
       return new Set();
     }
   }
-  function saveUnlocked(set) {
+  function saveUnlocked(set, { sync = true } = {}) {
     localStorage.setItem(STORAGE_UNLOCKED, JSON.stringify(Array.from(set)));
+    if (sync) scheduleProfileSync();
   }
   function loadAudioPreference() {
     try {
@@ -197,10 +204,311 @@
     }
   }
 
-  function saveAudioPreference(enabled) {
+  function saveAudioPreference(enabled, { sync = true } = {}) {
     try {
       localStorage.setItem(STORAGE_AUDIO_PREF, enabled ? "1" : "0");
     } catch {}
+    if (sync) scheduleProfileSync();
+  }
+
+  function normalizeDisplayName(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function toFirebaseKey(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[.#$/\[\]]/g, "_")
+      .trim();
+  }
+
+  function getStoredDisplayName() {
+    try {
+      return localStorage.getItem(STORAGE_DISPLAY_NAME);
+    } catch {
+      return null;
+    }
+  }
+
+  function storeDisplayName(name) {
+    try {
+      localStorage.setItem(STORAGE_DISPLAY_NAME, name);
+    } catch {}
+  }
+
+  function setActiveProfile(displayName, pinHash) {
+    ACTIVE_PROFILE = {
+      displayName,
+      key: toFirebaseKey(displayName),
+      pinHash,
+    };
+  }
+
+  async function hashPin(pin) {
+    if (window.crypto && window.crypto.subtle) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(pin);
+      const hash = await window.crypto.subtle.digest("SHA-256", data);
+      return Array.from(new Uint8Array(hash))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+    return btoa(pin);
+  }
+
+  function buildProfilePayload({ displayName, pinHash } = {}) {
+    const name = displayName || ACTIVE_PROFILE?.displayName;
+    const hash = pinHash || ACTIVE_PROFILE?.pinHash;
+    const unlocked = Array.from(loadUnlocked());
+    let lastOpenMonth = null;
+    try {
+      lastOpenMonth = localStorage.getItem(STORAGE_LAST_OPEN_MONTH);
+    } catch {}
+    return {
+      displayName: name,
+      pinHash: hash,
+      audioEnabled: loadAudioPreference(),
+      capsuleState: {
+        unlockedMonths: unlocked,
+        lastOpenMonth: lastOpenMonth ? Number(lastOpenMonth) : null,
+        currentMonth: CURRENT_CAPSULE_MONTH || null,
+      },
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  function applyRemoteProfile(profile) {
+    if (!profile || typeof profile !== "object") return;
+    const unlocked = new Set(profile.capsuleState?.unlockedMonths || []);
+    saveUnlocked(unlocked, { sync: false });
+    if (profile.capsuleState?.lastOpenMonth) {
+      saveLastOpenMonth(profile.capsuleState.lastOpenMonth, { sync: false });
+    }
+    if (typeof profile.audioEnabled === "boolean") {
+      saveAudioPreference(profile.audioEnabled, { sync: false });
+    }
+    CURRENT_CAPSULE_MONTH = profile.capsuleState?.currentMonth || null;
+  }
+
+  function scheduleProfileSync() {
+    if (!ACTIVE_PROFILE) return;
+    if (PROFILE_SYNC_TIMER) {
+      window.clearTimeout(PROFILE_SYNC_TIMER);
+    }
+    PROFILE_SYNC_TIMER = window.setTimeout(() => {
+      syncProfileData();
+    }, 400);
+  }
+
+  async function syncProfileData() {
+    if (!ACTIVE_PROFILE) return;
+    const payload = buildProfilePayload();
+    await writeFirebaseJSON(
+      `userProfiles/${ACTIVE_PROFILE.key}`,
+      payload,
+      "PUT"
+    );
+  }
+
+  async function fetchUserProfile(displayName) {
+    const key = toFirebaseKey(displayName);
+    if (!key) return null;
+    return await fetchFirebaseJSON(`userProfiles/${key}`);
+  }
+
+  function createAuthModal() {
+    let modal = document.getElementById("authModal");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.className = "auth-modal";
+    modal.id = "authModal";
+    modal.setAttribute("aria-hidden", "true");
+    modal.innerHTML = `
+      <div class="auth-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="authModalTitle" tabindex="-1">
+        <header class="auth-modal__header">
+          <p class="auth-modal__eyebrow">Welcome</p>
+          <h2 class="auth-modal__title" id="authModalTitle">Let’s set up your profile</h2>
+          <p class="auth-modal__subtitle" id="authModalSubtitle">Enter a unique display name to begin.</p>
+        </header>
+        <form class="auth-modal__form">
+          <label class="auth-modal__field">
+            <span>Display name</span>
+            <input type="text" name="displayName" autocomplete="nickname" placeholder="e.g., Mae" required />
+          </label>
+          <label class="auth-modal__field auth-modal__pin-field is-hidden">
+            <span id="authPinLabel">Set a numeric PIN</span>
+            <input type="password" name="pin" inputmode="numeric" pattern="[0-9]*" placeholder="4-12 digits" minlength="4" maxlength="12" />
+          </label>
+          <p class="auth-modal__error" role="alert"></p>
+          <button class="btn btn-primary auth-modal__submit" type="submit">Continue</button>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  async function ensureUserProfile() {
+    const storedName = getStoredDisplayName();
+    const sessionOk =
+      typeof sessionStorage !== "undefined" &&
+      sessionStorage.getItem(STORAGE_AUTH_SESSION) === "1";
+
+    if (sessionOk && storedName) {
+      const profile = await fetchUserProfile(storedName);
+      if (profile?.pinHash) {
+        setActiveProfile(storedName, profile.pinHash);
+        applyRemoteProfile(profile);
+        return;
+      }
+    }
+
+    return new Promise((resolve) => {
+      const modal = createAuthModal();
+      const dialog = modal.querySelector(".auth-modal__dialog");
+      const form = modal.querySelector(".auth-modal__form");
+      const nameInput = form.querySelector('input[name="displayName"]');
+      const pinField = form.querySelector(".auth-modal__pin-field");
+      const pinInput = form.querySelector('input[name="pin"]');
+      const pinLabel = form.querySelector("#authPinLabel");
+      const errorEl = form.querySelector(".auth-modal__error");
+      const submitBtn = form.querySelector(".auth-modal__submit");
+      const subtitle = modal.querySelector("#authModalSubtitle");
+
+      let mode = "identify";
+      let loadedProfile = null;
+
+      const setError = (msg) => {
+        if (errorEl) errorEl.textContent = msg || "";
+      };
+
+      const showPinField = (labelText) => {
+        if (pinLabel) pinLabel.textContent = labelText;
+        pinField?.classList.remove("is-hidden");
+        if (pinInput) {
+          pinInput.value = "";
+          pinInput.required = true;
+        }
+      };
+
+      const resetFlow = () => {
+        mode = "identify";
+        loadedProfile = null;
+        submitBtn.textContent = "Continue";
+        subtitle.textContent = "Enter a unique display name to begin.";
+        setError("");
+        pinField?.classList.add("is-hidden");
+        if (pinInput) {
+          pinInput.value = "";
+          pinInput.required = false;
+        }
+      };
+
+      if (storedName && nameInput) {
+        nameInput.value = storedName;
+      }
+
+      nameInput?.addEventListener("input", () => {
+        resetFlow();
+      });
+
+      const showModal = () => {
+        modal.classList.add("is-visible");
+        modal.setAttribute("aria-hidden", "false");
+        document.documentElement.classList.add("auth-locked");
+        document.body.classList.add("auth-locked");
+        if (dialog && typeof dialog.focus === "function") {
+          dialog.focus({ preventScroll: true });
+        }
+      };
+
+      const hideModal = () => {
+        modal.classList.remove("is-visible");
+        modal.setAttribute("aria-hidden", "true");
+        document.documentElement.classList.remove("auth-locked");
+        document.body.classList.remove("auth-locked");
+      };
+
+      form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setError("");
+        const displayName = normalizeDisplayName(nameInput?.value || "");
+        if (!displayName) {
+          setError("Please enter a display name.");
+          return;
+        }
+        if (mode === "identify") {
+          submitBtn.textContent = "Checking…";
+          const profile = await fetchUserProfile(displayName);
+          if (profile?.pinHash) {
+            mode = "verify";
+            loadedProfile = profile;
+            subtitle.textContent = "Welcome back! Enter your PIN to continue.";
+            submitBtn.textContent = "Unlock";
+            showPinField("Enter your PIN");
+            pinInput?.focus();
+          } else {
+            mode = "create";
+            loadedProfile = null;
+            subtitle.textContent = "Set a numeric PIN to secure your profile.";
+            submitBtn.textContent = "Create profile";
+            showPinField("Set a numeric PIN");
+            pinInput?.focus();
+          }
+          return;
+        }
+
+        const pin = String(pinInput?.value || "").trim();
+        if (!/^[0-9]{4,12}$/.test(pin)) {
+          setError("PIN must be 4–12 digits.");
+          submitBtn.textContent =
+            mode === "verify" ? "Unlock" : "Create profile";
+          return;
+        }
+        submitBtn.textContent = mode === "verify" ? "Unlocking…" : "Creating…";
+        const pinHash = await hashPin(pin);
+        if (mode === "verify") {
+          if (!loadedProfile || pinHash !== loadedProfile.pinHash) {
+            setError("Incorrect PIN. Please try again.");
+            submitBtn.textContent = "Unlock";
+            return;
+          }
+          storeDisplayName(displayName);
+          setActiveProfile(displayName, loadedProfile.pinHash);
+          applyRemoteProfile(loadedProfile);
+          if (typeof sessionStorage !== "undefined") {
+            sessionStorage.setItem(STORAGE_AUTH_SESSION, "1");
+          }
+          hideModal();
+          resolve();
+          return;
+        }
+
+        const payload = buildProfilePayload({
+          displayName,
+          pinHash,
+        });
+        payload.createdAt = new Date().toISOString();
+        await writeFirebaseJSON(
+          `userProfiles/${toFirebaseKey(displayName)}`,
+          payload,
+          "PUT"
+        );
+        storeDisplayName(displayName);
+        setActiveProfile(displayName, pinHash);
+        applyRemoteProfile(payload);
+        if (typeof sessionStorage !== "undefined") {
+          sessionStorage.setItem(STORAGE_AUTH_SESSION, "1");
+        }
+        hideModal();
+        resolve();
+      });
+
+      showModal();
+    });
   }
 
   async function fetchRepliesForMonth(monthId) {
@@ -1378,7 +1686,14 @@
     });
 
     monthStates.forEach(
-      ({ month, unlockMs, isUnlocked, isOpenable, prereqsMet, isTimeUnlocked }) => {
+      ({
+        month,
+        unlockMs,
+        isUnlocked,
+        isOpenable,
+        prereqsMet,
+        isTimeUnlocked,
+      }) => {
         if (!isUnlocked && isOpenable && currentOpenable === null)
           currentOpenable = month;
         if (!isOpenable && unlockMs > nowMs)
@@ -1404,11 +1719,11 @@
           } ${statusTextFor(status)}</div>
           <div class="month-actions">
             <button class="btn btn-secondary" data-open="${month.id}" ${
-              isOpenable ? "" : "disabled"
-            }>Open</button>
+          isOpenable ? "" : "disabled"
+        }>Open</button>
             <a class="btn view" href="capsule.html?m=${month.id}" ${
-              isOpenable ? "" : 'tabindex="-1" aria-disabled="true"'
-            }>View</a>
+          isOpenable ? "" : 'tabindex="-1" aria-disabled="true"'
+        }>View</a>
           </div>
         `;
         monthsGrid.appendChild(card);
@@ -1492,7 +1807,9 @@
     const toggleUnlockedSongs = $("#toggleUnlockedSongs");
     const songsModal = $("#unlockedSongsModal");
     const songsTimeline = $("#unlockedSongsTimeline");
-    const songsClose = songsModal?.querySelector(".unlocked-songs-modal__close");
+    const songsClose = songsModal?.querySelector(
+      ".unlocked-songs-modal__close"
+    );
     const songsBackdrop = songsModal?.querySelector(
       ".unlocked-songs-modal__backdrop"
     );
@@ -1505,12 +1822,10 @@
       const entries = data.months
         .filter((month) => unlocked.has(month.id))
         .flatMap((month) =>
-          (month.songsAdded || [])
-            .filter(Boolean)
-            .map((url) => ({
-              url,
-              monthLabel: displayTitleForMonth(month, data),
-            }))
+          (month.songsAdded || []).filter(Boolean).map((url) => ({
+            url,
+            monthLabel: displayTitleForMonth(month, data),
+          }))
         );
 
       if (!entries.length) {
@@ -1740,6 +2055,7 @@
       "Happy Monthsary!";
     header.textContent = `${greet} (${dynTitle})`;
 
+    CURRENT_CAPSULE_MONTH = month.id;
     saveLastOpenMonth(month.id);
     writeFirebaseJSON(`userCapsuleState/${userId}`, {
       currentMonth: month.id,
@@ -2276,6 +2592,7 @@
   }
 
   (async function init() {
+    await ensureUserProfile();
     const data = ensureUnlockDates(await loadData());
     CURRENT_SETTINGS = mergeSettings(data.settings);
     applySettings(CURRENT_SETTINGS);
