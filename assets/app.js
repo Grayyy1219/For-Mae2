@@ -752,11 +752,13 @@
     const start = data.startDate ? parseISO(data.startDate) : now();
     const anchorDay = start.getDate();
     const baseYear = start.getFullYear();
+    const baseMonth = start.getMonth();
     data.months = (data.months || []).map((m, i) => {
       if (!m.unlockDate) {
-        const lastDay = new Date(baseYear, i + 1, 0).getDate();
+        const targetMonth = baseMonth + i;
+        const lastDay = new Date(baseYear, targetMonth + 1, 0).getDate();
         const day = Math.min(anchorDay, lastDay);
-        const d = new Date(baseYear, i, day, 0, 0, 1, 0);
+        const d = new Date(baseYear, targetMonth, day, 0, 0, 1, 0);
         m.unlockDate = d.toISOString();
       }
       return m;
@@ -1035,15 +1037,24 @@
   function displayTitleForMonth(m, data) {
     try {
       const start = data.startDate ? parseISO(data.startDate) : now();
-      const unlock = parseISO(m.unlockDate);
-      const months = monthCountSince(start, unlock);
-      const monthName = unlock.toLocaleDateString(undefined, {
+      const index = Array.isArray(data.months)
+        ? data.months.findIndex((month) => month.id === m.id)
+        : -1;
+      const monthIndex = index >= 0 ? index : 0;
+      const anchorYear = 2025;
+      const januaryLastDay = new Date(anchorYear, 1, 0).getDate();
+      const januaryDay = Math.min(start.getDate(), januaryLastDay);
+      const januaryAnchor = new Date(anchorYear, 0, januaryDay);
+      const startOffset = monthCountSince(start, januaryAnchor);
+      const monthOffset = startOffset + monthIndex;
+      const targetDate = addMonths(januaryAnchor, monthIndex);
+      const monthName = targetDate.toLocaleDateString(undefined, {
         month: "long",
       });
-      const displayOrder = ordinal(months + 1);
+      const displayOrder = ordinal(monthOffset + 1);
 
-      if (months > 0 && months % 12 === 0) {
-        const years = Math.floor(months / 12);
+      if (monthOffset > 0 && monthOffset % 12 === 0) {
+        const years = Math.floor(monthOffset / 12);
         return `${monthName} “${ordinal(years)} Anniversary”`;
       }
       return `${monthName} “${displayOrder}”`;
