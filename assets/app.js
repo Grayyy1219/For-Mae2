@@ -1668,6 +1668,7 @@
     modal: null,
     book: null,
     timers: [],
+    ambient: null,
   };
 
   const YEARBOOK_MONTHS = [
@@ -2086,6 +2087,66 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     yearbookState.timers = [];
   }
 
+  function setYearbookAmbientEnabled(enabled) {
+    const audio = document.getElementById("bgAudio");
+    if (!audio) return;
+    const toggle = document.getElementById("bgAudioToggle");
+    const container = toggle ? toggle.closest(".audio-toggle") : null;
+
+    if (toggle) toggle.checked = enabled;
+    if (container) container.classList.toggle("is-active", enabled);
+
+    if (enabled) {
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {});
+      }
+    } else {
+      audio.pause();
+    }
+  }
+
+  function enableYearbookAmbient() {
+    if (yearbookState.ambient) return;
+    const audio = document.getElementById("bgAudio");
+    if (!audio) return;
+    const toggle = document.getElementById("bgAudioToggle");
+    const container = toggle ? toggle.closest(".audio-toggle") : null;
+    yearbookState.ambient = {
+      wasPlaying: !audio.paused,
+      toggleChecked: toggle ? toggle.checked : null,
+      wasActive: container ? container.classList.contains("is-active") : null,
+    };
+    setYearbookAmbientEnabled(true);
+  }
+
+  function restoreYearbookAmbient() {
+    const previous = yearbookState.ambient;
+    if (!previous) return;
+    const audio = document.getElementById("bgAudio");
+    if (!audio) return;
+    const toggle = document.getElementById("bgAudioToggle");
+    const container = toggle ? toggle.closest(".audio-toggle") : null;
+
+    if (toggle && previous.toggleChecked !== null) {
+      toggle.checked = previous.toggleChecked;
+    }
+    if (container && previous.wasActive !== null) {
+      container.classList.toggle("is-active", previous.wasActive);
+    }
+
+    if (previous.wasPlaying) {
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {});
+      }
+    } else {
+      audio.pause();
+    }
+
+    yearbookState.ambient = null;
+  }
+
   function scheduleYearbookTimer(callback, delay) {
     const timer = window.setTimeout(callback, delay);
     yearbookState.timers.push(timer);
@@ -2251,6 +2312,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     modal.classList.remove("is-visible");
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("yearbook-open");
+    restoreYearbookAmbient();
   }
 
   function ensureYearbookModal(data) {
@@ -2288,6 +2350,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("yearbook-open");
     modal.focus({ preventScroll: true });
+    enableYearbookAmbient();
   }
 
   function renderHome(data) {
