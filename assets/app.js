@@ -2330,7 +2330,7 @@
     if (btn) {
       if (yearEndAvailable) {
         btn.disabled = false;
-        btn.textContent = "Open Year-End Compilation";
+        btn.textContent = "Open Wrapped 2025";
         btn.onclick = () => showYearbook(data);
       } else if (currentOpenable) {
         btn.disabled = false;
