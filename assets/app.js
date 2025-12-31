@@ -1787,6 +1787,44 @@
     return content;
   }
 
+  function collectYearbookMediaSources(data) {
+    const months = Array.isArray(data?.months) ? data.months : [];
+    const sources = [];
+    months.forEach((month) => {
+      const photos = normalizeYearbookList(month?.photos);
+      const memories = normalizeYearbookList(month?.memories);
+      photos.forEach((src) => sources.push(src));
+      memories.forEach((src) => sources.push(src));
+    });
+    return sources.filter(Boolean);
+  }
+
+  function preloadYearbookAssets(data) {
+    const sources = collectYearbookMediaSources(data);
+    if (!sources.length) return Promise.resolve();
+    const tasks = sources.map((source) => {
+      if (MEDIA_EXT_VIDEO.test(source)) {
+        return new Promise((resolve) => {
+          const video = document.createElement("video");
+          const done = () => resolve();
+          video.addEventListener("loadedmetadata", done, { once: true });
+          video.addEventListener("error", done, { once: true });
+          video.preload = "metadata";
+          video.src = source;
+          video.load();
+        });
+      }
+      return new Promise((resolve) => {
+        const img = new Image();
+        const done = () => resolve();
+        img.onload = done;
+        img.onerror = done;
+        img.src = source;
+      });
+    });
+    return Promise.allSettled(tasks);
+  }
+
   function getSpotifyTrackId(url) {
     if (!url) return null;
     const match = String(url).match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
@@ -2061,6 +2099,16 @@
     }
   }
 
+  function syncYearbookPageStack(state) {
+    if (!state?.pages?.length) return;
+    state.pages.forEach((page, index) => {
+      const base = 20;
+      page.style.zIndex = page.classList.contains("turn")
+        ? String(base + index)
+        : String(base - index);
+    });
+  }
+
   function resetYearbookBook(state) {
     if (!state) return;
     clearYearbookTimers();
@@ -2074,7 +2122,10 @@
     state.pages.forEach((page) => {
       page.classList.add("turn");
       page.style.zIndex = "";
+      page.style.transitionDelay = "";
+      page.style.transitionDuration = "";
     });
+    syncYearbookPageStack(state);
   }
 
   function openYearbookCover(state) {
@@ -2085,14 +2136,28 @@
     state.coverRight.classList.add("turn");
     scheduleYearbookTimer(() => {
       if (state.coverRight) state.coverRight.style.zIndex = "-1";
-    }, 600);
-    const firstPage = state.pages[0];
-    if (firstPage) {
-      firstPage.classList.remove("turn");
-      scheduleYearbookTimer(() => {
-        firstPage.style.zIndex = "10";
-      }, 500);
-    }
+    }, 900);
+
+    const pagesInOrder = [...state.pages].reverse();
+    pagesInOrder.forEach((page, index) => {
+      page.style.transitionDuration = "3s";
+      page.style.transitionDelay = `${(index + 1) * 120}ms`;
+      page.style.zIndex = String(10 + index);
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        pagesInOrder.forEach((page) => page.classList.remove("turn"));
+      });
+    });
+
+    const totalDelay = (pagesInOrder.length + 1) * 120 + 900;
+    scheduleYearbookTimer(() => {
+      pagesInOrder.forEach((page) => {
+        page.style.transitionDelay = "";
+        page.style.transitionDuration = "";
+      });
+    }, totalDelay);
   }
 
   function setupYearbookBookInteractions(state) {
@@ -2106,25 +2171,28 @@
     }
 
     const pageTurnBtns = state.wrapper.querySelectorAll(".nextprev-btn");
-    pageTurnBtns.forEach((el, index) => {
+    pageTurnBtns.forEach((el) => {
       el.addEventListener("click", (event) => {
         event.preventDefault();
         const pageTurnId = el.getAttribute("data-page");
         if (!pageTurnId) return;
         const pageTurn = state.wrapper.querySelector(`#${pageTurnId}`);
         if (!pageTurn) return;
+        const transitionDuration = parseFloat(
+          window.getComputedStyle(pageTurn).transitionDuration
+        );
+        const transitionMs = Number.isNaN(transitionDuration)
+          ? 1000
+          : transitionDuration * 1000;
 
         if (pageTurn.classList.contains("turn")) {
           pageTurn.classList.remove("turn");
-          window.setTimeout(() => {
-            pageTurn.style.zIndex = String(2 - index);
-          }, 500);
         } else {
           pageTurn.classList.add("turn");
-          window.setTimeout(() => {
-            pageTurn.style.zIndex = String(2 + index);
-          }, 500);
         }
+        window.setTimeout(() => {
+          syncYearbookPageStack(state);
+        }, transitionMs);
       });
     });
 
@@ -2193,9 +2261,10 @@
     return modal;
   }
 
-  function showYearbook(data) {
+  async function showYearbook(data) {
     const modal = ensureYearbookModal(data);
     if (!modal) return;
+    await preloadYearbookAssets(data);
     renderYearbookBook(modal, data);
     yearbookState.book = buildYearbookBookState(modal);
     setupYearbookBookInteractions(yearbookState.book);

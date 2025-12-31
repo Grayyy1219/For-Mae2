@@ -1024,7 +1024,8 @@ header a {
 }
 .yearbook-book-wrapper .cover.cover-right {
   z-index: 100;
-  transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
   background-color: var(--pages-color);
   display: flex;
   align-items: center;
@@ -1034,6 +1035,7 @@ header a {
 }
 .yearbook-book-wrapper .cover.cover-right.turn {
   transform: rotateY(180deg);
+  pointer-events: none;
 }
 .yearbook-book-wrapper .book {
   position: relative;
@@ -1054,6 +1056,7 @@ header a {
 .yearbook-book-wrapper .book-page.page-left {
   box-shadow: -0.6rem 0.6rem 0.6rem rgba(0, 0, 0, 0.1);
   overflow: auto;
+  z-index: 0;
 }
 .yearbook-book-wrapper .profile-page {
   display: flex;
@@ -1135,7 +1138,9 @@ header a {
   right: 0;
   transform-style: preserve-3d;
   transform-origin: left;
-  transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  z-index: 2;
 }
 .yearbook-book-wrapper .book-page.page-right.turn {
   transform: rotateY(-180deg);
@@ -1154,6 +1159,7 @@ header a {
   grid-template-columns: 1fr auto 1fr;
   gap: 1rem;
   overflow: hidden;
+  backface-visibility: hidden;
 }
 .yearbook-book-wrapper .book-page .page-front {
   transform: rotateY(0deg) translateZ(1px);
