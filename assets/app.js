@@ -1216,9 +1216,6 @@
           <button class="media-modal__nav media-modal__nav--prev" type="button" aria-label="Previous memory">‹</button>
           <button class="media-modal__nav media-modal__nav--next" type="button" aria-label="Next memory">›</button>
         </div>
-        <div class="media-modal__controls">
-          <a class="btn btn-primary media-modal__open" href="#">Open this month</a>
-        </div>
       </div>
     `;
 
@@ -1739,6 +1736,57 @@
     return content;
   }
 
+  function createYearbookMediaBlock({ label, icon, summary, sources }) {
+    const content = document.createElement("div");
+    content.className = "workeduc-content";
+
+    const span = document.createElement("span");
+    span.className = "year";
+    const iconEl = document.createElement("i");
+    iconEl.className = `bx ${icon}`;
+    span.append(iconEl, document.createTextNode(` ${label}`));
+    content.append(span);
+
+    if (summary) {
+      const p = document.createElement("p");
+      p.textContent = summary;
+      content.append(p);
+    }
+
+    const normalizedSources = Array.isArray(sources)
+      ? sources.map((source) => String(source || "").trim()).filter(Boolean)
+      : [];
+
+    if (!normalizedSources.length) return content;
+
+    const grid = document.createElement("div");
+    grid.className = "yearbook-media-grid";
+
+    normalizedSources.forEach((source) => {
+      if (MEDIA_EXT_VIDEO.test(source)) {
+        const video = document.createElement("video");
+        video.className = "yearbook-media";
+        video.src = source;
+        video.controls = true;
+        video.preload = "metadata";
+        video.playsInline = true;
+        video.muted = true;
+        grid.append(video);
+      } else {
+        const img = document.createElement("img");
+        img.className = "yearbook-media";
+        img.src = source;
+        img.alt = "";
+        img.loading = "lazy";
+        img.decoding = "async";
+        grid.append(img);
+      }
+    });
+
+    content.append(grid);
+    return content;
+  }
+
   function getSpotifyTrackId(url) {
     if (!url) return null;
     const match = String(url).match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
@@ -1834,10 +1882,11 @@
         icon: "bxs-star",
         list: highlightSummary,
       }),
-      createYearbookContentBlock({
+      createYearbookMediaBlock({
         label: "Memories",
         icon: "bxs-photo-album",
-        list: memoriesSummary,
+        summary: memoriesSummary,
+        sources: photosList,
       })
     );
 
