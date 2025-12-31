@@ -349,7 +349,7 @@ header a {
   background: #0b0d13;
 }
 .container {
-  max-width: 980px;
+  max-width: 70vw;
   margin: 0 auto;
   padding: 24px;
 }
