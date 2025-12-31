@@ -1282,7 +1282,7 @@ header a {
   margin-top: 26px;
 }
 .months-grid:not(.show-locked) .month-card.locked {
-  display: none;
+  opacity: 0;
 }
 .month-card {
   background: var(--panel);
