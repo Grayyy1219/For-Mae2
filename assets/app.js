@@ -2217,7 +2217,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     pagesInOrder.forEach((page, index) => {
       page.style.transitionDuration = "3s";
       page.style.transitionDelay = `${(index + 1) * 120}ms`;
-      page.style.zIndex = String(10 + index);
+      page.style.zIndex = String(10 + (pagesInOrder.length - 1 - index));
     });
 
     window.requestAnimationFrame(() => {
@@ -2232,6 +2232,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
         page.style.transitionDelay = "";
         page.style.transitionDuration = "";
       });
+      syncYearbookPageStack(state);
     }, totalDelay);
   }
 
