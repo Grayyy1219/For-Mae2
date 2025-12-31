@@ -181,5 +181,69 @@
         </div>
       </div>
     </div>
+
+    <div class="yearbook-modal" id="yearEndModal" aria-hidden="true">
+      <div class="yearbook-modal__backdrop"></div>
+      <div
+        class="yearbook-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="yearbookTitle"
+        tabindex="-1"
+      >
+        <button
+          class="yearbook-modal__close"
+          type="button"
+          aria-label="Close Year-End Compilation"
+        >
+          ×
+        </button>
+        <div class="yearbook">
+          <div class="yearbook__header">
+            <p class="yearbook__eyebrow">Year-End Compilation</p>
+            <h2 id="yearbookTitle">A year in pages</h2>
+            <p class="yearbook__subtitle" id="yearbookSubtitle">
+              Every month, bound into a single story.
+            </p>
+          </div>
+          <div class="yearbook__book">
+            <div class="yearbook__pages" id="yearbookPages">
+              <div class="yearbook__cover" id="yearbookCover">
+                <div class="yearbook__cover-inner">
+                  <p class="yearbook__cover-eyebrow">Year-End Compilation</p>
+                  <h3 class="yearbook__cover-title">Our story in pages</h3>
+                  <p class="yearbook__cover-subtitle">
+                    Open the book to relive every chapter together.
+                  </p>
+                  <button class="btn" id="yearbookOpenCover" type="button">
+                    Open the book
+                  </button>
+                </div>
+              </div>
+              <div class="yearbook__spread">
+                <div class="yearbook__page-slot" id="yearbookLeft"></div>
+                <div class="yearbook__page-slot" id="yearbookRight"></div>
+              </div>
+            </div>
+            <div class="yearbook__nav">
+              <button
+                class="btn btn-secondary"
+                id="yearbookPrev"
+                type="button"
+              >
+                ⟵ Previous
+              </button>
+              <div class="yearbook__count" aria-live="polite">
+                <span id="yearbookPageIndex">1</span> /
+                <span id="yearbookPageTotal">1</span>
+              </div>
+              <button class="btn" id="yearbookNext" type="button">
+                Next ⟶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

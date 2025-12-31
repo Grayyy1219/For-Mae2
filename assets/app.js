@@ -181,6 +181,19 @@
     return formatCountdown(ms);
   }
 
+  function isYearEndDay(date = now()) {
+    return date.getMonth() === 11 && date.getDate() === 31;
+  }
+
+  function formatYearbookText(text) {
+    const safe = escapeHTML(text || "");
+    if (!safe) return "";
+    const paragraphs = safe.split(/\n{2,}/);
+    return paragraphs
+      .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
+      .join("");
+  }
+
   function loadUnlocked() {
     try {
       const raw = localStorage.getItem(STORAGE_UNLOCKED);
@@ -1653,6 +1666,320 @@
     );
   }
 
+  let yearbookState = {
+    modal: null,
+    pages: [],
+    spreadIndex: 0,
+    coverOpen: false,
+    dataKey: "",
+  };
+
+  function renderYearbookList(items, emptyLabel) {
+    if (!items.length) {
+      return `<li>${escapeHTML(emptyLabel)}</li>`;
+    }
+    return items
+      .map((item) => `<li>${escapeHTML(item)}</li>`)
+      .join("");
+  }
+
+  function renderYearbookSongs(items) {
+    if (!items.length) {
+      return `<li>No songs saved yet.</li>`;
+    }
+    return items
+      .map((url, idx) => {
+        const safeUrl = escapeHTML(url);
+        return `<li><a href="${safeUrl}" target="_blank" rel="noopener">Track ${
+          idx + 1
+        }</a></li>`;
+      })
+      .join("");
+  }
+
+  function buildYearbookPages(data) {
+    const pages = (data.months || []).map((month) => {
+      const unlockDate = parseISO(month.unlockDate || now().toISOString());
+      const monthName = unlockDate.toLocaleDateString(undefined, {
+        month: "long",
+      });
+      const title = displayTitleForMonth(month, data);
+      const letterHtml =
+        formatYearbookText(month.letter) ||
+        "<p>No letter saved for this month yet.</p>";
+      const noteHtml =
+        formatYearbookText(month.surprise) ||
+        "<p>No note saved for this month yet.</p>";
+      const photos = (month.photos || [])
+        .map(normalizeMediaSrc)
+        .filter(Boolean);
+      const imageSources = photos.filter((src) => !MEDIA_EXT_VIDEO.test(src));
+      const videoCount = photos.length - imageSources.length;
+      const places = (month.placesVisited || []).filter(Boolean);
+      const songs = (month.songsAdded || []).filter(Boolean);
+      const mediaItems = imageSources
+        .slice(0, 4)
+        .map(
+          (src) =>
+            `<div class="yearbook-media__item"><img src="${escapeHTML(
+              src
+            )}" alt="Memory photo" loading="lazy" decoding="async" /></div>`
+        )
+        .join("");
+      const videoBadge = videoCount
+        ? `<div class="yearbook-media__item">Video memory ×${videoCount}</div>`
+        : "";
+      const mediaHtml =
+        mediaItems || videoBadge
+          ? `${mediaItems}${videoBadge}`
+          : `<div class="yearbook-media__item">No photos yet.</div>`;
+
+      return {
+        id: month.id,
+        html: `
+          <article class="yearbook-page" data-month="${month.id}">
+            <div class="yearbook-page__content">
+              <div>
+                <div class="yearbook-page__month">${escapeHTML(monthName)}</div>
+                <h3 class="yearbook-page__title">${escapeHTML(title)}</h3>
+              </div>
+              <div class="yearbook-page__note">${letterHtml}</div>
+              <div class="yearbook-page__grid">
+                <div class="yearbook-card">
+                  <h4>Highlights</h4>
+                  <div class="yearbook-page__note">${noteHtml}</div>
+                  <ul class="yearbook-list">
+                    ${renderYearbookList(places, "No places saved yet.")}
+                  </ul>
+                </div>
+                <div class="yearbook-card">
+                  <h4>Soundtrack</h4>
+                  <ul class="yearbook-list">
+                    ${renderYearbookSongs(songs)}
+                  </ul>
+                  <p class="yearbook-page__note">Photos saved: ${photos.length}</p>
+                </div>
+              </div>
+              <div class="yearbook-media">${mediaHtml}</div>
+            </div>
+          </article>
+        `,
+      };
+    });
+
+    const yearEnd = data.yearEnd || {};
+    const year = now().getFullYear();
+    const closingTitle = yearEnd.title || `${year} in our hearts`;
+    const closingMessage =
+      formatYearbookText(
+        yearEnd.message ||
+          "As the year closes, every small moment becomes a reminder of how far we have come. These pages hold our laughter, our quiet victories, and the gentle way we kept choosing each other."
+      ) || "";
+    const reflectionMessage =
+      formatYearbookText(
+        yearEnd.reflections ||
+          "We learned to meet the hard days with softer hands, and to grow together even when the path felt uncertain."
+      ) || "";
+    const unspokenMessage =
+      formatYearbookText(
+        yearEnd.unspoken ||
+          "Some days we were tired, some words stayed in our hearts. Thank you for reading me even when I stayed quiet."
+      ) || "";
+    const resolutionMessage =
+      formatYearbookText(
+        yearEnd.resolution ||
+          "In the coming year, let’s keep choosing patience, gentleness, and the kind of love that feels like coming home."
+      ) || "";
+
+    pages.push({
+      id: "final",
+      html: `
+        <article class="yearbook-page yearbook-page--final" data-month="final">
+          <div class="yearbook-page__content">
+            <div>
+              <div class="yearbook-page__month">Finale</div>
+              <h3 class="yearbook-page__title">${escapeHTML(closingTitle)}</h3>
+            </div>
+            <div class="yearbook-page__final">${closingMessage}</div>
+            <div class="yearbook-page__grid">
+              <div class="yearbook-card">
+                <h4>Reflections on challenges & growth</h4>
+                <div class="yearbook-page__note">${reflectionMessage}</div>
+              </div>
+              <div class="yearbook-card">
+                <h4>Things that were hard to say</h4>
+                <div class="yearbook-page__note">${unspokenMessage}</div>
+              </div>
+              <div class="yearbook-card">
+                <h4>New Year’s intentions</h4>
+                <div class="yearbook-page__note">${resolutionMessage}</div>
+              </div>
+            </div>
+            <div class="yearbook-page__signature">With love, always.</div>
+          </div>
+        </article>
+      `,
+    });
+
+    return pages;
+  }
+
+  function updateYearbookNav(modal) {
+    const prevBtn = modal?.querySelector("#yearbookPrev");
+    const nextBtn = modal?.querySelector("#yearbookNext");
+    const indexEl = modal?.querySelector("#yearbookPageIndex");
+    const totalEl = modal?.querySelector("#yearbookPageTotal");
+    const total = Math.max(1, Math.ceil(yearbookState.pages.length / 2));
+    if (indexEl) {
+      indexEl.textContent = yearbookState.coverOpen
+        ? String(yearbookState.spreadIndex + 1)
+        : "Cover";
+    }
+    if (totalEl) totalEl.textContent = String(total);
+    if (prevBtn) prevBtn.disabled = !yearbookState.coverOpen || yearbookState.spreadIndex <= 0;
+    if (nextBtn) {
+      nextBtn.disabled =
+        yearbookState.coverOpen &&
+        yearbookState.spreadIndex >= total - 1;
+      nextBtn.textContent = yearbookState.coverOpen ? "Next ⟶" : "Open book ⟶";
+    }
+  }
+
+  function renderYearbookSpread(modal, direction = 1) {
+    if (!modal) return;
+    const leftSlot = modal.querySelector("#yearbookLeft");
+    const rightSlot = modal.querySelector("#yearbookRight");
+    if (!leftSlot || !rightSlot) return;
+
+    const pages = yearbookState.pages;
+    const leftIndex = yearbookState.spreadIndex * 2;
+    const rightIndex = leftIndex + 1;
+
+    const leftPage = pages[leftIndex];
+    const rightPage = pages[rightIndex];
+
+    leftSlot.innerHTML = leftPage ? leftPage.html : "";
+    rightSlot.innerHTML = rightPage ? rightPage.html : "";
+
+    leftSlot.classList.toggle("is-blank", !leftPage);
+    rightSlot.classList.toggle("is-blank", !rightPage);
+
+    if (!leftPage) leftSlot.textContent = "The End";
+    if (!rightPage) rightSlot.textContent = "The End";
+
+    const leftEl = leftSlot.querySelector(".yearbook-page");
+    const rightEl = rightSlot.querySelector(".yearbook-page");
+    [leftEl, rightEl].forEach((page) => {
+      if (!page) return;
+      page.classList.remove("is-leaving-next", "is-leaving-prev");
+      page.classList.add("is-active");
+      if (direction !== 0) {
+        page.classList.add(direction > 0 ? "is-leaving-prev" : "is-leaving-next");
+        window.setTimeout(() => {
+          page.classList.remove("is-leaving-next", "is-leaving-prev");
+        }, 450);
+      }
+    });
+
+    updateYearbookNav(modal);
+  }
+
+  function setYearbookCover(modal, isOpen) {
+    const cover = modal?.querySelector("#yearbookCover");
+    if (!cover) return;
+    cover.classList.toggle("is-open", isOpen);
+    yearbookState.coverOpen = isOpen;
+    updateYearbookNav(modal);
+  }
+
+  function stepYearbookPage(modal, delta) {
+    if (!yearbookState.coverOpen) {
+      setYearbookCover(modal, true);
+      renderYearbookSpread(modal, 0);
+      return;
+    }
+    const total = Math.max(1, Math.ceil(yearbookState.pages.length / 2));
+    const nextIndex = Math.max(
+      0,
+      Math.min(yearbookState.spreadIndex + delta, total - 1)
+    );
+    if (nextIndex === yearbookState.spreadIndex) {
+      updateYearbookNav(modal);
+      return;
+    }
+    yearbookState.spreadIndex = nextIndex;
+    renderYearbookSpread(modal, delta);
+  }
+
+  function hideYearbook(modal) {
+    if (!modal) return;
+    modal.classList.remove("is-visible");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("yearbook-open");
+  }
+
+  function ensureYearbookModal(data) {
+    if (yearbookState.modal) return yearbookState.modal;
+    const modal = $("#yearEndModal");
+    if (!modal) return null;
+
+    const close = () => hideYearbook(modal);
+    modal
+      .querySelector(".yearbook-modal__close")
+      .addEventListener("click", close);
+    modal
+      .querySelector(".yearbook-modal__backdrop")
+      .addEventListener("click", close);
+
+    modal.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") hideYearbook(modal);
+      if (event.key === "ArrowRight") stepYearbookPage(modal, 1);
+      if (event.key === "ArrowLeft") stepYearbookPage(modal, -1);
+    });
+
+    const prevBtn = modal.querySelector("#yearbookPrev");
+    const nextBtn = modal.querySelector("#yearbookNext");
+    if (prevBtn) prevBtn.addEventListener("click", () => stepYearbookPage(modal, -1));
+    if (nextBtn) nextBtn.addEventListener("click", () => stepYearbookPage(modal, 1));
+    const openCoverBtn = modal.querySelector("#yearbookOpenCover");
+    if (openCoverBtn) {
+      openCoverBtn.addEventListener("click", () => stepYearbookPage(modal, 1));
+    }
+
+    yearbookState.modal = modal;
+    yearbookState.dataKey = "";
+
+    const yearbookTitle = modal.querySelector("#yearbookTitle");
+    if (yearbookTitle) {
+      const year = now().getFullYear();
+      yearbookTitle.textContent = `Year-End Compilation ${year}`;
+    }
+    if (data && modal.querySelector("#yearbookSubtitle")) {
+      modal.querySelector("#yearbookSubtitle").textContent =
+        "A full year of love, bound into one gentle story.";
+    }
+
+    return modal;
+  }
+
+  function showYearbook(data) {
+    const modal = ensureYearbookModal(data);
+    if (!modal) return;
+    const dataKey = JSON.stringify((data.months || []).map((m) => m.id));
+    if (yearbookState.dataKey !== dataKey) {
+      yearbookState.pages = buildYearbookPages(data);
+      yearbookState.dataKey = dataKey;
+    }
+    yearbookState.spreadIndex = 0;
+    setYearbookCover(modal, false);
+    renderYearbookSpread(modal, 0);
+
+    modal.classList.add("is-visible");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("yearbook-open");
+    modal.focus({ preventScroll: true });
+  }
+
   function renderHome(data) {
     const unlocked = loadUnlocked();
     setRingProgress(unlocked.size);
@@ -1772,8 +2099,13 @@
     }
 
     const btn = $("#openCurrent");
+    const yearEndAvailable = isYearEndDay();
     if (btn) {
-      if (currentOpenable) {
+      if (yearEndAvailable) {
+        btn.disabled = false;
+        btn.textContent = "Open Year-End Compilation";
+        btn.onclick = () => showYearbook(data);
+      } else if (currentOpenable) {
         btn.disabled = false;
         btn.onclick = () => {
           unlocked.add(currentOpenable.id);
@@ -1801,8 +2133,14 @@
       nextUnlockMs -= 1000;
       if (nextUnlockMs < 0) window.location.reload();
     }
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+    if (yearEndAvailable) {
+      const cdl = $("#countdownLabel");
+      if (cdl) cdl.textContent = "Year-End Compilation";
+      if (cd) cd.textContent = "Unlocked";
+    } else {
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    }
 
     const toggleUnlockedSongs = $("#toggleUnlockedSongs");
     const songsModal = $("#unlockedSongsModal");
@@ -2634,6 +2972,7 @@
   if (typeof window !== "undefined") {
     window.__initMediaBackground = initMediaBackground;
     window.__showInlineMediaPreview = showInlineMediaPreview;
+    window.__showYearbook = showYearbook;
   }
 })();
 async function resetAppStorage() {
