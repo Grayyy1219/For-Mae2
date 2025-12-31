@@ -185,15 +185,6 @@
     return date.getMonth() === 11 && date.getDate() === 31;
   }
 
-  function formatYearbookText(text) {
-    const safe = escapeHTML(text || "");
-    if (!safe) return "";
-    const paragraphs = safe.split(/\n{2,}/);
-    return paragraphs
-      .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
-      .join("");
-  }
-
   function loadUnlocked() {
     try {
       const raw = localStorage.getItem(STORAGE_UNLOCKED);
@@ -1668,345 +1659,145 @@
 
   let yearbookState = {
     modal: null,
-    pages: [],
-    spreadIndex: 0,
-    coverOpen: false,
-    dataKey: "",
+    book: null,
+    timers: [],
   };
 
-  function renderYearbookList(items, emptyLabel) {
-    if (!items.length) {
-      return `<li>${escapeHTML(emptyLabel)}</li>`;
-    }
-    return items
-      .map((item) => `<li>${escapeHTML(item)}</li>`)
-      .join("");
+  function clearYearbookTimers() {
+    yearbookState.timers.forEach((timer) => window.clearTimeout(timer));
+    yearbookState.timers = [];
   }
 
-  function renderYearbookSongs(items) {
-    if (!items.length) {
-      return `<li>No songs saved yet.</li>`;
-    }
-    return items
-      .map((url, idx) => {
-        const safeUrl = escapeHTML(url);
-        return `<li><a href="${safeUrl}" target="_blank" rel="noopener">Track ${
-          idx + 1
-        }</a></li>`;
-      })
-      .join("");
+  function scheduleYearbookTimer(callback, delay) {
+    const timer = window.setTimeout(callback, delay);
+    yearbookState.timers.push(timer);
   }
 
-  const YEARBOOK_MONTHS = Array.from({ length: 12 }).map((_, index) =>
-    new Date(2000, index, 1).toLocaleDateString(undefined, { month: "long" })
-  );
+  function buildYearbookBookState(modal) {
+    const wrapper = modal.querySelector(".yearbook-book-wrapper");
+    if (!wrapper) return null;
+    const coverRight = wrapper.querySelector(".cover.cover-right");
+    const pages = Array.from(wrapper.querySelectorAll(".book-page.page-right"));
+    return {
+      wrapper,
+      coverRight,
+      pages,
+      totalPages: pages.length,
+      pageNumber: 0,
+    };
+  }
 
-  function normalizeYearbookMonths(data) {
-    const monthMap = Array.from({ length: 12 }).fill(null);
-    const sourceMonths = Array.isArray(data.months) ? data.months : [];
-    sourceMonths.forEach((month) => {
-      if (!month) return;
-      let parsedDate = null;
-      try {
-        parsedDate = parseISO(month.unlockDate || "");
-      } catch {}
-      const monthIndex =
-        parsedDate instanceof Date && !Number.isNaN(parsedDate.getTime())
-          ? parsedDate.getMonth()
-          : null;
-      if (monthIndex === null) return;
-      if (!monthMap[monthIndex]) monthMap[monthIndex] = month;
+  function reverseBookIndex(state) {
+    if (!state.totalPages) return;
+    state.pageNumber -= 1;
+    if (state.pageNumber < 0) {
+      state.pageNumber = state.totalPages - 1;
+    }
+  }
+
+  function resetYearbookBook(state) {
+    if (!state) return;
+    clearYearbookTimers();
+    state.pageNumber = 0;
+    if (!state.totalPages) return;
+    if (state.coverRight) {
+      state.coverRight.classList.remove("turn");
+      state.coverRight.style.zIndex = "";
+    }
+
+    state.pages.forEach((page) => {
+      page.classList.add("turn");
+      page.style.zIndex = "";
     });
 
-    const year = now().getFullYear();
-    return monthMap.map((month, index) => {
-      const fallbackDate = new Date(year, index, 1, 0, 0, 1, 0);
-      const normalized = month
-        ? { ...month }
-        : {
-            id: index + 1,
-            title: `Month ${index + 1}`,
-            letter: "",
-            surprise: "",
-            photos: [],
-            voiceNote: "",
-            songsAdded: [],
-            placesVisited: [],
-          };
-      if (!normalized.unlockDate) {
-        normalized.unlockDate = fallbackDate.toISOString();
-      }
-      normalized.photos = Array.isArray(normalized.photos)
-        ? normalized.photos
-        : [];
-      normalized.placesVisited = Array.isArray(normalized.placesVisited)
-        ? normalized.placesVisited
-        : [];
-      normalized.songsAdded = Array.isArray(normalized.songsAdded)
-        ? normalized.songsAdded
-        : [];
-      normalized.letter = normalized.letter || "";
-      normalized.surprise = normalized.surprise || "";
-      return normalized;
+    scheduleYearbookTimer(() => {
+      if (state.coverRight) state.coverRight.classList.add("turn");
+    }, 2100);
+
+    scheduleYearbookTimer(() => {
+      if (state.coverRight) state.coverRight.style.zIndex = "-1";
+    }, 2800);
+
+    state.pages.forEach((_, index) => {
+      scheduleYearbookTimer(() => {
+        reverseBookIndex(state);
+        const page = state.pages[state.pageNumber];
+        if (!page) return;
+        page.classList.remove("turn");
+        scheduleYearbookTimer(() => {
+          reverseBookIndex(state);
+          const targetPage = state.pages[state.pageNumber];
+          if (targetPage) targetPage.style.zIndex = String(10 + index);
+        }, 500);
+      }, (index + 1) * 200 + 2100);
     });
   }
 
-  function formatYearbookDate(dateString) {
-    try {
-      return parseISO(dateString).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
+  function setupYearbookBookInteractions(state) {
+    if (!state || state.wrapper.dataset.bookInitialized === "true") return;
+    state.wrapper.dataset.bookInitialized = "true";
+
+    const pageTurnBtns = state.wrapper.querySelectorAll(".nextprev-btn");
+    pageTurnBtns.forEach((el, index) => {
+      el.addEventListener("click", (event) => {
+        event.preventDefault();
+        const pageTurnId = el.getAttribute("data-page");
+        if (!pageTurnId) return;
+        const pageTurn = state.wrapper.querySelector(`#${pageTurnId}`);
+        if (!pageTurn) return;
+
+        if (pageTurn.classList.contains("turn")) {
+          pageTurn.classList.remove("turn");
+          window.setTimeout(() => {
+            pageTurn.style.zIndex = String(2 - index);
+          }, 500);
+        } else {
+          pageTurn.classList.add("turn");
+          window.setTimeout(() => {
+            pageTurn.style.zIndex = String(2 + index);
+          }, 500);
+        }
       });
-    } catch {
-      return "Date not set";
-    }
-  }
-
-  function renderYearbookCard(title, bodyHtml) {
-    return `
-      <div class="yearbook-card">
-        <h4>${escapeHTML(title)}</h4>
-        ${bodyHtml}
-      </div>
-    `;
-  }
-
-  function renderYearbookPage({ id, monthName, title, leadHtml, cards, mediaHtml }) {
-    const cardsHtml = cards.length
-      ? `<div class="yearbook-page__grid">${cards.join("")}</div>`
-      : "";
-    const mediaSection = mediaHtml
-      ? `<div class="yearbook-media">${mediaHtml}</div>`
-      : "";
-    return `
-      <article class="yearbook-page" data-month="${escapeHTML(String(id))}">
-        <div class="yearbook-page__content">
-          <div>
-            <div class="yearbook-page__month">${escapeHTML(monthName)}</div>
-            <h3 class="yearbook-page__title">${escapeHTML(title)}</h3>
-          </div>
-          ${leadHtml ? `<div class="yearbook-page__note">${leadHtml}</div>` : ""}
-          ${cardsHtml}
-          ${mediaSection}
-        </div>
-      </article>
-    `;
-  }
-
-  function buildYearbookPages(data) {
-    const months = normalizeYearbookMonths(data);
-
-    return months.map((month, index) => {
-      const monthName = YEARBOOK_MONTHS[index] || "Month";
-      const title = displayTitleForMonth(month, data);
-      const letterHtml =
-        formatYearbookText(month.letter) ||
-        "<p>No monthly story saved yet.</p>";
-      const noteHtml =
-        formatYearbookText(month.surprise) ||
-        "<p>No reflections saved yet.</p>";
-      const photos = (month.photos || [])
-        .map(normalizeMediaSrc)
-        .filter(Boolean);
-      const imageSources = photos.filter((src) => !MEDIA_EXT_VIDEO.test(src));
-      const videoCount = photos.length - imageSources.length;
-      const places = (month.placesVisited || []).filter(Boolean);
-      const songs = (month.songsAdded || []).filter(Boolean);
-      const mediaItems = imageSources
-        .slice(0, 4)
-        .map(
-          (src) =>
-            `<div class="yearbook-media__item"><img src="${escapeHTML(
-              src
-            )}" alt="Memory photo" loading="lazy" decoding="async" /></div>`
-        )
-        .join("");
-      const videoBadge = videoCount
-        ? `<div class="yearbook-media__item">Video memory ×${videoCount}</div>`
-        : "";
-      const mediaHtml =
-        mediaItems || videoBadge
-          ? `${mediaItems}${videoBadge}`
-          : `<div class="yearbook-media__item">No photos yet.</div>`;
-
-      const highlightsBody = `
-        <div class="yearbook-page__note">${noteHtml}</div>
-        <ul class="yearbook-list">
-          ${renderYearbookList(places, "No places saved yet.")}
-        </ul>
-      `;
-      const memoriesBody = `
-        <p class="yearbook-page__note">Photos saved: ${photos.length}</p>
-        <p class="yearbook-page__note">Songs saved: ${songs.length}</p>
-      `;
-      const detailsBody = `
-        <p class="yearbook-page__note">Opened on ${escapeHTML(
-          formatYearbookDate(month.unlockDate)
-        )}</p>
-        <p class="yearbook-page__note">Month ${index + 1} of 12</p>
-      `;
-      const soundtrackBody = `
-        <ul class="yearbook-list">
-          ${renderYearbookSongs(songs)}
-        </ul>
-      `;
-      const supportingBody = `
-        <ul class="yearbook-list">
-          ${renderYearbookList(places, "No shared moments logged yet.")}
-        </ul>
-      `;
-
-      return {
-        id: month.id,
-        leftHtml: renderYearbookPage({
-          id: month.id,
-          monthName,
-          title,
-          leadHtml: letterHtml,
-          cards: [
-            renderYearbookCard("Highlights", highlightsBody),
-            renderYearbookCard("Memories", memoriesBody),
-          ],
-          mediaHtml,
-        }),
-        rightHtml: renderYearbookPage({
-          id: month.id,
-          monthName,
-          title: "Details & reflections",
-          leadHtml: noteHtml,
-          cards: [
-            renderYearbookCard("Date details", detailsBody),
-            renderYearbookCard("Soundtrack", soundtrackBody),
-            renderYearbookCard("Supporting moments", supportingBody),
-          ],
-          mediaHtml: "",
-        }),
-      };
-    });
-  }
-
-  function renderYearbookEndPage() {
-    return `
-      <article class="yearbook-page yearbook-page--final" data-month="final">
-        <div class="yearbook-page__content">
-          <div>
-            <div class="yearbook-page__month">Finale</div>
-            <h3 class="yearbook-page__title">The last page for now</h3>
-          </div>
-          <div class="yearbook-page__final">
-            Thank you for sharing this year together. Every month is waiting to
-            be reopened whenever you need it.
-          </div>
-          <div class="yearbook-page__signature">With love, always.</div>
-        </div>
-      </article>
-    `;
-  }
-
-  function renderYearbookBookPages(modal) {
-    if (!modal) return;
-    const pagesContainer = modal.querySelector("#yearbookBookPages");
-    const leftPage = modal.querySelector("#yearbookLeftPage");
-    if (!pagesContainer || !leftPage) return;
-
-    pagesContainer
-      .querySelectorAll(".book-page.page-right")
-      .forEach((page) => page.remove());
-
-    const pages = yearbookState.pages;
-    if (!pages.length) {
-      leftPage.innerHTML = renderYearbookEndPage();
-      return;
-    }
-
-    leftPage.innerHTML = pages[0].leftHtml;
-
-    pages.forEach((page, index) => {
-      const sheet = document.createElement("div");
-      sheet.className = "book-page page-right";
-      sheet.id = `yearbook-sheet-${index + 1}`;
-      const backHtml = pages[index + 1]?.leftHtml || renderYearbookEndPage();
-      sheet.innerHTML = `
-        <div class="page-front">${page.rightHtml}</div>
-        <div class="page-back">${backHtml}</div>
-      `;
-      pagesContainer.appendChild(sheet);
-    });
-  }
-
-  function updateYearbookNav(modal) {
-    const prevBtn = modal?.querySelector("#yearbookPrev");
-    const nextBtn = modal?.querySelector("#yearbookNext");
-    const indexEl = modal?.querySelector("#yearbookPageIndex");
-    const totalEl = modal?.querySelector("#yearbookPageTotal");
-    const total = Math.max(1, yearbookState.pages.length);
-    if (indexEl) {
-      indexEl.textContent = yearbookState.coverOpen
-        ? String(yearbookState.spreadIndex + 1)
-        : "Cover";
-    }
-    if (totalEl) totalEl.textContent = String(total);
-    if (prevBtn) prevBtn.disabled = !yearbookState.coverOpen || yearbookState.spreadIndex <= 0;
-    if (nextBtn) {
-      nextBtn.disabled =
-        yearbookState.coverOpen &&
-        yearbookState.spreadIndex >= total - 1;
-      nextBtn.textContent = yearbookState.coverOpen ? "Next ⟶" : "Open book ⟶";
-    }
-  }
-
-  function renderYearbookSpread(modal) {
-    if (!modal) return;
-    const book = modal.querySelector("#yearbookBook");
-    const pagesContainer = modal.querySelector("#yearbookBookPages");
-    if (!book || !pagesContainer) return;
-
-    const sheets = Array.from(
-      pagesContainer.querySelectorAll(".book-page.page-right")
-    );
-    sheets.forEach((sheet, index) => {
-      const isTurned = index < yearbookState.spreadIndex;
-      sheet.classList.toggle("turn", isTurned);
-      sheet.style.zIndex = isTurned
-        ? String(index + 2)
-        : String(sheets.length - index + 4);
     });
 
-    updateYearbookNav(modal);
-  }
-
-  function setYearbookCover(modal, isOpen) {
-    const cover = modal?.querySelector("#yearbookCover");
-    const book = modal?.querySelector("#yearbookBook");
-    if (!cover || !book) return;
-    cover.classList.toggle("turn", isOpen);
-    book.classList.toggle("is-open", isOpen);
-    yearbookState.coverOpen = isOpen;
-    updateYearbookNav(modal);
-  }
-
-  function stepYearbookPage(modal, delta) {
-    if (!yearbookState.coverOpen) {
-      setYearbookCover(modal, true);
-      renderYearbookSpread(modal);
-      return;
+    const contactMeBtn = state.wrapper.querySelector(".btn.contact-me");
+    if (contactMeBtn) {
+      contactMeBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        state.pages.forEach((page, index) => {
+          window.setTimeout(() => {
+            page.classList.add("turn");
+            window.setTimeout(() => {
+              page.style.zIndex = String(20 + index);
+            }, 500);
+          }, (index + 1) * 200 + 100);
+        });
+      });
     }
-    const total = Math.max(1, yearbookState.pages.length);
-    const nextIndex = Math.max(
-      0,
-      Math.min(yearbookState.spreadIndex + delta, total - 1)
-    );
-    if (nextIndex === yearbookState.spreadIndex) {
-      updateYearbookNav(modal);
-      return;
+
+    const backProfileBtn = state.wrapper.querySelector(".back-profile");
+    if (backProfileBtn) {
+      backProfileBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        state.pages.forEach((_, index) => {
+          window.setTimeout(() => {
+            reverseBookIndex(state);
+            const page = state.pages[state.pageNumber];
+            if (page) page.classList.remove("turn");
+            window.setTimeout(() => {
+              reverseBookIndex(state);
+              const targetPage = state.pages[state.pageNumber];
+              if (targetPage) targetPage.style.zIndex = String(10 + index);
+            }, 500);
+          }, (index + 1) * 200 + 100);
+        });
+      });
     }
-    yearbookState.spreadIndex = nextIndex;
-    renderYearbookSpread(modal);
   }
 
   function hideYearbook(modal) {
     if (!modal) return;
+    clearYearbookTimers();
     modal.classList.remove("is-visible");
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("yearbook-open");
@@ -2027,40 +1818,11 @@
 
     modal.addEventListener("keydown", (event) => {
       if (event.key === "Escape") hideYearbook(modal);
-      if (event.key === "ArrowRight") stepYearbookPage(modal, 1);
-      if (event.key === "ArrowLeft") stepYearbookPage(modal, -1);
     });
 
-    const prevBtn = modal.querySelector("#yearbookPrev");
-    const nextBtn = modal.querySelector("#yearbookNext");
-    if (prevBtn) prevBtn.addEventListener("click", () => stepYearbookPage(modal, -1));
-    if (nextBtn) nextBtn.addEventListener("click", () => stepYearbookPage(modal, 1));
-    const openCoverBtn = modal.querySelector("#yearbookOpenCover");
-    if (openCoverBtn) {
-      openCoverBtn.addEventListener("click", () => stepYearbookPage(modal, 1));
-    }
-    const book = modal.querySelector("#yearbookBook");
-    if (book) {
-      book.addEventListener("click", (event) => {
-        if (event.target.closest("button, a")) return;
-        const rect = book.getBoundingClientRect();
-        const isLeft = event.clientX - rect.left < rect.width / 2;
-        stepYearbookPage(modal, isLeft ? -1 : 1);
-      });
-    }
-
     yearbookState.modal = modal;
-    yearbookState.dataKey = "";
-
-    const yearbookTitle = modal.querySelector("#yearbookTitle");
-    if (yearbookTitle) {
-      const year = now().getFullYear();
-      yearbookTitle.textContent = `Year-End Compilation ${year}`;
-    }
-    if (data && modal.querySelector("#yearbookSubtitle")) {
-      modal.querySelector("#yearbookSubtitle").textContent =
-        "A full year of love, bound into one gentle story.";
-    }
+    yearbookState.book = buildYearbookBookState(modal);
+    setupYearbookBookInteractions(yearbookState.book);
 
     return modal;
   }
@@ -2068,15 +1830,7 @@
   function showYearbook(data) {
     const modal = ensureYearbookModal(data);
     if (!modal) return;
-    const dataKey = JSON.stringify((data.months || []).map((m) => m.id));
-    if (yearbookState.dataKey !== dataKey) {
-      yearbookState.pages = buildYearbookPages(data);
-      renderYearbookBookPages(modal);
-      yearbookState.dataKey = dataKey;
-    }
-    yearbookState.spreadIndex = 0;
-    setYearbookCover(modal, false);
-    renderYearbookSpread(modal);
+    resetYearbookBook(yearbookState.book);
 
     modal.classList.add("is-visible");
     modal.setAttribute("aria-hidden", "false");
