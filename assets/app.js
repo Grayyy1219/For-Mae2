@@ -2260,10 +2260,13 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
           ? 1000
           : transitionDuration * 1000;
 
-        if (pageTurn.classList.contains("turn")) {
+        const isTurningBack = pageTurn.classList.contains("turn");
+        if (isTurningBack) {
+          pageTurn.style.zIndex = String(40 + state.pages.length);
           pageTurn.classList.remove("turn");
         } else {
           pageTurn.classList.add("turn");
+          syncYearbookPageStack(state);
         }
         window.setTimeout(() => {
           syncYearbookPageStack(state);
