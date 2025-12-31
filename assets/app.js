@@ -1862,10 +1862,9 @@
       month?.surprise || "Add highlights from the month."
     );
 
-    const memoriesSummary = listSummary(
-      memoriesList.length ? memoriesList : photosList,
-      "Capture favorite photos and notes."
-    );
+    const memoriesSummary = memoriesList.length
+      ? listSummary(memoriesList, "Capture favorite photos and notes.")
+      : "";
 
     const box = document.createElement("div");
     box.className = "workeduc-box";

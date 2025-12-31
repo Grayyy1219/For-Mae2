@@ -1053,6 +1053,7 @@ header a {
 }
 .yearbook-book-wrapper .book-page.page-left {
   box-shadow: -0.6rem 0.6rem 0.6rem rgba(0, 0, 0, 0.1);
+  overflow: auto;
 }
 .yearbook-book-wrapper .profile-page {
   display: flex;
@@ -1219,14 +1220,14 @@ header a {
   font-size: 1.2rem;
 }
 .yearbook-book-wrapper .number-page {
-  position: absolute;
+  position: fixed;
   bottom: 1rem;
   left: 50%;
   transform: translateX(-50%);
   font-weight: 600;
 }
 .yearbook-book-wrapper .nextprev-btn {
-  position: absolute;
+  position: fixed;
   bottom: 0.9rem;
   right: 1.5rem;
   width: 2rem;
