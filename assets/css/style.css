@@ -1138,7 +1138,6 @@ header a {
   color: var(--white-color);
 }
 .yearbook-book-wrapper .profile-page p {
-  text-align: justify;
   font-size: 1.1rem;
 }
 .yearbook-book-wrapper .profile-page .btn-box {
