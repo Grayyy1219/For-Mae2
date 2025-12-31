@@ -19,6 +19,19 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="assets/css/style.css" />
+    <script>
+      window.__SpotifyIFrameAPI = null;
+      window.onSpotifyIframeApiReady = (IFrameAPI) => {
+        window.__SpotifyIFrameAPI = IFrameAPI;
+        if (typeof window.__initSpotifyEmbed === "function") {
+          window.__initSpotifyEmbed(IFrameAPI);
+        }
+        if (typeof window.__initYearbookSpotify === "function") {
+          window.__initYearbookSpotify(IFrameAPI);
+        }
+      };
+    </script>
+    <script async src="https://open.spotify.com/embed/iframe-api/v1"></script>
     <script defer src="assets/app.js"></script>
   </head>
   <body data-page="home">

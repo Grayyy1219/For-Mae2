@@ -1669,6 +1669,7 @@
     book: null,
     timers: [],
     ambient: null,
+    spotify: null,
   };
 
   const YEARBOOK_MONTHS = [
@@ -1842,7 +1843,13 @@
     return match ? match[1] : null;
   }
 
-  function createYearbookSoundtrackBlock(soundtrackList) {
+  function getYearbookSoundtrackId(soundtrackList) {
+    return soundtrackList
+      .map((track) => getSpotifyTrackId(track))
+      .find(Boolean);
+  }
+
+  function createYearbookSoundtrackBlock({ soundtrackList, trackId, monthIndex }) {
     const content = document.createElement("div");
     content.className = "workeduc-content";
 
@@ -1853,20 +1860,15 @@
     span.append(iconEl, document.createTextNode(" Soundtrack"));
     content.append(span);
 
-    const trackId = soundtrackList
-      .map((track) => getSpotifyTrackId(track))
-      .find(Boolean);
-
     if (trackId) {
-      const iframe = document.createElement("iframe");
-      iframe.className = "yearbook-spotify-embed";
-      iframe.src = `https://open.spotify.com/embed/track/${trackId}`;
-      iframe.width = "100%";
-      iframe.height = "152";
-      iframe.loading = "lazy";
-      iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
-      iframe.title = "Spotify track";
-      content.append(iframe);
+      const mount = document.createElement("div");
+      mount.className = "yearbook-spotify-embed";
+      mount.dataset.spotifyTrack = trackId;
+      if (typeof monthIndex === "number") {
+        mount.dataset.monthIndex = String(monthIndex);
+      }
+      mount.textContent = "Loading Spotify track…";
+      content.append(mount);
     } else {
       const summary = listSummary(
         soundtrackList,
@@ -1980,6 +1982,7 @@
       const pageNumberFront = index * 2 + 2;
       const pageNumberBack = pageNumberFront + 1;
       const soundtrackList = normalizeYearbookList(month?.songsAdded);
+      const trackId = getYearbookSoundtrackId(soundtrackList);
       const supportingList = normalizeYearbookList(month?.supportingMoments);
       const placesList = normalizeYearbookList(month?.placesVisited);
 
@@ -1991,6 +1994,11 @@
       const page = document.createElement("div");
       page.className = "book-page page-right turn";
       page.id = pageId;
+      page.dataset.frontMonth = String(index);
+      const nextMonthIndex = index + 1;
+      if (nextMonthIndex < months.length) {
+        page.dataset.backMonth = String(nextMonthIndex);
+      }
 
       const front = document.createElement("div");
       front.className = "page-front";
@@ -2007,7 +2015,11 @@
           icon: "bxs-calendar",
           body: formatYearbookDate(month?.unlockDate, index),
         }),
-        createYearbookSoundtrackBlock(soundtrackList),
+        createYearbookSoundtrackBlock({
+          soundtrackList,
+          trackId,
+          monthIndex: index,
+        }),
         createYearbookContentBlock({
           label: "Supporting Moments",
           icon: "bxs-heart",
@@ -2033,7 +2045,6 @@
       back.className = "page-back";
       const backTitle = document.createElement("h1");
       backTitle.className = "title";
-      const nextMonthIndex = index + 1;
       if (nextMonthIndex < months.length) {
         const nextMonthName =
           YEARBOOK_MONTHS[nextMonthIndex] || `Month ${nextMonthIndex + 1}`;
@@ -2080,6 +2091,84 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     });
 
     book.append(fragment);
+  }
+
+  function buildYearbookSpotifyState(months) {
+    return {
+      controllers: new Map(),
+      trackIds: months.map((month) =>
+        getYearbookSoundtrackId(normalizeYearbookList(month?.songsAdded))
+      ),
+      currentMonthIndex: null,
+      pendingMonthIndex: null,
+    };
+  }
+
+  function initYearbookSpotifyEmbeds(modal, IFrameAPI) {
+    if (!modal || !IFrameAPI?.createController || !yearbookState.spotify) return;
+    const mounts = modal.querySelectorAll(
+      ".yearbook-spotify-embed[data-spotify-track]"
+    );
+    mounts.forEach((mount) => {
+      const trackId = mount.dataset.spotifyTrack;
+      const monthIndex = Number(mount.dataset.monthIndex);
+      if (!trackId || Number.isNaN(monthIndex)) return;
+      if (yearbookState.spotify.controllers.has(monthIndex)) return;
+
+      IFrameAPI.createController(
+        mount,
+        { uri: `spotify:track:${trackId}`, width: "100%", height: 152 },
+        (EmbedController) => {
+          yearbookState.spotify.controllers.set(monthIndex, EmbedController);
+          if (yearbookState.spotify.pendingMonthIndex === monthIndex) {
+            if (typeof EmbedController.play === "function") {
+              EmbedController.play();
+            }
+            yearbookState.spotify.pendingMonthIndex = null;
+          }
+        }
+      );
+    });
+  }
+
+  function pauseYearbookSpotify() {
+    if (!yearbookState.spotify) return;
+    yearbookState.spotify.controllers.forEach((controller) => {
+      if (controller && typeof controller.pause === "function") {
+        controller.pause();
+      }
+    });
+  }
+
+  function playYearbookTrackForMonth(monthIndex) {
+    if (!yearbookState.spotify) return;
+    if (monthIndex === null || typeof monthIndex === "undefined") {
+      pauseYearbookSpotify();
+      return;
+    }
+    yearbookState.spotify.currentMonthIndex = monthIndex;
+    yearbookState.spotify.pendingMonthIndex = monthIndex;
+    pauseYearbookSpotify();
+    const trackId = yearbookState.spotify.trackIds?.[monthIndex];
+    if (!trackId) {
+      yearbookState.spotify.pendingMonthIndex = null;
+      return;
+    }
+    const controller = yearbookState.spotify.controllers.get(monthIndex);
+    if (controller && typeof controller.play === "function") {
+      controller.play();
+      yearbookState.spotify.pendingMonthIndex = null;
+    }
+  }
+
+  function getYearbookVisibleMonthIndex(page) {
+    if (!page) return null;
+    const frontMonth = Number(page.dataset.frontMonth);
+    const backMonth = Number(page.dataset.backMonth);
+    if (page.classList.contains("turn")) {
+      return Number.isNaN(backMonth) ? null : backMonth;
+    }
+    return Number.isNaN(frontMonth) ? null : frontMonth;
   }
 
   function clearYearbookTimers() {
@@ -2234,6 +2323,8 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
       });
       syncYearbookPageStack(state);
     }, totalDelay);
+
+    playYearbookTrackForMonth(0);
   }
 
   function setupYearbookBookInteractions(state) {
@@ -2271,6 +2362,10 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
         }
         window.setTimeout(() => {
           syncYearbookPageStack(state);
+        }, transitionMs);
+        scheduleYearbookTimer(() => {
+          const targetMonthIndex = getYearbookVisibleMonthIndex(pageTurn);
+          playYearbookTrackForMonth(targetMonthIndex);
         }, transitionMs);
       });
     });
@@ -2317,6 +2412,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("yearbook-open");
     restoreYearbookAmbient();
+    pauseYearbookSpotify();
   }
 
   function ensureYearbookModal(data) {
@@ -2346,6 +2442,14 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     if (!modal) return;
     await preloadYearbookAssets(data);
     renderYearbookBook(modal, data);
+    const months = Array.isArray(data?.months) ? data.months.slice(0, 12) : [];
+    yearbookState.spotify = buildYearbookSpotifyState(months);
+    window.__initYearbookSpotify = (IFrameAPI) => {
+      initYearbookSpotifyEmbeds(modal, IFrameAPI);
+    };
+    if (window.__SpotifyIFrameAPI) {
+      window.__initYearbookSpotify(window.__SpotifyIFrameAPI);
+    }
     yearbookState.book = buildYearbookBookState(modal);
     setupYearbookBookInteractions(yearbookState.book);
     resetYearbookBook(yearbookState.book);
