@@ -1149,7 +1149,11 @@ header a {
   height: 100%;
   background: var(--pages-color);
   padding: 1.5rem 2rem;
-  overflow: auto;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  overflow: hidden;
 }
 .yearbook-book-wrapper .book-page .page-front {
   transform: rotateY(0deg) translateZ(1px);
@@ -1159,15 +1163,30 @@ header a {
 }
 .yearbook-book-wrapper .title {
   text-align: center;
+  grid-column: 1 / -1;
 }
 .yearbook-book-wrapper .workeduc-box {
-  border-left: var(--border);
+  grid-column: 1 / -1;
+  min-height: 0;
+  border-left: none;
   margin-top: 2rem;
+  overflow: auto;
+  padding-right: 0.4rem;
 }
 .yearbook-book-wrapper .workeduc-box .workeduc-content {
   position: relative;
   padding-left: 1.6rem;
   padding-bottom: 1.2rem;
+}
+.yearbook-book-wrapper .workeduc-box .workeduc-content::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -0.0625rem;
+  width: 0.125rem;
+  height: 100%;
+  background: #8b5cf6;
+  z-index: 0;
 }
 .yearbook-book-wrapper .workeduc-box .workeduc-content::before {
   content: "";
@@ -1178,6 +1197,7 @@ header a {
   height: 1.2rem;
   border-radius: 50%;
   background: var(--main-color);
+  z-index: 1;
 }
 .yearbook-book-wrapper .workeduc-content .year {
   color: var(--main-color);
@@ -1220,16 +1240,15 @@ header a {
   font-size: 1.2rem;
 }
 .yearbook-book-wrapper .number-page {
-  position: fixed;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
+  grid-row: 3;
+  grid-column: 2;
+  justify-self: center;
   font-weight: 600;
 }
 .yearbook-book-wrapper .nextprev-btn {
-  position: fixed;
-  bottom: 0.9rem;
-  right: 1.5rem;
+  grid-row: 3;
+  grid-column: 3;
+  justify-self: end;
   width: 2rem;
   height: 2rem;
   cursor: pointer;
@@ -1244,7 +1263,8 @@ header a {
   color: var(--main-color);
 }
 .yearbook-book-wrapper .nextprev-btn.back {
-  left: 1.5rem;
+  grid-column: 1;
+  justify-self: start;
 }
 .yearbook-book-wrapper .services-box {
   display: flex;
