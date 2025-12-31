@@ -1281,6 +1281,9 @@ header a {
   gap: 14px;
   margin-top: 26px;
 }
+.months-grid:not(.show-locked) .month-card.locked {
+  display: none;
+}
 .month-card {
   background: var(--panel);
   border: 1px solid #222838;
@@ -1522,6 +1525,22 @@ body[data-page="admin"] .admin-wrap {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+.home-actions {
+  margin-top: 18px;
+  display: grid;
+  gap: 12px;
+}
+.home-actions .row {
+  justify-content: center;
+}
+.unlocked-songs-play {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  font-size: 14px;
 }
 .hidden {
   display: none !important;

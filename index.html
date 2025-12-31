@@ -66,6 +66,27 @@
         </div>
       </section>
 
+      <section class="home-actions" aria-label="Month filters and songs">
+        <div class="row center">
+          <button
+            id="toggleAllMonths"
+            class="btn btn-secondary"
+            type="button"
+            aria-pressed="false"
+          >
+            View all months
+          </button>
+          <button
+            id="toggleUnlockedSongs"
+            class="btn btn-secondary"
+            type="button"
+            aria-haspopup="dialog"
+          >
+            View unlocked songs
+          </button>
+        </div>
+      </section>
+
       <section
         class="months-grid"
         id="monthsGrid"
@@ -117,6 +138,46 @@
         </header>
         <div class="patch-modal__body">
           <div class="patch-timeline" id="patchTimeline"></div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="media-modal unlocked-songs-modal"
+      id="unlockedSongsModal"
+      aria-hidden="true"
+    >
+      <div class="media-modal__backdrop unlocked-songs-modal__backdrop"></div>
+      <div
+        class="media-modal__dialog unlocked-songs-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="unlockedSongsTitle"
+        tabindex="-1"
+      >
+        <header class="patch-modal__header">
+          <div>
+            <p class="patch-modal__eyebrow">Unlocked playlist</p>
+            <h2 class="patch-modal__title" id="unlockedSongsTitle">
+              Unlocked songs
+            </h2>
+            <p class="patch-modal__subtitle">
+              Tracks from months you have already opened.
+            </p>
+          </div>
+          <button
+            class="media-modal__close unlocked-songs-modal__close"
+            type="button"
+            aria-label="Close unlocked songs"
+          >
+            ×
+          </button>
+        </header>
+        <div class="patch-modal__body">
+          <div
+            class="patch-timeline unlocked-songs-timeline"
+            id="unlockedSongsTimeline"
+          ></div>
         </div>
       </div>
     </div>

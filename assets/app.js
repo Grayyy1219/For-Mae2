@@ -1378,45 +1378,77 @@
     });
 
     monthStates.forEach(
-      ({
-        month,
-        unlockMs,
-        isUnlocked,
-        isOpenable,
-        status,
-        prereqsMet,
-        isTimeUnlocked,
-      }) => {
+      ({ month, unlockMs, isUnlocked, isOpenable, prereqsMet, isTimeUnlocked }) => {
         if (!isUnlocked && isOpenable && currentOpenable === null)
           currentOpenable = month;
-        if (!isOpenable && isTimeUnlocked && !prereqsMet) return;
         if (!isOpenable && unlockMs > nowMs)
           nextUnlockMs = Math.min(nextUnlockMs, unlockMs - nowMs);
+        if (!isOpenable && isTimeUnlocked && !prereqsMet) return;
+      }
+    );
 
+    const renderMonthsGrid = () => {
+      monthsGrid.innerHTML = "";
+      monthStates.forEach(({ month, isOpenable, status }) => {
         const card = document.createElement("div");
         card.className = "month-card" + (isOpenable ? "" : " locked");
         const title = displayTitleForMonth(month, data);
         card.innerHTML = `
-        <div class="month-title">${title}</div>
-        <div class="pill">${
-          status === "Unlocked"
-            ? iconFor(CURRENT_SETTINGS.statusIcons.unlocked)
-            : status === "Ready"
-            ? iconFor(CURRENT_SETTINGS.statusIcons.ready)
-            : iconFor(CURRENT_SETTINGS.statusIcons.locked)
-        } ${statusTextFor(status)}</div>
-        <div class="month-actions">
-          <button class="btn btn-secondary" data-open="${month.id}" ${
-          isOpenable ? "" : "disabled"
-        }>Open</button>
-          <a class="btn view" href="capsule.html?m=${month.id}" ${
-          isOpenable ? "" : 'tabindex="-1" aria-disabled="true"'
-        }>View</a>
-        </div>
-      `;
+          <div class="month-title">${title}</div>
+          <div class="pill">${
+            status === "Unlocked"
+              ? iconFor(CURRENT_SETTINGS.statusIcons.unlocked)
+              : status === "Ready"
+              ? iconFor(CURRENT_SETTINGS.statusIcons.ready)
+              : iconFor(CURRENT_SETTINGS.statusIcons.locked)
+          } ${statusTextFor(status)}</div>
+          <div class="month-actions">
+            <button class="btn btn-secondary" data-open="${month.id}" ${
+              isOpenable ? "" : "disabled"
+            }>Open</button>
+            <a class="btn view" href="capsule.html?m=${month.id}" ${
+              isOpenable ? "" : 'tabindex="-1" aria-disabled="true"'
+            }>View</a>
+          </div>
+        `;
         monthsGrid.appendChild(card);
-      }
-    );
+      });
+    };
+
+    const attachOpenHandlers = () => {
+      $$("button[data-open]").forEach((b) => {
+        const id = Number(b.getAttribute("data-open"));
+        const state = monthStates.find((m) => m.month.id === id);
+        b.addEventListener("click", () => {
+          if (!state || !state.isOpenable) return;
+          unlocked.add(id);
+          saveUnlocked(unlocked);
+          confettiBurst();
+          softBeep();
+          window.location.href = `capsule.html?m=${id}&auto=open`;
+        });
+      });
+    };
+
+    let showAllMonths = false;
+    const toggleAllMonths = $("#toggleAllMonths");
+    const updateAllMonthsToggle = () => {
+      if (!toggleAllMonths) return;
+      toggleAllMonths.setAttribute("aria-pressed", String(showAllMonths));
+      toggleAllMonths.textContent = showAllMonths
+        ? "Hide locked months"
+        : "View all months";
+      monthsGrid.classList.toggle("show-locked", showAllMonths);
+    };
+    if (toggleAllMonths) {
+      toggleAllMonths.addEventListener("click", () => {
+        showAllMonths = !showAllMonths;
+        updateAllMonthsToggle();
+      });
+    }
+    renderMonthsGrid();
+    attachOpenHandlers();
+    updateAllMonthsToggle();
 
     renderProgressMarkers(monthStates, data);
 
@@ -1457,17 +1489,100 @@
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    $$("button[data-open]").forEach((b) => {
-      const id = Number(b.getAttribute("data-open"));
-      const state = monthStates.find((m) => m.month.id === id);
-      b.addEventListener("click", () => {
-        if (!state || !state.isOpenable) return;
-        unlocked.add(id);
-        saveUnlocked(unlocked);
-        confettiBurst();
-        softBeep();
-        window.location.href = `capsule.html?m=${id}&auto=open`;
+    const toggleUnlockedSongs = $("#toggleUnlockedSongs");
+    const songsModal = $("#unlockedSongsModal");
+    const songsTimeline = $("#unlockedSongsTimeline");
+    const songsClose = songsModal?.querySelector(".unlocked-songs-modal__close");
+    const songsBackdrop = songsModal?.querySelector(
+      ".unlocked-songs-modal__backdrop"
+    );
+    const songsDialog = songsModal?.querySelector(
+      ".unlocked-songs-modal__dialog"
+    );
+
+    const renderUnlockedSongs = async () => {
+      if (!songsTimeline) return;
+      const entries = data.months
+        .filter((month) => unlocked.has(month.id))
+        .flatMap((month) =>
+          (month.songsAdded || [])
+            .filter(Boolean)
+            .map((url) => ({
+              url,
+              monthLabel: displayTitleForMonth(month, data),
+            }))
+        );
+
+      if (!entries.length) {
+        songsTimeline.innerHTML =
+          '<div class="patch-empty">No unlocked songs yet.</div>';
+        return;
+      }
+
+      const titled = await Promise.all(
+        entries.map(async (entry) => ({
+          ...entry,
+          title: (await fetchSongTitle(entry.url)) || "Spotify track",
+        }))
+      );
+
+      songsTimeline.innerHTML = titled
+        .map(
+          (item) => `
+            <div class="patch-item unlocked-song-item">
+              <div class="patch-item__marker" aria-hidden="true"></div>
+              <div>
+                <div class="patch-item__meta">
+                  <span class="patch-item__version">${escapeHTML(
+                    item.monthLabel
+                  )}</span>
+                  <span>Spotify track</span>
+                </div>
+                <div class="patch-item__title">${escapeHTML(item.title)}</div>
+                <a
+                  class="btn btn-secondary unlocked-songs-play"
+                  href="${escapeHTML(item.url)}"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Play
+                </a>
+              </div>
+            </div>
+          `
+        )
+        .join("");
+    };
+
+    const closeSongsModal = () => {
+      if (!songsModal) return;
+      songsModal.classList.remove("is-visible");
+      songsModal.setAttribute("aria-hidden", "true");
+    };
+
+    const openSongsModal = async () => {
+      if (!songsModal) return;
+      await renderUnlockedSongs();
+      songsModal.classList.add("is-visible");
+      songsModal.setAttribute("aria-hidden", "false");
+      if (songsDialog && typeof songsDialog.focus === "function") {
+        songsDialog.focus({ preventScroll: true });
+      }
+    };
+
+    if (toggleUnlockedSongs) {
+      toggleUnlockedSongs.addEventListener("click", (e) => {
+        e.preventDefault();
+        openSongsModal();
       });
+    }
+
+    [songsClose, songsBackdrop].forEach(
+      (el) => el && el.addEventListener("click", closeSongsModal)
+    );
+
+    songsModal?.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeSongsModal();
     });
   }
 
