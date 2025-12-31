@@ -7,6 +7,15 @@
   --accent-2: #c4b5fd;
   --ring-track: #2a2f3f;
   --ring-fill: #a78bfa;
+  --bg-color: #151f28;
+  --main-color: #8b5cf6;
+  --text-color: #333;
+  --second-text-color: #555;
+  --white-color: #fff;
+  --cover-color: linear-gradient(45deg, #351879, #c4b5fd);
+  --pages-color: linear-gradient(90deg, #fff, #ddd);
+  --border: 0.125rem solid #8b5cf6;
+  --box-shadow: 0 0 0.8rem rgba(0, 0, 0, 0.2);
 }
 * {
   box-sizing: border-box;
@@ -961,7 +970,7 @@ header a {
 .yearbook-modal__dialog {
   position: relative;
   width: min(1200px, 96vw);
-  height: min(820px, 94vh);
+  height: min(920px, 94vh);
   padding: clamp(16px, 3vw, 32px);
   background: radial-gradient(circle at top, #1b2233, #0a0c12 65%);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -985,15 +994,6 @@ header a {
   font-size: 20px;
 }
 .yearbook-book-wrapper {
-  --bg-color: #151f28;
-  --main-color: #00abf0;
-  --text-color: #333;
-  --second-text-color: #555;
-  --white-color: #fff;
-  --cover-color: linear-gradient(45deg, #00abf0, #006e9a);
-  --pages-color: linear-gradient(90deg, #fff, #ddd);
-  --border: 0.125rem solid #00abf0;
-  --box-shadow: 0 0 0.8rem rgba(0, 0, 0, 0.2);
   width: 100%;
   height: 100%;
   display: flex;
@@ -1012,10 +1012,11 @@ header a {
   border: none;
   outline: none;
 }
+
 .yearbook-book-wrapper .wrapper {
   position: relative;
   width: min(66rem, 100%);
-  height: min(45rem, 100%);
+  height: min(55rem, 100%);
   padding: 2rem;
   perspective: 250rem;
   animation: yearbook-show-animate 2s forwards;
@@ -1037,8 +1038,7 @@ header a {
   left: 0;
   width: 50%;
   height: 100%;
-  background-color: var(--cover-color);
-  background-color: #029bca;
+  background: var(--cover-color);
   box-shadow: var(--box-shadow);
   border-top-left-radius: 0.6rem;
   border-bottom-left-radius: 0.6rem;
@@ -1050,6 +1050,12 @@ header a {
 .yearbook-book-wrapper .cover.cover-right {
   z-index: 100;
   transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+  background-color: var(--pages-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  cursor: pointer;
 }
 .yearbook-book-wrapper .cover.cover-right.turn {
   transform: rotateY(180deg);
@@ -1167,6 +1173,7 @@ header a {
   height: 100%;
   background: var(--pages-color);
   padding: 1.5rem 2rem;
+  overflow: auto;
 }
 .yearbook-book-wrapper .book-page .page-front {
   transform: rotateY(0deg) translateZ(1px);
@@ -1207,6 +1214,10 @@ header a {
 .yearbook-book-wrapper .workeduc-content p {
   font-size: 1.15rem;
   text-align: justify;
+}
+
+.yearbook-book-wrapper .workeduc-content .yearbook-letter {
+  white-space: pre-line;
 }
 .yearbook-book-wrapper .workeduc-content .year i {
   margin-right: 0.4rem;

@@ -1663,6 +1663,289 @@
     timers: [],
   };
 
+  const YEARBOOK_MONTHS = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  function normalizeYearbookList(value) {
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item).trim()).filter(Boolean);
+    }
+    if (typeof value === "string") {
+      return value
+        .split(/\n|,/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+    return [];
+  }
+
+  function listSummary(list, fallback) {
+    if (!list.length) return fallback;
+    return list.join(" • ");
+  }
+
+  function formatYearbookDate(unlockDate, monthIndex) {
+    const date = unlockDate ? parseISO(unlockDate) : null;
+    const safeDate =
+      date && !Number.isNaN(date.getTime())
+        ? date
+        : new Date(now().getFullYear(), monthIndex, 1);
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(safeDate);
+  }
+
+  function createYearbookContentBlock({ label, icon, heading, body, list }) {
+    const content = document.createElement("div");
+    content.className = "workeduc-content";
+
+    const span = document.createElement("span");
+    span.className = "year";
+    const iconEl = document.createElement("i");
+    iconEl.className = `bx ${icon}`;
+    span.append(iconEl, document.createTextNode(` ${label}`));
+    content.append(span);
+
+    if (heading) {
+      const h3 = document.createElement("h3");
+      h3.textContent = heading;
+      content.append(h3);
+    }
+
+    if (body || list) {
+      const p = document.createElement("p");
+      if (list) {
+        p.textContent = list;
+      } else {
+        p.textContent = body;
+      }
+      content.append(p);
+    }
+
+    return content;
+  }
+
+  function createYearbookLetterBlock(letter) {
+    const content = document.createElement("div");
+    content.className = "workeduc-content";
+    const span = document.createElement("span");
+    span.className = "year";
+    const iconEl = document.createElement("i");
+    iconEl.className = "bx bxs-envelope";
+    span.append(iconEl, document.createTextNode(" Monthly Letter"));
+    content.append(span);
+
+    const p = document.createElement("p");
+    p.className = "yearbook-letter";
+    p.textContent = letter;
+    content.append(p);
+    return content;
+  }
+
+  function createYearbookMainEntry(month, index) {
+    const monthName = YEARBOOK_MONTHS[index] || `Month ${index + 1}`;
+    const title = month?.title || `${monthName} Highlights`;
+    const letter = month?.letter || "Add your monthly letter here.";
+    const highlightsList = normalizeYearbookList(month?.highlights);
+    const memoriesList = normalizeYearbookList(month?.memories);
+    const placesList = normalizeYearbookList(month?.placesVisited);
+    const photosList = normalizeYearbookList(month?.photos);
+
+    const highlightSummary = listSummary(
+      highlightsList.length ? highlightsList : placesList,
+      month?.surprise || "Add highlights from the month."
+    );
+
+    const memoriesSummary = listSummary(
+      memoriesList.length ? memoriesList : photosList,
+      "Capture favorite photos and notes."
+    );
+
+    const box = document.createElement("div");
+    box.className = "workeduc-box";
+    box.append(
+      createYearbookLetterBlock(letter),
+      createYearbookContentBlock({
+        label: "Title",
+        icon: "bxs-bookmark",
+        heading: title,
+        body: "",
+      }),
+      createYearbookContentBlock({
+        label: "Highlights",
+        icon: "bxs-star",
+        list: highlightSummary,
+      }),
+      createYearbookContentBlock({
+        label: "Memories",
+        icon: "bxs-photo-album",
+        list: memoriesSummary,
+      })
+    );
+
+    return box;
+  }
+
+  function renderYearbookBook(modal, data) {
+    if (!modal) return;
+    const book = modal.querySelector(".yearbook-book");
+    if (!book) return;
+
+    book.querySelectorAll(".book-page.page-right").forEach((page) =>
+      page.remove()
+    );
+
+    const leftPage = book.querySelector(".book-page.page-left");
+    if (leftPage) {
+      leftPage.innerHTML = "";
+    }
+
+    const wrapper = modal.querySelector(".yearbook-book-wrapper");
+    if (wrapper) delete wrapper.dataset.bookInitialized;
+
+    const months = Array.isArray(data?.months) ? data.months.slice(0, 12) : [];
+    const fragment = document.createDocumentFragment();
+
+    const firstMonth = months[0];
+    if (leftPage && firstMonth) {
+      const leftTitle = document.createElement("h1");
+      leftTitle.className = "title";
+      leftTitle.textContent = `Month 1 — ${YEARBOOK_MONTHS[0] || "January"}`;
+      leftPage.append(leftTitle, createYearbookMainEntry(firstMonth, 0));
+
+      const leftNumber = document.createElement("span");
+      leftNumber.className = "number-page";
+      leftNumber.textContent = "1";
+      leftPage.append(leftNumber);
+    }
+
+    months.forEach((month, index) => {
+      const monthName = YEARBOOK_MONTHS[index] || `Month ${index + 1}`;
+      const pageId = `turn-${index + 1}`;
+      const pageNumberFront = index * 2 + 2;
+      const pageNumberBack = pageNumberFront + 1;
+      const soundtrackList = normalizeYearbookList(month?.songsAdded);
+      const supportingList = normalizeYearbookList(month?.supportingMoments);
+      const placesList = normalizeYearbookList(month?.placesVisited);
+
+      const soundtrackSummary = listSummary(
+        soundtrackList,
+        "Add the songs that defined the month."
+      );
+
+      const supportingSummary = listSummary(
+        supportingList.length ? supportingList : placesList,
+        "List the moments that supported you."
+      );
+
+      const page = document.createElement("div");
+      page.className = "book-page page-right turn";
+      page.id = pageId;
+
+      const front = document.createElement("div");
+      front.className = "page-front";
+      const frontTitle = document.createElement("h1");
+      frontTitle.className = "title";
+      frontTitle.textContent = `${monthName} Details & Reflections`;
+      front.append(frontTitle);
+
+      const frontBox = document.createElement("div");
+      frontBox.className = "workeduc-box";
+      frontBox.append(
+        createYearbookContentBlock({
+          label: "Date Info",
+          icon: "bxs-calendar",
+          body: formatYearbookDate(month?.unlockDate, index),
+        }),
+        createYearbookContentBlock({
+          label: "Soundtrack",
+          icon: "bxs-music",
+          list: soundtrackSummary,
+        }),
+        createYearbookContentBlock({
+          label: "Supporting Moments",
+          icon: "bxs-heart",
+          list: supportingSummary,
+        })
+      );
+      front.append(frontBox);
+
+      const frontNumber = document.createElement("span");
+      frontNumber.className = "number-page";
+      frontNumber.textContent = String(pageNumberFront);
+      front.append(frontNumber);
+
+      const frontNav = document.createElement("span");
+      frontNav.className = "nextprev-btn";
+      frontNav.dataset.page = pageId;
+      const frontIcon = document.createElement("i");
+      frontIcon.className = "bx bx-chevron-right";
+      frontNav.append(frontIcon);
+      front.append(frontNav);
+
+      const back = document.createElement("div");
+      back.className = "page-back";
+      const backTitle = document.createElement("h1");
+      backTitle.className = "title";
+      const nextMonthIndex = index + 1;
+      if (nextMonthIndex < months.length) {
+        const nextMonthName =
+          YEARBOOK_MONTHS[nextMonthIndex] || `Month ${nextMonthIndex + 1}`;
+        backTitle.textContent = `Month ${nextMonthIndex + 1} — ${nextMonthName}`;
+      } else {
+        backTitle.textContent = "Year Wrap-Up";
+      }
+      back.append(backTitle);
+
+      if (nextMonthIndex < months.length) {
+        back.append(createYearbookMainEntry(months[nextMonthIndex], nextMonthIndex));
+      } else {
+        const wrapBox = document.createElement("div");
+        wrapBox.className = "workeduc-box";
+        wrapBox.append(
+          createYearbookContentBlock({
+            label: "Thank You",
+            icon: "bxs-heart",
+            body: "A full year of memories captured. Here's to more.",
+          })
+        );
+        back.append(wrapBox);
+      }
+
+      const backNumber = document.createElement("span");
+      backNumber.className = "number-page";
+      backNumber.textContent = String(pageNumberBack);
+      back.append(backNumber);
+
+      const backNav = document.createElement("span");
+      backNav.className = "nextprev-btn back";
+      backNav.dataset.page = pageId;
+      const backIcon = document.createElement("i");
+      backIcon.className = "bx bx-chevron-left";
+      backNav.append(backIcon);
+      back.append(backNav);
+
+      page.append(front, back);
+      fragment.append(page);
+    });
+
+    book.append(fragment);
+  }
+
   function clearYearbookTimers() {
     yearbookState.timers.forEach((timer) => window.clearTimeout(timer));
     yearbookState.timers = [];
@@ -1709,33 +1992,35 @@
       page.classList.add("turn");
       page.style.zIndex = "";
     });
+  }
 
-    scheduleYearbookTimer(() => {
-      if (state.coverRight) state.coverRight.classList.add("turn");
-    }, 2100);
-
+  function openYearbookCover(state) {
+    if (!state || !state.totalPages || state.coverRight?.classList.contains("turn")) {
+      return;
+    }
+    clearYearbookTimers();
+    state.coverRight.classList.add("turn");
     scheduleYearbookTimer(() => {
       if (state.coverRight) state.coverRight.style.zIndex = "-1";
-    }, 2800);
-
-    state.pages.forEach((_, index) => {
+    }, 600);
+    const firstPage = state.pages[0];
+    if (firstPage) {
+      firstPage.classList.remove("turn");
       scheduleYearbookTimer(() => {
-        reverseBookIndex(state);
-        const page = state.pages[state.pageNumber];
-        if (!page) return;
-        page.classList.remove("turn");
-        scheduleYearbookTimer(() => {
-          reverseBookIndex(state);
-          const targetPage = state.pages[state.pageNumber];
-          if (targetPage) targetPage.style.zIndex = String(10 + index);
-        }, 500);
-      }, (index + 1) * 200 + 2100);
-    });
+        firstPage.style.zIndex = "10";
+      }, 500);
+    }
   }
 
   function setupYearbookBookInteractions(state) {
     if (!state || state.wrapper.dataset.bookInitialized === "true") return;
     state.wrapper.dataset.bookInitialized = "true";
+
+    if (state.coverRight) {
+      state.coverRight.addEventListener("click", () => {
+        openYearbookCover(state);
+      });
+    }
 
     const pageTurnBtns = state.wrapper.querySelectorAll(".nextprev-btn");
     pageTurnBtns.forEach((el, index) => {
@@ -1821,8 +2106,6 @@
     });
 
     yearbookState.modal = modal;
-    yearbookState.book = buildYearbookBookState(modal);
-    setupYearbookBookInteractions(yearbookState.book);
 
     return modal;
   }
@@ -1830,6 +2113,9 @@
   function showYearbook(data) {
     const modal = ensureYearbookModal(data);
     if (!modal) return;
+    renderYearbookBook(modal, data);
+    yearbookState.book = buildYearbookBookState(modal);
+    setupYearbookBookInteractions(yearbookState.book);
     resetYearbookBook(yearbookState.book);
 
     modal.classList.add("is-visible");
