@@ -2041,7 +2041,11 @@
           createYearbookContentBlock({
             label: "Thank You",
             icon: "bxs-heart",
-            body: "A full year of memories captured. Here's to more.",
+            body: `It’s the last day of the year, and honestly, I’m still here still choosing us, still fighting for this love, kahit hindi laging madali. This year wasn’t perfect. Madalas tayo mag-away, madalas tayong sabaw, may times na hindi ko rin alam kung tama ba yung ginagawa ko. Pero kahit ganun, I still stayed. I still chose you. Always.
+
+Every month with you taught me something about patience, about understanding, about how even on days na magulo ang lahat, having you around makes things lighter. Hindi naman araw-araw okay, pero it’s good enough, and it’s still us trying, figuring things out month by month.
+
+As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow, and the days after, bring something better for us more calm days, more laughs, more moments na tahimik lang pero safe. I don’t have everything figured out, but one thing’s clear: I still want to be here with you as we step into the new year, together.`,
           })
         );
         back.append(wrapBox);

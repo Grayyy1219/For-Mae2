@@ -12,7 +12,7 @@
   --text-color: #333;
   --second-text-color: #555;
   --white-color: #fff;
-  --cover-color: linear-gradient(45deg, #351879, #c4b5fd);
+  --cover-color: linear-gradient(135deg, #120a24 0%, #1e1336 55%, #2b1a4a 100%);
   --pages-color: linear-gradient(90deg, #fff, #ddd);
   --border: 0.125rem solid #8b5cf6;
   --box-shadow: 0 0 0.8rem rgba(0, 0, 0, 0.2);
@@ -1026,7 +1026,7 @@ header a {
   z-index: 100;
   transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
-  background-color: var(--pages-color);
+  background: var(--cover-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1063,6 +1063,44 @@ header a {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+.yearbook-book-wrapper .yearbook-cover {
+  gap: 0.75rem;
+  text-align: center;
+  color: #f4ecff;
+}
+.yearbook-book-wrapper .yearbook-cover .cover-eyebrow {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.35rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+.yearbook-book-wrapper .yearbook-cover h1 {
+  font-size: 2.6rem;
+  line-height: 1.1;
+  margin: 0;
+}
+.yearbook-book-wrapper .yearbook-cover p {
+  max-width: 20rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+.yearbook-book-wrapper .yearbook-cover .cover-action {
+  margin-top: 0.75rem;
+}
+.yearbook-book-wrapper .yearbook-cover .btn.cover-btn {
+  background: #9d7bff;
+  border-color: transparent;
+  color: #1d0f35;
+  border-radius: 999px;
+  padding: 0 1.8rem;
+  height: 2.6rem;
+  font-weight: 600;
+}
+.yearbook-book-wrapper .yearbook-cover .btn.cover-btn:hover {
+  background: #b59bff;
+  color: #1a0f2c;
 }
 .yearbook-book-wrapper .profile-page img {
   max-width: 180px;
@@ -1217,6 +1255,7 @@ header a {
 .yearbook-book-wrapper .workeduc-content p {
   font-size: 1.15rem;
   text-align: justify;
+  white-space: pre-line;
 }
 .yearbook-book-wrapper .workeduc-content .yearbook-spotify-embed {
   display: block;
