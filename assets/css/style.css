@@ -1037,6 +1037,10 @@ header a {
   transform: rotateY(180deg);
   pointer-events: none;
 }
+.yearbook-book-wrapper .cover.cover-right.turn .yearbook-cover {
+  opacity: 0;
+  visibility: hidden;
+}
 .yearbook-book-wrapper .book {
   position: relative;
   width: 100%;
