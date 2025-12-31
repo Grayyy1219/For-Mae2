@@ -1215,6 +1215,12 @@ header a {
   font-size: 1.15rem;
   text-align: justify;
 }
+.yearbook-book-wrapper .workeduc-content .yearbook-spotify-embed {
+  display: block;
+  margin-top: 0.4rem;
+  border: 0;
+  border-radius: 12px;
+}
 
 .yearbook-book-wrapper .workeduc-content .yearbook-letter {
   white-space: pre-line;

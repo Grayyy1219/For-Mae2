@@ -1739,6 +1739,50 @@
     return content;
   }
 
+  function getSpotifyTrackId(url) {
+    if (!url) return null;
+    const match = String(url).match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
+    return match ? match[1] : null;
+  }
+
+  function createYearbookSoundtrackBlock(soundtrackList) {
+    const content = document.createElement("div");
+    content.className = "workeduc-content";
+
+    const span = document.createElement("span");
+    span.className = "year";
+    const iconEl = document.createElement("i");
+    iconEl.className = "bx bxs-music";
+    span.append(iconEl, document.createTextNode(" Soundtrack"));
+    content.append(span);
+
+    const trackId = soundtrackList
+      .map((track) => getSpotifyTrackId(track))
+      .find(Boolean);
+
+    if (trackId) {
+      const iframe = document.createElement("iframe");
+      iframe.className = "yearbook-spotify-embed";
+      iframe.src = `https://open.spotify.com/embed/track/${trackId}`;
+      iframe.width = "100%";
+      iframe.height = "152";
+      iframe.loading = "lazy";
+      iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+      iframe.title = "Spotify track";
+      content.append(iframe);
+    } else {
+      const summary = listSummary(
+        soundtrackList,
+        "Add the songs that defined the month."
+      );
+      const p = document.createElement("p");
+      p.textContent = summary;
+      content.append(p);
+    }
+
+    return content;
+  }
+
   function createYearbookLetterBlock(letter) {
     const content = document.createElement("div");
     content.className = "workeduc-content";
@@ -1842,11 +1886,6 @@
       const supportingList = normalizeYearbookList(month?.supportingMoments);
       const placesList = normalizeYearbookList(month?.placesVisited);
 
-      const soundtrackSummary = listSummary(
-        soundtrackList,
-        "Add the songs that defined the month."
-      );
-
       const supportingSummary = listSummary(
         supportingList.length ? supportingList : placesList,
         "List the moments that supported you."
@@ -1871,11 +1910,7 @@
           icon: "bxs-calendar",
           body: formatYearbookDate(month?.unlockDate, index),
         }),
-        createYearbookContentBlock({
-          label: "Soundtrack",
-          icon: "bxs-music",
-          list: soundtrackSummary,
-        }),
+        createYearbookSoundtrackBlock(soundtrackList),
         createYearbookContentBlock({
           label: "Supporting Moments",
           icon: "bxs-heart",
