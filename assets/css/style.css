@@ -1073,7 +1073,7 @@ header a {
   height: 100%;
   background: var(--pages-color);
   box-shadow: 0 0 0.6rem rgba(0, 0, 0, 0.1);
-  display: flex;
+  /* display: flex; */
   padding: 2rem;
 }
 .yearbook-book-wrapper .book-page.page-left {
