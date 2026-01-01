@@ -1815,19 +1815,29 @@
   }
 
   function collectYearbookMediaSources(data) {
-    const months = Array.isArray(data?.months) ? data.months : [];
+    const months = Array.isArray(data?.months) ? data.months.slice() : [];
+    months.sort((a, b) => {
+      const aId = Number(a?.id);
+      const bId = Number(b?.id);
+      if (Number.isNaN(aId) && Number.isNaN(bId)) return 0;
+      if (Number.isNaN(aId)) return 1;
+      if (Number.isNaN(bId)) return -1;
+      return aId - bId;
+    });
     const sources = [];
     months.forEach((month) => {
       const photos = normalizeYearbookList(month?.photos);
       const memories = normalizeYearbookList(month?.memories);
-      photos.forEach((src) => sources.push(src));
-      memories.forEach((src) => sources.push(src));
+      [...photos, ...memories].forEach((src) => {
+        const normalized = normalizeMediaSrc(src);
+        if (normalized) sources.push(normalized);
+      });
     });
-    return sources.filter(Boolean);
+    return sources;
   }
 
   function getYearbookLoaderSources(data) {
-    return collectMediaSources(data).slice(0, 12);
+    return collectYearbookMediaSources(data);
   }
 
   function stopYearbookLoaderOrbit({ reset = false } = {}) {
@@ -1903,18 +1913,21 @@
     }, fadeEnd);
   }
 
-  function pickRandomOrbitSource(current) {
+  function pickNextOrbitSource(current) {
     if (!yearbookLoaderState.sources.length) return current || "";
     if (yearbookLoaderState.sources.length === 1)
       return yearbookLoaderState.sources[0];
-    let next = current;
-    let tries = 0;
-    while (next === current && tries < 6) {
+    let next =
+      yearbookLoaderState.sources[
+        yearbookLoaderState.index % yearbookLoaderState.sources.length
+      ];
+    yearbookLoaderState.index += 1;
+    if (next === current) {
       next =
         yearbookLoaderState.sources[
-          Math.floor(Math.random() * yearbookLoaderState.sources.length)
+          yearbookLoaderState.index % yearbookLoaderState.sources.length
         ];
-      tries += 1;
+      yearbookLoaderState.index += 1;
     }
     return next;
   }
@@ -1937,7 +1950,7 @@
       available[yearbookLoaderState.itemIndex % available.length];
     yearbookLoaderState.itemIndex += 1;
     const current = item.dataset.current || "";
-    const source = pickRandomOrbitSource(current);
+    const source = pickNextOrbitSource(current);
     animateOrbitItem(item, source);
     scheduleYearbookLoaderOrbit(modal);
   }
@@ -1958,11 +1971,8 @@
     yearbookLoaderState.itemIndex = 0;
 
     const displayCount = Math.min(12, sources.length);
-    const shuffledSources = sources
-      .slice()
-      .sort(() => Math.random() - 0.5)
-      .slice(0, displayCount);
-    shuffledSources.forEach((source, index) => {
+    const displaySources = sources.slice(0, displayCount);
+    displaySources.forEach((source) => {
       const item = document.createElement("span");
       item.className = "yearbook-loader__orbit-item";
       item.dataset.busy = "false";

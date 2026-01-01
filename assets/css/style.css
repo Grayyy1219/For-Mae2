@@ -1004,8 +1004,7 @@ header a {
 }
 .yearbook-loader__orbit-item {
   position: absolute;
-  width: clamp(54px, 7vw, 88px);
-  height: clamp(54px, 7vw, 88px);
+  width: clamp(54px, 7vw, 200px);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 14px 28px rgba(6, 8, 15, 0.45),
