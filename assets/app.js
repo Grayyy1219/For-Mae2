@@ -1872,11 +1872,11 @@
     if (!item) return;
     item.dataset.busy = "true";
     const angle = Math.random() * Math.PI * 2;
-    const radius = 420 + Math.random() * 160;
+    const radius = 320 + Math.random() * 160;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
     const moveDuration = 10 + Math.random() * 4;
-    const fadeDuration = 2.6 + Math.random() * 1.4;
+    const fadeDuration = 3.6 + Math.random() * 1.4;
     item.style.setProperty("--x", `${x.toFixed(1)}px`);
     item.style.setProperty("--y", `${y.toFixed(1)}px`);
     item.style.setProperty("--move-duration", `${moveDuration}s`);
