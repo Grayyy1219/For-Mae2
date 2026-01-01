@@ -938,6 +938,15 @@ header a {
   opacity: 1;
   pointer-events: auto;
 }
+.yearbook-modal.is-loading .yearbook-book-wrapper {
+  opacity: 0.18;
+  filter: blur(3px);
+  pointer-events: none;
+}
+.yearbook-modal.is-loading .yearbook-loader {
+  opacity: 1;
+  pointer-events: auto;
+}
 .yearbook-modal__backdrop {
   position: absolute;
   inset: 0;
@@ -954,6 +963,40 @@ header a {
   display: grid;
   place-items: center;
   box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+}
+.yearbook-loader {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  text-align: center;
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(167, 139, 250, 0.16),
+      transparent
+    ),
+    radial-gradient(circle at 80% 0%, rgba(244, 114, 182, 0.16), transparent),
+    linear-gradient(180deg, rgba(10, 12, 20, 0.92), rgba(6, 8, 13, 0.96));
+  color: #e9ecff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+  border-radius: 24px;
+  z-index: 3;
+}
+.yearbook-loader__spinner {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: var(--accent, #a78bfa);
+  animation: media-spinner 900ms linear infinite;
+  box-shadow: 0 0 0 12px rgba(167, 139, 250, 0.1);
+}
+.yearbook-loader__text {
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 .yearbook-modal__close {
   position: absolute;

@@ -2405,9 +2405,19 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     }
   }
 
+  function setYearbookLoading(modal, isLoading) {
+    if (!modal) return;
+    modal.classList.toggle("is-loading", isLoading);
+    const dialog = modal.querySelector(".yearbook-modal__dialog");
+    if (dialog) {
+      dialog.setAttribute("aria-busy", isLoading ? "true" : "false");
+    }
+  }
+
   function hideYearbook(modal) {
     if (!modal) return;
     clearYearbookTimers();
+    setYearbookLoading(modal, false);
     modal.classList.remove("is-visible");
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("yearbook-open");
@@ -2440,25 +2450,29 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
   async function showYearbook(data) {
     const modal = ensureYearbookModal(data);
     if (!modal) return;
-    await preloadYearbookAssets(data);
-    renderYearbookBook(modal, data);
-    const months = Array.isArray(data?.months) ? data.months.slice(0, 12) : [];
-    yearbookState.spotify = buildYearbookSpotifyState(months);
-    window.__initYearbookSpotify = (IFrameAPI) => {
-      initYearbookSpotifyEmbeds(modal, IFrameAPI);
-    };
-    if (window.__SpotifyIFrameAPI) {
-      window.__initYearbookSpotify(window.__SpotifyIFrameAPI);
-    }
-    yearbookState.book = buildYearbookBookState(modal);
-    setupYearbookBookInteractions(yearbookState.book);
-    resetYearbookBook(yearbookState.book);
-
     modal.classList.add("is-visible");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("yearbook-open");
+    setYearbookLoading(modal, true);
     modal.focus({ preventScroll: true });
-    enableYearbookAmbient();
+    try {
+      await preloadYearbookAssets(data);
+      renderYearbookBook(modal, data);
+      const months = Array.isArray(data?.months) ? data.months.slice(0, 12) : [];
+      yearbookState.spotify = buildYearbookSpotifyState(months);
+      window.__initYearbookSpotify = (IFrameAPI) => {
+        initYearbookSpotifyEmbeds(modal, IFrameAPI);
+      };
+      if (window.__SpotifyIFrameAPI) {
+        window.__initYearbookSpotify(window.__SpotifyIFrameAPI);
+      }
+      yearbookState.book = buildYearbookBookState(modal);
+      setupYearbookBookInteractions(yearbookState.book);
+      resetYearbookBook(yearbookState.book);
+      enableYearbookAmbient();
+    } finally {
+      setYearbookLoading(modal, false);
+    }
   }
 
   function renderHome(data) {
