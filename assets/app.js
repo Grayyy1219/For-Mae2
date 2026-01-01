@@ -1893,10 +1893,13 @@
       item.classList.add("is-fading");
     }, fadeStart);
     window.setTimeout(() => {
+      item.style.transition = "none";
       item.classList.remove("is-moving", "is-fading");
       item.dataset.busy = "false";
       item.style.setProperty("--x", "0px");
       item.style.setProperty("--y", "0px");
+      void item.offsetWidth;
+      item.style.transition = "";
     }, fadeEnd);
   }
 
