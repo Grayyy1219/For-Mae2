@@ -1948,8 +1948,7 @@
       return;
     }
 
-    const item =
-      available[yearbookLoaderState.itemIndex % available.length];
+    const item = available[yearbookLoaderState.itemIndex % available.length];
     yearbookLoaderState.itemIndex += 1;
     const current = item.dataset.current || "";
     const source = pickNextOrbitSource(current);
@@ -2028,7 +2027,9 @@
 
   function getSpotifyTrackId(url) {
     if (!url) return null;
-    const match = String(url).match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
+    const match = String(url).match(
+      /open\.spotify\.com\/track\/([a-zA-Z0-9]+)/
+    );
     return match ? match[1] : null;
   }
 
@@ -2038,7 +2039,11 @@
       .find(Boolean);
   }
 
-  function createYearbookSoundtrackBlock({ soundtrackList, trackId, monthIndex }) {
+  function createYearbookSoundtrackBlock({
+    soundtrackList,
+    trackId,
+    monthIndex,
+  }) {
     const content = document.createElement("div");
     content.className = "workeduc-content";
 
@@ -2137,9 +2142,9 @@
     const book = modal.querySelector(".yearbook-book");
     if (!book) return;
 
-    book.querySelectorAll(".book-page.page-right").forEach((page) =>
-      page.remove()
-    );
+    book
+      .querySelectorAll(".book-page.page-right")
+      .forEach((page) => page.remove());
 
     const leftPage = book.querySelector(".book-page.page-left");
     if (leftPage) {
@@ -2237,14 +2242,18 @@
       if (nextMonthIndex < months.length) {
         const nextMonthName =
           YEARBOOK_MONTHS[nextMonthIndex] || `Month ${nextMonthIndex + 1}`;
-        backTitle.textContent = `Month ${nextMonthIndex + 1} — ${nextMonthName}`;
+        backTitle.textContent = `Month ${
+          nextMonthIndex + 1
+        } — ${nextMonthName}`;
       } else {
         backTitle.textContent = "Year Wrap-Up";
       }
       back.append(backTitle);
 
       if (nextMonthIndex < months.length) {
-        back.append(createYearbookMainEntry(months[nextMonthIndex], nextMonthIndex));
+        back.append(
+          createYearbookMainEntry(months[nextMonthIndex], nextMonthIndex)
+        );
       } else {
         const wrapBox = document.createElement("div");
         wrapBox.className = "workeduc-box";
@@ -2294,7 +2303,8 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
   }
 
   function initYearbookSpotifyEmbeds(modal, IFrameAPI) {
-    if (!modal || !IFrameAPI?.createController || !yearbookState.spotify) return;
+    if (!modal || !IFrameAPI?.createController || !yearbookState.spotify)
+      return;
     const mounts = modal.querySelectorAll(
       ".yearbook-spotify-embed[data-spotify-track]"
     );
@@ -2384,7 +2394,6 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     }
   }
 
-  
   function updateAmbientSource(audio, src) {
     if (!audio || !src) return;
     const currentSrc = audio.currentSrc || audio.src;
@@ -2402,13 +2411,12 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     yearbookState.ambient = {
       wasPlaying: !audio.paused,
       toggleChecked: toggle ? toggle.checked : null,
-     wasActive: container ? container.classList.contains("is-active") : null,
+      wasActive: container ? container.classList.contains("is-active") : null,
       src: audio.currentSrc || audio.src,
     };
     updateAmbientSource(audio, AMBIENT_YEARBOOK_SRC);
     setYearbookAmbientEnabled(true);
   }
-
 
   function restoreYearbookAmbient() {
     const previous = yearbookState.ambient;
@@ -2425,7 +2433,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
       container.classList.toggle("is-active", previous.wasActive);
     }
 
-        updateAmbientSource(audio, previous.src || AMBIENT_IDLE_SRC);
+    updateAmbientSource(audio, previous.src || AMBIENT_IDLE_SRC);
     if (previous.wasPlaying) {
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.catch === "function") {
@@ -2443,6 +2451,13 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     yearbookState.timers.push(timer);
   }
 
+  function waitForMinimumDuration(startMs, minimumMs) {
+    const elapsed = Date.now() - startMs;
+    if (elapsed >= minimumMs) return Promise.resolve();
+    return new Promise((resolve) => {
+      window.setTimeout(resolve, minimumMs - elapsed);
+    });
+  }
   function buildYearbookBookState(modal) {
     const wrapper = modal.querySelector(".yearbook-book-wrapper");
     if (!wrapper) return null;
@@ -2495,7 +2510,11 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
   }
 
   function openYearbookCover(state) {
-    if (!state || !state.totalPages || state.coverRight?.classList.contains("turn")) {
+    if (
+      !state ||
+      !state.totalPages ||
+      state.coverRight?.classList.contains("turn")
+    ) {
       return;
     }
     clearYearbookTimers();
@@ -2653,11 +2672,12 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
   async function showYearbook(data) {
     const modal = ensureYearbookModal(data);
     if (!modal) return;
+    const loadingStartedAt = Date.now();
     modal.classList.add("is-visible");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("yearbook-open");
     setYearbookLoading(modal, true);
-        enableYearbookAmbient();
+    enableYearbookAmbient();
     stopYearbookLoaderOrbit({ reset: true });
     renderYearbookLoaderOrbit(modal, data);
     scheduleYearbookLoaderOrbit(modal);
@@ -2665,7 +2685,9 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     try {
       await preloadYearbookAssets(data);
       renderYearbookBook(modal, data);
-      const months = Array.isArray(data?.months) ? data.months.slice(0, 12) : [];
+      const months = Array.isArray(data?.months)
+        ? data.months.slice(0, 12)
+        : [];
       yearbookState.spotify = buildYearbookSpotifyState(months);
       window.__initYearbookSpotify = (IFrameAPI) => {
         initYearbookSpotifyEmbeds(modal, IFrameAPI);
@@ -2677,6 +2699,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
       setupYearbookBookInteractions(yearbookState.book);
       resetYearbookBook(yearbookState.book);
     } finally {
+      await waitForMinimumDuration(loadingStartedAt, 10000);
       setYearbookLoading(modal, false);
     }
   }
