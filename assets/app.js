@@ -7,6 +7,8 @@
   const STORAGE_LAST_OPEN_MONTH = "mtc_last_open_month";
   const STORAGE_DISPLAY_NAME = "mtc_display_name";
   const STORAGE_AUTH_SESSION = "mtc_auth_session";
+  const AMBIENT_IDLE_SRC = "assets/audio/Mine.mp3";
+  const AMBIENT_YEARBOOK_SRC = "assets/audio/Anti-Hero.mp3";
   const FIREBASE_DB_URL =
     "https://for-mae-default-rtdb.asia-southeast1.firebasedatabase.app";
   let CURRENT_SETTINGS = null;
@@ -2382,6 +2384,15 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     }
   }
 
+  
+  function updateAmbientSource(audio, src) {
+    if (!audio || !src) return;
+    const currentSrc = audio.currentSrc || audio.src;
+    if (currentSrc && currentSrc.endsWith(src)) return;
+    audio.src = src;
+    audio.load();
+  }
+
   function enableYearbookAmbient() {
     if (yearbookState.ambient) return;
     const audio = document.getElementById("bgAudio");
@@ -2391,10 +2402,13 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     yearbookState.ambient = {
       wasPlaying: !audio.paused,
       toggleChecked: toggle ? toggle.checked : null,
-      wasActive: container ? container.classList.contains("is-active") : null,
+     wasActive: container ? container.classList.contains("is-active") : null,
+      src: audio.currentSrc || audio.src,
     };
+    updateAmbientSource(audio, AMBIENT_YEARBOOK_SRC);
     setYearbookAmbientEnabled(true);
   }
+
 
   function restoreYearbookAmbient() {
     const previous = yearbookState.ambient;
@@ -2411,6 +2425,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
       container.classList.toggle("is-active", previous.wasActive);
     }
 
+        updateAmbientSource(audio, previous.src || AMBIENT_IDLE_SRC);
     if (previous.wasPlaying) {
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.catch === "function") {
@@ -2642,6 +2657,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("yearbook-open");
     setYearbookLoading(modal, true);
+        enableYearbookAmbient();
     stopYearbookLoaderOrbit({ reset: true });
     renderYearbookLoaderOrbit(modal, data);
     scheduleYearbookLoaderOrbit(modal);
@@ -2660,7 +2676,6 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
       yearbookState.book = buildYearbookBookState(modal);
       setupYearbookBookInteractions(yearbookState.book);
       resetYearbookBook(yearbookState.book);
-      enableYearbookAmbient();
     } finally {
       setYearbookLoading(modal, false);
     }
