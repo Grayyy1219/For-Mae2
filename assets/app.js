@@ -819,6 +819,14 @@
   const MEDIA_EXT_VIDEO = /\.(mp4|webm|ogg)(\?.*)?$/i;
   const MEDIA_BG_SLIDE_INTERVAL = 7000;
   let mediaBgTimer = null;
+  let yearbookLoaderState = {
+    timer: null,
+    sources: [],
+    index: 0,
+    cycleDelay: 5200,
+    isRunning: false,
+    itemIndex: 0,
+  };
 
   function createBackgroundMedia(src, { autoplay = false } = {}) {
     const isVideo = MEDIA_EXT_VIDEO.test(src);
@@ -855,7 +863,14 @@
   }
   function normalizeMediaSrc(src) {
     if (typeof src !== "string") return "";
-    return src.replace(/\\\\/g, "/").trim();
+    const trimmed = src.trim();
+    if (!trimmed) return "";
+    if (/^(https?:|data:)/i.test(trimmed)) return trimmed;
+    let normalized = trimmed.replace(/\\\\/g, "/").replace(/\\/g, "/");
+    normalized = normalized.replace(/assetsimg/gi, "assets/img/");
+    normalized = normalized.replace(/assets\/img(?!\/)/i, "assets/img/");
+    normalized = normalized.replace(/\/{2,}/g, "/");
+    return normalized;
   }
 
   function collectMediaSources(data) {
@@ -1811,6 +1826,165 @@
     return sources.filter(Boolean);
   }
 
+  function getYearbookLoaderSources(data) {
+    return collectMediaSources(data).slice(0, 12);
+  }
+
+  function stopYearbookLoaderOrbit({ reset = false } = {}) {
+    if (yearbookLoaderState.timer) {
+      clearInterval(yearbookLoaderState.timer);
+      yearbookLoaderState.timer = null;
+    }
+    if (reset) yearbookLoaderState.isRunning = false;
+  }
+
+  function updateYearbookOrbitItemMedia(item, source) {
+    if (!item) return;
+    const media = item.querySelector(".yearbook-loader__orbit-media");
+    if (!media) return;
+    item.dataset.current = source;
+    item.classList.remove("is-blooming");
+    if (MEDIA_EXT_VIDEO.test(source)) {
+      if (media.tagName.toLowerCase() !== "video") {
+        const replacement = createBackgroundMedia(source, { autoplay: true });
+        replacement.classList.add("yearbook-loader__orbit-media");
+        media.replaceWith(replacement);
+        return;
+      }
+      if (media.src !== source) {
+        media.src = source;
+        if (typeof media.play === "function") {
+          media.play().catch(() => {});
+        }
+      }
+      return;
+    }
+    if (media.tagName.toLowerCase() !== "img") {
+      const replacement = createBackgroundMedia(source, { autoplay: false });
+      replacement.classList.add("yearbook-loader__orbit-media");
+      media.replaceWith(replacement);
+      return;
+    }
+    media.src = source;
+  }
+
+  function animateOrbitItem(item, source) {
+    if (!item) return;
+    item.dataset.busy = "true";
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 420 + Math.random() * 160;
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+    const moveDuration = 10 + Math.random() * 4;
+    const fadeDuration = 2.6 + Math.random() * 1.4;
+    item.style.setProperty("--x", `${x.toFixed(1)}px`);
+    item.style.setProperty("--y", `${y.toFixed(1)}px`);
+    item.style.setProperty("--move-duration", `${moveDuration}s`);
+    item.style.setProperty("--fade-duration", `${fadeDuration}s`);
+
+    updateYearbookOrbitItemMedia(item, source);
+    item.classList.remove("is-moving", "is-fading");
+    void item.offsetWidth;
+    item.classList.add("is-moving");
+
+    const fadeStart = moveDuration * 0.9 * 1000;
+    const fadeEnd = fadeStart + fadeDuration * 1000;
+    window.setTimeout(() => {
+      item.classList.add("is-fading");
+    }, fadeStart);
+    window.setTimeout(() => {
+      item.classList.remove("is-moving", "is-fading");
+      item.dataset.busy = "false";
+      item.style.setProperty("--x", "0px");
+      item.style.setProperty("--y", "0px");
+    }, fadeEnd);
+  }
+
+  function pickRandomOrbitSource(current) {
+    if (!yearbookLoaderState.sources.length) return current || "";
+    if (yearbookLoaderState.sources.length === 1)
+      return yearbookLoaderState.sources[0];
+    let next = current;
+    let tries = 0;
+    while (next === current && tries < 6) {
+      next =
+        yearbookLoaderState.sources[
+          Math.floor(Math.random() * yearbookLoaderState.sources.length)
+        ];
+      tries += 1;
+    }
+    return next;
+  }
+
+  function stepYearbookLoaderOrbit(modal) {
+    const orbit = modal.querySelector(".yearbook-loader__orbit");
+    if (!orbit) return;
+    const items = Array.from(
+      orbit.querySelectorAll(".yearbook-loader__orbit-item")
+    );
+    if (!items.length || !yearbookLoaderState.sources.length) return;
+
+    const available = items.filter((item) => item.dataset.busy !== "true");
+    if (!available.length) {
+      scheduleYearbookLoaderOrbit(modal);
+      return;
+    }
+
+    const item =
+      available[yearbookLoaderState.itemIndex % available.length];
+    yearbookLoaderState.itemIndex += 1;
+    const current = item.dataset.current || "";
+    const source = pickRandomOrbitSource(current);
+    animateOrbitItem(item, source);
+    scheduleYearbookLoaderOrbit(modal);
+  }
+
+  function renderYearbookLoaderOrbit(modal, data) {
+    if (!modal) return;
+    const orbit = modal.querySelector(".yearbook-loader__orbit");
+    if (!orbit) return;
+    orbit.innerHTML = "";
+
+    const sources = getYearbookLoaderSources(data);
+    if (!sources.length) return;
+
+    yearbookLoaderState.sources = sources;
+    yearbookLoaderState.index = 0;
+    yearbookLoaderState.cycleDelay = 5200;
+    yearbookLoaderState.isRunning = true;
+    yearbookLoaderState.itemIndex = 0;
+
+    const displayCount = Math.min(12, sources.length);
+    const shuffledSources = sources
+      .slice()
+      .sort(() => Math.random() - 0.5)
+      .slice(0, displayCount);
+    shuffledSources.forEach((source, index) => {
+      const item = document.createElement("span");
+      item.className = "yearbook-loader__orbit-item";
+      item.dataset.busy = "false";
+      item.style.setProperty("--x", "0px");
+      item.style.setProperty("--y", "0px");
+      item.style.setProperty("--move-duration", "6s");
+      item.style.setProperty("--fade-duration", "2s");
+      const media = createBackgroundMedia(source, { autoplay: true });
+      media.classList.add("yearbook-loader__orbit-media");
+      item.dataset.current = source;
+      item.append(media);
+      orbit.append(item);
+    });
+  }
+
+  function scheduleYearbookLoaderOrbit(modal) {
+    if (!yearbookLoaderState.isRunning) return;
+    stopYearbookLoaderOrbit();
+    const nextDelay = 1000 + Math.random() * 1000;
+    yearbookLoaderState.cycleDelay = nextDelay;
+    yearbookLoaderState.timer = window.setTimeout(() => {
+      stepYearbookLoaderOrbit(modal);
+    }, yearbookLoaderState.cycleDelay);
+  }
+
   function preloadYearbookAssets(data) {
     const sources = collectYearbookMediaSources(data);
     if (!sources.length) return Promise.resolve();
@@ -2417,6 +2591,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
   function hideYearbook(modal) {
     if (!modal) return;
     clearYearbookTimers();
+    stopYearbookLoaderOrbit({ reset: true });
     setYearbookLoading(modal, false);
     modal.classList.remove("is-visible");
     modal.setAttribute("aria-hidden", "true");
@@ -2454,6 +2629,9 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("yearbook-open");
     setYearbookLoading(modal, true);
+    stopYearbookLoaderOrbit({ reset: true });
+    renderYearbookLoaderOrbit(modal, data);
+    scheduleYearbookLoaderOrbit(modal);
     modal.focus({ preventScroll: true });
     try {
       await preloadYearbookAssets(data);
