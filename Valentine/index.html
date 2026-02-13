@@ -99,6 +99,10 @@
     <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
 
     <script>
+      const mount = document.getElementById("spotifyMount");
+      const autoplayHint = document.getElementById("autoplayHint");
+      const trackId = "4ewAfHYpDTzpW1GKO44CVP";
+      
       function showSecret() {
         console.log("[Secret] showSecret() triggered!");
         const secret = document.getElementById("secret");
