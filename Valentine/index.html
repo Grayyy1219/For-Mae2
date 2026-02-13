@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Happy Valentine’s ❤️</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #ff758c, #ff7eb3);
+        color: white;
+        text-align: center;
+        padding: 30px;
+      }
+      .card {
+        max-width: 700px;
+        margin: auto;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 25px;
+        border-radius: 20px;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      }
+      h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+      p {
+        font-size: 1.2em;
+        line-height: 1.6;
+      }
+      img {
+        width: 100%;
+        max-width: 300px;
+        border-radius: 15px;
+        margin: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+      .gallery {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+      }
+      button {
+        margin-top: 20px;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 12px;
+        background: #ff2e63;
+        color: white;
+        font-size: 1.1em;
+        cursor: pointer;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+      }
+      button:hover {
+        background: #ff0844;
+      }
+      #secret {
+        display: none;
+        margin-top: 20px;
+        font-size: 1.3em;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Happy Valentine’s Day ❤️</h1>
+      <p>
+        Hi love 🥺💖 <br /><br />
+        I just want you to know that you’re the best thing that ever happened to
+        me. Thank you for being my safe place, my happiness, and my favorite
+        person.
+      </p>
+
+      <h2>Our Memories 📸</h2>
+      <div class="gallery">
+        <!-- <img src="photo1.jpg" alt="photo1" />
+        <img src="photo2.jpg" alt="photo2" />
+        <img src="photo3.jpg" alt="photo3" /> -->
+      </div>
+
+      <button onclick="showSecret()">Click for a Surprise 💌</button>
+      <div id="secret">
+        I love you more than words can explain. ❤️ <br />
+        Date tayo soon 😘
+      </div>
+
+      <h2>Our Song 🎶</h2>
+
+      <div id="spotifyMount" style="margin-top: 15px"></div>
+
+      <p id="autoplayHint" style="font-size: 0.9em; opacity: 0.8">
+        (If it doesn't play automatically, tap the button again 💖)
+      </p>
+    </div>
+    <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+
+    <script>
+      function showSecret() {
+        console.log("[Secret] showSecret() triggered!");
+        const secret = document.getElementById("secret");
+
+        if (secret) {
+          secret.style.display = "block";
+          console.log("[Secret] Secret message displayed!");
+        } else {
+          console.warn("[Secret] secret element not found!");
+        }
+      }
+      document.addEventListener(
+        "click",
+        () => {
+          console.log("[Spotify] User clicked, forcing play again...");
+          attemptSpotifyPlay();
+        },
+        { once: true },
+      );
+    </script>
+  </body>
+</html>
