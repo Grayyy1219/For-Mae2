@@ -144,6 +144,7 @@
 
       @media (max-width: 640px) {
         .card {
+          width: min(100%, 90vw);
           padding: 24px 16px;
           border-radius: 18px;
         }
@@ -435,7 +436,6 @@
       }
 
       async function initFirebaseSlideshow() {
-        console.log("initFirebaseSlideshow");
         try {
           const { assets, intervalMs } = await fetchSlideshowData();
           renderSlideshow(assets, intervalMs);
@@ -450,6 +450,7 @@
 
       const attemptSpotifyPlay = () => {
         if (!spotifyController) return;
+
         try {
           spotifyController.play();
         } catch (error) {
@@ -488,12 +489,10 @@
       };
 
       function showSecret() {
-        console.log("[Secret] showSecret() triggered!");
         const secret = document.getElementById("secret");
 
         if (secret) {
           secret.style.display = "block";
-          console.log("[Secret] Secret message displayed!");
         } else {
           console.warn("[Secret] secret element not found!");
         }
