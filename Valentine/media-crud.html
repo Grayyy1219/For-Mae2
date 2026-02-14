@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Valentine Media Manager</title>
+    <style>
+      :root {
+        --bg: #fff6fb;
+        --card: #ffffff;
+        --primary: #e84393;
+        --primary-dark: #c92f78;
+        --text: #2d1438;
+        --muted: #7b6786;
+        --border: #f3d9e8;
+        --danger: #dc3545;
+        --danger-dark: #b52331;
+        --ring: rgba(232, 67, 147, 0.25);
+        --shadow: 0 15px 35px rgba(96, 34, 83, 0.1);
+        --ok: #218838;
+        --error: #b4232e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+        background:
+          radial-gradient(circle at top right, #ffd8ec, transparent 45%),
+          var(--bg);
+        color: var(--text);
+        padding: 2rem 1rem 3rem;
+      }
+
+      .container {
+        max-width: 1080px;
+        margin: 0 auto;
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      .panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 1.25rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.5rem, 2vw + 1rem, 2.4rem);
+      }
+      .subtitle {
+        margin: 0.35rem 0 0;
+        color: var(--muted);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.9rem;
+        margin-top: 0.9rem;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+      label {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.68rem 0.8rem;
+        font: inherit;
+        color: inherit;
+        background: #fff;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 96px;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px var(--ring);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        margin-top: 0.95rem;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 0.68rem 1.1rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition:
+          transform 0.12s ease,
+          opacity 0.2s ease,
+          background 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+      button:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--primary-dark);
+      }
+      .btn-secondary {
+        background: #f6eef3;
+        color: var(--text);
+      }
+      .btn-danger {
+        background: var(--danger);
+        color: #fff;
+      }
+      .btn-danger:hover {
+        background: var(--danger-dark);
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.8rem;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 0.7rem;
+      }
+
+      .badge {
+        font-size: 0.85rem;
+        background: #ffe5f1;
+        color: #8a2f62;
+        padding: 0.3rem 0.62rem;
+        border-radius: 999px;
+        font-weight: 600;
+      }
+
+      #mediaList {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1rem;
+        margin-top: 0.9rem;
+      }
+
+      .media-card {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+      }
+
+      .preview {
+        height: 170px;
+        background: #f9f2f7;
+        display: grid;
+        place-items: center;
+      }
+      .preview img,
+      .preview video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .card-body {
+        padding: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.42rem;
+        background-color: #ffffff66;
+        backdrop-filter: blur(10px);
+      }
+      .meta {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.86rem;
+        word-break: break-word;
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 0.55rem;
+        margin-top: 0.35rem;
+      }
+      .card-actions button {
+        flex: 1;
+        border-radius: 10px;
+        padding: 0.58rem 0.65rem;
+        font-size: 0.85rem;
+      }
+
+      .empty {
+        border: 1px dashed var(--border);
+        border-radius: 14px;
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--muted);
+        background: #fff;
+      }
+
+      .notice {
+        margin-top: 0.6rem;
+        color: var(--muted);
+        font-size: 0.84rem;
+        line-height: 1.35;
+      }
+
+      .status {
+        margin-top: 0.6rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+      }
+
+      .status.ok {
+        color: var(--ok);
+      }
+      .status.error {
+        color: var(--error);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="panel">
+        <h1>Valentine Media CRUD Form</h1>
+        <p class="subtitle">
+          Upload images/videos, update details, and remove files with a clean
+          professional workflow.
+        </p>
+
+        <form id="mediaForm" novalidate>
+          <input id="mediaId" type="hidden" />
+          <div class="form-grid">
+            <div class="field">
+              <label for="title">Title</label>
+              <input
+                id="title"
+                name="title"
+                type="text"
+                placeholder="My lovely memory"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="mediaType">Media Type</label>
+              <select id="mediaType" name="mediaType" required>
+                <option value="">Select type</option>
+                <option value="image">Image</option>
+                <option value="video">Video</option>
+              </select>
+            </div>
+            <div class="field" style="grid-column: 1 / -1">
+              <label for="description">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                placeholder="Write a short description..."
+              ></textarea>
+            </div>
+            <div class="field" style="grid-column: 1 / -1">
+              <label for="fileInput">File Upload (image/video)</label>
+              <input
+                id="fileInput"
+                name="fileInput"
+                type="file"
+                accept="image/*,video/*"
+              />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn-primary" id="submitButton">
+              Create Media
+            </button>
+            <button type="button" class="btn-secondary" id="resetButton">
+              Reset
+            </button>
+          </div>
+        </form>
+        <p class="notice">
+          Connected to Firebase Realtime Database path:
+          <strong>valentine/slideshow/assets</strong>. New files are uploaded to
+          Firebase Storage and linked automatically.
+        </p>
+        <p class="status" id="statusMessage">Connecting to Firebase...</p>
+      </section>
+
+      <section class="panel">
+        <div class="info-row">
+          <h2 style="margin: 0; font-size: 1.15rem">Media Library</h2>
+          <span class="badge" id="countBadge">0 items</span>
+        </div>
+        <div id="mediaList"></div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+      import {
+        getDatabase,
+        onValue,
+        push,
+        ref as dbRef,
+        remove,
+        set,
+      } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+      import {
+        deleteObject,
+        getDownloadURL,
+        getStorage,
+        ref as storageRef,
+        uploadBytes,
+      } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyD9iANgGXG8sfryA5qwVacmscyyNLCHlok",
+        authDomain: "for-mae.firebaseapp.com",
+        databaseURL:
+          "https://for-mae-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "for-mae",
+        storageBucket: "for-mae.firebasestorage.app",
+        messagingSenderId: "391845822528",
+        appId: "1:391845822528:web:da9842ed1038666cfd5fa5",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
+      const storage = getStorage(app);
+      const assetsRef = dbRef(database, "valentine/slideshow/assets");
+
+      const form = document.getElementById("mediaForm");
+      const mediaIdInput = document.getElementById("mediaId");
+      const titleInput = document.getElementById("title");
+      const typeInput = document.getElementById("mediaType");
+      const descriptionInput = document.getElementById("description");
+      const fileInput = document.getElementById("fileInput");
+      const submitButton = document.getElementById("submitButton");
+      const resetButton = document.getElementById("resetButton");
+      const mediaList = document.getElementById("mediaList");
+      const countBadge = document.getElementById("countBadge");
+      const statusMessage = document.getElementById("statusMessage");
+
+      let mediaItems = [];
+
+      const uid = () =>
+        `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+      function setStatus(message, tone = "ok") {
+        statusMessage.textContent = message;
+        statusMessage.className = `status ${tone}`;
+      }
+
+      function escapeHtml(value = "") {
+        return value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function normalizeRecord(id, record = {}) {
+        return {
+          id,
+          title: record.title || "Untitled",
+          description: record.description || "",
+          type: record.type || "image",
+          src: record.src || "",
+          source: record.source || "firebase",
+          storagePath: record.storagePath || "",
+          createdAt: record.createdAt || "",
+          updatedAt: record.updatedAt || "",
+        };
+      }
+
+      function renderList() {
+        countBadge.textContent = `${mediaItems.length} item${mediaItems.length === 1 ? "" : "s"}`;
+        if (!mediaItems.length) {
+          mediaList.innerHTML = `<div class="empty">No media yet. Use the form above to create your first record.</div>`;
+          return;
+        }
+
+        mediaList.innerHTML = mediaItems
+          .map((item) => {
+            const safeTitle = escapeHtml(item.title || "Untitled");
+            const safeDescription = escapeHtml(
+              item.description || "No description",
+            );
+            const safeSrc = escapeHtml(item.src);
+            const preview =
+              item.type === "video"
+                ? `<video src="${safeSrc}" controls muted></video>`
+                : `<img src="${safeSrc}" alt="${safeTitle}">`;
+
+            return `
+          <article class="media-card">
+            <div class="preview">${preview}</div>
+            <div class="card-body">
+              <strong>${safeTitle}</strong>
+              <p class="meta">${safeDescription}</p>
+              <p class="meta">Type: ${item.type} • Source: ${item.source}</p>
+              <div class="card-actions">
+                <button class="btn-secondary" data-action="edit" data-id="${item.id}">Edit</button>
+                <button class="btn-danger" data-action="delete" data-id="${item.id}">Delete</button>
+              </div>
+            </div>
+          </article>
+        `;
+          })
+          .join("");
+      }
+
+      function resetForm() {
+        form.reset();
+        mediaIdInput.value = "";
+        submitButton.textContent = "Create Media";
+        submitButton.disabled = false;
+      }
+
+      function detectType(fileName = "") {
+        const lower = fileName.toLowerCase();
+        if (/(mp4|mov|webm|ogg)$/i.test(lower)) return "video";
+        return "image";
+      }
+
+      async function uploadFileAndGetData(file) {
+        const ext = file.name.split(".").pop() || "bin";
+        const fileId = `${Date.now()}-${uid()}.${ext}`;
+        const path = `valentine/uploads/${fileId}`;
+        const fileRef = storageRef(storage, path);
+        await uploadBytes(fileRef, file);
+        const downloadUrl = await getDownloadURL(fileRef);
+        return { src: downloadUrl, storagePath: path };
+      }
+
+      async function deleteStorageFile(storagePath = "") {
+        if (!storagePath) return;
+        try {
+          await deleteObject(storageRef(storage, storagePath));
+        } catch {}
+      }
+
+      async function handleSubmit(event) {
+        event.preventDefault();
+        const editingId = mediaIdInput.value;
+        const file = fileInput.files[0];
+        const title = titleInput.value.trim();
+        const description = descriptionInput.value.trim();
+        let type = typeInput.value;
+
+        if (!title) {
+          alert("Please enter a title.");
+          return;
+        }
+
+        if (!editingId && !file) {
+          alert("Please select a file when creating a new media item.");
+          return;
+        }
+
+        if (file && !type) {
+          type = detectType(file.name);
+        }
+
+        if (!type) {
+          alert("Please choose media type.");
+          return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = editingId ? "Updating..." : "Creating...";
+        setStatus("Syncing with Firebase...", "ok");
+
+        try {
+          if (editingId) {
+            const existing = mediaItems.find((item) => item.id === editingId);
+            if (!existing) throw new Error("Item not found for update.");
+
+            let nextSrc = existing.src;
+            let nextStoragePath = existing.storagePath || "";
+
+            if (file) {
+              const uploaded = await uploadFileAndGetData(file);
+              if (existing.storagePath) {
+                await deleteStorageFile(existing.storagePath);
+              }
+              nextSrc = uploaded.src;
+              nextStoragePath = uploaded.storagePath;
+            }
+
+            await set(
+              dbRef(database, `valentine/slideshow/assets/${editingId}`),
+              {
+                title,
+                description,
+                type,
+                src: nextSrc,
+                source: "firebase-storage",
+                storagePath: nextStoragePath,
+                updatedAt: new Date().toISOString(),
+              },
+            );
+            setStatus("Media updated in Firebase.", "ok");
+          } else {
+            const uploaded = await uploadFileAndGetData(file);
+            const newRef = push(assetsRef);
+            await set(newRef, {
+              title,
+              description,
+              type,
+              src: uploaded.src,
+              source: "firebase-storage",
+              storagePath: uploaded.storagePath,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+            setStatus("Media created in Firebase.", "ok");
+          }
+          resetForm();
+        } catch (error) {
+          console.error(error);
+          setStatus(
+            `Firebase write failed: ${error?.message || "Unknown error"}`,
+            "error",
+          );
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = mediaIdInput.value
+            ? "Update Media"
+            : "Create Media";
+        }
+      }
+
+      async function handleDelete(id) {
+        const item = mediaItems.find((m) => m.id === id);
+        if (!item) return;
+        const confirmed = window.confirm(
+          "Delete this media item from Firebase?",
+        );
+        if (!confirmed) return;
+
+        try {
+          await remove(dbRef(database, `valentine/slideshow/assets/${id}`));
+          if (item.storagePath) {
+            await deleteStorageFile(item.storagePath);
+          }
+          setStatus("Media deleted from Firebase.", "ok");
+        } catch (error) {
+          setStatus(
+            `Delete failed: ${error?.message || "Unknown error"}`,
+            "error",
+          );
+        }
+      }
+
+      function handleListClick(event) {
+        const button = event.target.closest("button[data-action]");
+        if (!button) return;
+        const { action, id } = button.dataset;
+        const item = mediaItems.find((m) => m.id === id);
+        if (!item) return;
+
+        if (action === "delete") {
+          handleDelete(id);
+          return;
+        }
+
+        mediaIdInput.value = item.id;
+        titleInput.value = item.title;
+        descriptionInput.value = item.description || "";
+        typeInput.value = item.type;
+        submitButton.textContent = "Update Media";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function subscribeToAssets() {
+        onValue(
+          assetsRef,
+          (snapshot) => {
+            const data = snapshot.val();
+            const entries = data ? Object.entries(data) : [];
+            mediaItems = entries
+              .map(([id, record]) => normalizeRecord(id, record))
+              .filter((item) => item.src)
+              .sort((a, b) =>
+                (b.updatedAt || "").localeCompare(a.updatedAt || ""),
+              );
+            renderList();
+            setStatus("Connected to Firebase realtime updates.", "ok");
+          },
+          (error) => {
+            setStatus(
+              `Firebase read failed: ${error?.message || "Unknown error"}`,
+              "error",
+            );
+          },
+        );
+      }
+
+      resetButton.addEventListener("click", resetForm);
+      form.addEventListener("submit", handleSubmit);
+      mediaList.addEventListener("click", handleListClick);
+      fileInput.addEventListener("change", () => {
+        if (!typeInput.value && fileInput.files[0]) {
+          typeInput.value = detectType(fileInput.files[0].name);
+        }
+      });
+
+      subscribeToAssets();
+    </script>
+  </body>
+</html>

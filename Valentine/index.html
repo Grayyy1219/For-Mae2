@@ -13,6 +13,8 @@
         margin: 0;
         min-height: 100vh;
         font-family: "Inter", "Segoe UI", Arial, sans-serif;
+        position: relative;
+        overflow-x: hidden;
         background:
           radial-gradient(
             circle at 15% 20%,
@@ -35,7 +37,32 @@
         justify-content: center;
         padding: 28px 18px;
       }
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        width: min(62vw, 420px);
+        aspect-ratio: 1;
+        border-radius: 999px;
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0.28;
+        filter: blur(55px);
+      }
 
+      body::before {
+        top: -120px;
+        left: -120px;
+        background: var(--bg-gradient-start);
+        animation: floatBlobA 14s ease-in-out infinite alternate;
+      }
+
+      body::after {
+        right: -140px;
+        bottom: -140px;
+        background: var(--bg-gradient-end);
+        animation: floatBlobB 18s ease-in-out infinite alternate;
+      }
       .card {
         width: min(100%, 80vw);
         background: var(--surface);
@@ -134,20 +161,29 @@
         color: var(--text-soft);
       }
 
-      #secret {
-        display: none;
-        margin-top: 20px;
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: var(--text-main);
-      }
-
       #autoplayHint {
         font-size: 0.9rem;
         color: var(--text-soft);
       }
       .m-0-50 {
         margin: 0 50px;
+      }
+      @keyframes floatBlobA {
+        0% {
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        100% {
+          transform: translate3d(90px, 55px, 0) scale(1.15);
+        }
+      }
+
+      @keyframes floatBlobB {
+        0% {
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        100% {
+          transform: translate3d(-75px, -45px, 0) scale(1.12);
+        }
       }
 
       @media (max-width: 640px) {
@@ -157,9 +193,9 @@
           border-radius: 18px;
           flex-direction: column;
         }
- .m-0-50 {
-        margin: 0;
-      }
+        .m-0-50 {
+          margin: 0;
+        }
         h2 {
           margin-top: 24px;
         }
@@ -215,11 +251,7 @@
           <div id="dots" class="dots" aria-label="Slideshow pagination"></div>
           <p id="galleryStatus" class="gallery-status">Loading memories…</p>
         </div>
-        <button onclick="showSecret()">Click for a Surprise 💌</button>
-        <div id="secret">
-          I love you more than words can explain. ❤️ <br />
-          Date tayo soon 😘
-        </div>
+
         <h2>Our Song 🎶</h2>
         <div id="spotifyMount" style="margin-top: 15px"></div>
         <p id="autoplayHint">
@@ -528,16 +560,6 @@
         window.__SpotifyIFrameAPI = IFrameAPI;
         initSpotifyEmbed(IFrameAPI);
       };
-
-      function showSecret() {
-        const secret = document.getElementById("secret");
-
-        if (secret) {
-          secret.style.display = "block";
-        } else {
-          console.warn("[Secret] secret element not found!");
-        }
-      }
 
       if (window.__SpotifyIFrameAPI) {
         initSpotifyEmbed(window.__SpotifyIFrameAPI);
