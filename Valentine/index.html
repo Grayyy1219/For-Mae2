@@ -50,7 +50,9 @@
         z-index: -2;
         overflow: hidden;
       }
-
+      .ambient-layer--front {
+        z-index: 2;
+      }
       .ambient-layer::before {
         content: "";
         position: absolute;
@@ -77,6 +79,10 @@
         animation-delay: var(--heart-delay, 0s);
         font-size: var(--heart-size, 1rem);
         opacity: 0;
+      }
+      .floating-heart--front {
+        color: rgba(255, 205, 227, 0.82);
+        text-shadow: 0 0 16px rgba(255, 96, 156, 0.5);
       }
       body::before,
       body::after {
@@ -290,6 +296,11 @@
   </head>
   <body>
     <div class="ambient-layer" id="ambientLayer" aria-hidden="true"></div>
+    <div
+      class="ambient-layer ambient-layer--front"
+      id="foregroundHeartLayer"
+      aria-hidden="true"
+    ></div>
     <div class="card">
       <div class="carddiv cardletter">
         <h1>Dear Meyaaa ❤️</h1>
@@ -359,6 +370,9 @@
       const galleryStatus = document.getElementById("galleryStatus");
       const trackId = "4ewAfHYpDTzpW1GKO44CVP";
       const ambientLayer = document.getElementById("ambientLayer");
+      const foregroundHeartLayer = document.getElementById(
+        "foregroundHeartLayer",
+      );
       let spotifyController = null;
       let slideTimer = null;
 
@@ -670,6 +684,7 @@ I hope when you see them, you’ll feel how much I love you. 🥺❤️” `);
         const heartChar = ["❤", "♡", "💖", "💕"];
 
         ambientLayer.innerHTML = "";
+        if (foregroundHeartLayer) foregroundHeartLayer.innerHTML = "";
 
         for (let index = 0; index < heartCount; index += 1) {
           const heart = document.createElement("span");
@@ -692,7 +707,17 @@ I hope when you see them, you’ll feel how much I love you. 🥺❤️” `);
             `${-80 + Math.random() * 160}px`,
           );
 
-          ambientLayer.appendChild(heart);
+           const isForegroundHeart = Math.random() < 0.28;
+          const targetLayer =
+            isForegroundHeart && foregroundHeartLayer
+              ? foregroundHeartLayer
+              : ambientLayer;
+
+          if (isForegroundHeart) {
+            heart.classList.add("floating-heart--front");
+          }
+
+          targetLayer.appendChild(heart);
         }
       }
 
