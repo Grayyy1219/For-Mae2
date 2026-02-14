@@ -392,6 +392,27 @@
         };
       };
 
+      const parseJsonIfString = (value) => {
+        if (typeof value !== "string") return value;
+        const trimmed = value.trim();
+        if (!trimmed) return value;
+        if (!(trimmed.startsWith("{") || trimmed.startsWith("["))) {
+          return value;
+        }
+
+        try {
+          return JSON.parse(trimmed);
+        } catch {
+          return value;
+        }
+      };
+
+      const toAssetList = (input) => {
+        if (Array.isArray(input)) return input;
+        if (input && typeof input === "object") return Object.values(input);
+        return [];
+      };
+
       async function fetchSlideshowData() {
         const res = await fetch(`${FIREBASE_DB_URL}/valentine/slideshow.json`, {
           cache: "no-store",
@@ -401,19 +422,23 @@
           throw new Error(`Failed to load slideshow data (${res.status})`);
         }
 
-        const data = await res.json();
-        const assets = Array.isArray(data?.assets)
-          ? data.assets
-          : Array.isArray(data)
-            ? data
-            : [];
+        const data = parseJsonIfString(await res.json());
+        const slideshowData = parseJsonIfString(data?.slideshow) || data;
+        const assetsSource =
+          slideshowData?.assets ??
+          slideshowData?.items ??
+          data?.assets ??
+          data?.items ??
+          data;
+        const assets = toAssetList(assetsSource);
+        const intervalRaw =
+          slideshowData?.intervalMs ?? data?.intervalMs ?? data?.slideshowIntervalMs;
 
         return {
           assets: assets.map(normalizeMedia).filter(Boolean),
           intervalMs:
-            Number.isFinite(Number(data?.intervalMs)) &&
-            Number(data?.intervalMs) >= 2000
-              ? Number(data.intervalMs)
+            Number.isFinite(Number(intervalRaw)) && Number(intervalRaw) >= 2000
+              ? Number(intervalRaw)
               : 5000,
         };
       }
