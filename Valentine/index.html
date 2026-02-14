@@ -37,7 +37,7 @@
       }
 
       .card {
-        width: min(100%, 50vw);
+        width: min(100%, 80vw);
         background: var(--surface);
         border: 1px solid var(--surface-border);
         padding: 30px 24px;
@@ -45,6 +45,10 @@
         backdrop-filter: blur(12px);
         box-shadow: 0 18px 44px rgba(0, 0, 0, 0.3);
         text-align: center;
+        display: flex;
+      }
+      .carddiv {
+        width: 100%;
       }
 
       h1 {
@@ -59,6 +63,7 @@
         font-size: 1rem;
         line-height: 1.7;
         color: var(--text-soft);
+        text-align: start;
       }
 
       h2 {
@@ -111,7 +116,7 @@
         width: 12px;
         border-radius: 50px;
         border: 0;
-        background: #7a7a7a;
+        background: #ffffff78;
         transition: all ease 1s;
       }
 
@@ -141,14 +146,20 @@
         font-size: 0.9rem;
         color: var(--text-soft);
       }
+      .m-0-50 {
+        margin: 0 50px;
+      }
 
       @media (max-width: 640px) {
         .card {
           width: min(100%, 90vw);
           padding: 24px 16px;
           border-radius: 18px;
+          flex-direction: column;
         }
-
+ .m-0-50 {
+        margin: 0;
+      }
         h2 {
           margin-top: 24px;
         }
@@ -157,36 +168,66 @@
   </head>
   <body>
     <div class="card">
-      <h1>Happy Valentine’s Day ❤️</h1>
-      <p class="subtitle">
-        Hi love 🥺💖 <br /><br />
-        I just want you to know that you’re the best thing that ever happened to
-        me. Thank you for being my safe place, my happiness, and my favorite
-        person.
-      </p>
-
-      <h2>Our Memories 📸</h2>
-      <div class="gallery">
-        <div id="slideshow" class="slideshow" aria-live="polite"></div>
-        <div id="dots" class="dots" aria-label="Slideshow pagination"></div>
-        <p id="galleryStatus" class="gallery-status">Loading memories…</p>
+      <div class="carddiv">
+        <h1>Dear Meyaaa ❤️</h1>
+        <p class="subtitle">
+          <b>
+            <br />
+            Happy Valentine’s Day, Mae.<br />
+          </b>
+          <br />
+          If there’s one thing I’m sure about, it’s that I’ll always be grateful
+          for you. For every month we survived, every away we fixed, every
+          laugh, every random sabaw moment, and every time we still chose each
+          other kahit mahirap.<br />
+          <br />
+          Like Taylor said…
+          <b>“I had the time of my life fighting dragons with you.”</b><br />
+          And Mi, I swear, ikaw yung favorite battle ko. Not because it was
+          easy, but because it was always <i>worth it</i> and because ikaw na
+          yan ih.<br />
+          <br />
+          We had our own little kingdom <br />
+          our BGC days, museum dates, ice skating, random Roblox nights, tiktok
+          spam, late talks, and even those times na tahimik lang but it still
+          felt safe because it’s you.<br />
+          <br />
+          And even if someday everything changes, I want you to know this:<br />
+          <br />
+          <b>Long live all the magic we made.</b><br />
+          Long live the memories we keep building.<br />
+          Long live us still figuring things out, still trying, still loving.<br />
+          <br />
+          Thank you for staying.<br />
+          Thank you for being my peace, my home, my favorite person.<br />
+          <br />
+          Happy Valentine’s Day, Leoneil Mae Bacasong Reyes.<br />
+          I love you, always.<br />
+          <br />
+          – Grayyy ❤️
+        </p>
       </div>
 
-      <button onclick="showSecret()">Click for a Surprise 💌</button>
-      <div id="secret">
-        I love you more than words can explain. ❤️ <br />
-        Date tayo soon 😘
+      <div class="carddiv m-0-50">
+        <h2>Our Memories 📸</h2>
+        <div class="gallery">
+          <div id="slideshow" class="slideshow" aria-live="polite"></div>
+          <div id="dots" class="dots" aria-label="Slideshow pagination"></div>
+          <p id="galleryStatus" class="gallery-status">Loading memories…</p>
+        </div>
+        <button onclick="showSecret()">Click for a Surprise 💌</button>
+        <div id="secret">
+          I love you more than words can explain. ❤️ <br />
+          Date tayo soon 😘
+        </div>
+        <h2>Our Song 🎶</h2>
+        <div id="spotifyMount" style="margin-top: 15px"></div>
+        <p id="autoplayHint">
+          (If it doesn't play automatically, tap the button again 💖)
+        </p>
       </div>
-
-      <h2>Our Song 🎶</h2>
-
-      <div id="spotifyMount" style="margin-top: 15px"></div>
-
-      <p id="autoplayHint">
-        (If it doesn't play automatically, tap the button again 💖)
-      </p>
+      <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
     </div>
-    <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
 
     <script>
       const FIREBASE_DB_URL =
