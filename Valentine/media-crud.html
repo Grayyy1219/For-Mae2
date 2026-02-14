@@ -286,7 +286,6 @@
                 name="title"
                 type="text"
                 placeholder="My lovely memory"
-                required
               />
             </div>
             <div class="field">
@@ -322,10 +321,16 @@
                 id="fileInput"
                 name="fileInput"
                 type="file"
+                multiple
                 accept="image/*,video/*"
               />
             </div>
           </div>
+
+          <p class="notice" style="margin-bottom: 0">
+            Tip: Select multiple files to batch add new records in one submit.
+            For updates, only the first selected file is used.
+          </p>
 
           <div class="actions">
             <button type="submit" class="btn-primary" id="submitButton">
@@ -553,19 +558,20 @@
       async function handleSubmit(event) {
         event.preventDefault();
         const editingId = mediaIdInput.value;
-        const file = fileInput.files[0];
+        const files = Array.from(fileInput.files || []);
+        const file = files[0];
         const title = titleInput.value.trim();
         const description = descriptionInput.value.trim();
         let type = typeInput.value;
         const parsedSortOrder = parseSortOrder(sortOrderInput.value);
 
-        if (!title) {
+        if (editingId && !title) {
           alert("Please enter a title.");
           return;
         }
 
-        if (!editingId && !file) {
-          alert("Please select a file when creating a new media item.");
+        if (!editingId && !files.length) {
+          alert("Please select at least one file when creating media.");
           return;
         }
 
@@ -621,20 +627,40 @@
             );
             setStatus("Media updated in Firebase.", "ok");
           } else {
-            const uploaded = await uploadFileAndGetData(file);
-            const newRef = push(assetsRef);
-            await set(newRef, {
-              title,
-              description,
-              type,
-              src: uploaded.src,
-              source: "firebase-storage",
-              storagePath: uploaded.storagePath,
-              sortOrder,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            });
-            setStatus("Media created in Firebase.", "ok");
+            let createdCount = 0;
+
+            for (const currentFile of files) {
+              const itemType = type || detectType(currentFile.name);
+              const uploaded = await uploadFileAndGetData(currentFile);
+              const newRef = push(assetsRef);
+              const fallbackTitle = currentFile.name
+                .replace(/\.[^/.]+$/, "")
+                .replace(/[-_]+/g, " ")
+                .trim();
+              const itemTitle =
+                files.length === 1
+                  ? title
+                  : title
+                    ? `${title} ${createdCount + 1}`
+                    : fallbackTitle || `Media ${createdCount + 1}`;
+
+              await set(newRef, {
+                title: itemTitle,
+                description,
+                type: itemType,
+                src: uploaded.src,
+                source: "firebase-storage",
+                storagePath: uploaded.storagePath,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              });
+              createdCount += 1;
+            }
+
+            setStatus(
+              `Batch add complete: ${createdCount} media item${createdCount === 1 ? "" : "s"} created in Firebase.`,
+              "ok",
+            );
           }
           resetForm();
         } catch (error) {
