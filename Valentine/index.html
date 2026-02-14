@@ -77,6 +77,11 @@
       .carddiv {
         width: 100%;
       }
+      .cardletter {
+        padding: 50px 10px;
+        border-radius: 22px;
+        backdrop-filter: blur(12px);
+      }
 
       h1 {
         font-size: clamp(2rem, 4.8vw, 3.1rem);
@@ -108,7 +113,7 @@
         margin: 0 auto;
         border-radius: 18px;
         overflow: hidden;
-        aspect-ratio: 16/9;
+        aspect-ratio: 4/3;
         background: rgba(0, 0, 0, 0.24);
         border: 1px solid rgba(255, 255, 255, 0.22);
       }
@@ -204,7 +209,7 @@
   </head>
   <body>
     <div class="card">
-      <div class="carddiv">
+      <div class="carddiv cardletter">
         <h1>Dear Meyaaa ❤️</h1>
         <p class="subtitle">
           <b>
@@ -245,14 +250,12 @@
       </div>
 
       <div class="carddiv m-0-50">
-        <h2>Our Memories 📸</h2>
         <div class="gallery">
+          <p id="galleryStatus" class="gallery-status">Loading memories…</p>
           <div id="slideshow" class="slideshow" aria-live="polite"></div>
           <div id="dots" class="dots" aria-label="Slideshow pagination"></div>
-          <p id="galleryStatus" class="gallery-status">Loading memories…</p>
         </div>
-
-        <h2>Our Song 🎶</h2>
+        <h2>Song reminds me of us</h2>
         <div id="spotifyMount" style="margin-top: 15px"></div>
         <p id="autoplayHint">
           (If it doesn't play automatically, tap the button again 💖)
@@ -367,12 +370,19 @@
         applyPalette(fallbackPalette);
       }
 
-      const normalizeMedia = (raw) => {
+      const normalizeMedia = (
+        raw,
+        fallbackOrder = Number.POSITIVE_INFINITY,
+      ) => {
         if (!raw) return null;
         if (typeof raw === "string") {
           const src = raw.trim();
           if (!src) return null;
-          return { src, type: VIDEO_EXT.test(src) ? "video" : "image" };
+          return {
+            src,
+            type: VIDEO_EXT.test(src) ? "video" : "image",
+            sortOrder: fallbackOrder,
+          };
         }
 
         const src = typeof raw.src === "string" ? raw.src.trim() : "";
@@ -383,12 +393,18 @@
           : IMAGE_EXT.test(src)
             ? "image"
             : "image";
+
+        const rawOrder = Number(raw.sortOrder);
+        const sortOrder =
+          Number.isFinite(rawOrder) && rawOrder > 0 ? rawOrder : fallbackOrder;
+
         return {
           src,
           type:
             explicitType === "video" || explicitType === "image"
               ? explicitType
               : guessedType,
+          sortOrder,
         };
       };
 
@@ -408,8 +424,20 @@
       };
 
       const toAssetList = (input) => {
-        if (Array.isArray(input)) return input;
-        if (input && typeof input === "object") return Object.values(input);
+        if (Array.isArray(input)) {
+          return input.map((item, index) => ({
+            item,
+            fallbackOrder: index + 1,
+          }));
+        }
+
+        if (input && typeof input === "object") {
+          return Object.entries(input).map(([, item], index) => ({
+            item,
+            fallbackOrder: index + 1,
+          }));
+        }
+
         return [];
       };
 
@@ -432,10 +460,17 @@
           data;
         const assets = toAssetList(assetsSource);
         const intervalRaw =
-          slideshowData?.intervalMs ?? data?.intervalMs ?? data?.slideshowIntervalMs;
+          slideshowData?.intervalMs ??
+          data?.intervalMs ??
+          data?.slideshowIntervalMs;
+
+        const normalizedAssets = assets
+          .map(({ item, fallbackOrder }) => normalizeMedia(item, fallbackOrder))
+          .filter(Boolean)
+          .sort((a, b) => a.sortOrder - b.sortOrder);
 
         return {
-          assets: assets.map(normalizeMedia).filter(Boolean),
+          assets: normalizedAssets,
           intervalMs:
             Number.isFinite(Number(intervalRaw)) && Number(intervalRaw) >= 2000
               ? Number(intervalRaw)
@@ -524,7 +559,9 @@
         }
 
         activate(0);
-        setGalleryStatus(`${items.length} memories loaded :>`);
+        setGalleryStatus(`“I picked ${items.length} memories for you :>
+Some are photos, some are videos, and some are little moments I never want to forget.
+I hope when you see them, you’ll feel how much I love you. 🥺❤️” `);
 
         if (slideElements.length > 1) {
           slideTimer = setInterval(() => {

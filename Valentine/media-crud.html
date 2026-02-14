@@ -185,6 +185,17 @@
         display: flex;
         flex-direction: column;
         min-height: 100%;
+        cursor: grab;
+      }
+
+      .media-card.dragging {
+        opacity: 0.45;
+        transform: scale(0.98);
+      }
+
+      .media-card.drop-target {
+        outline: 2px dashed var(--primary);
+        outline-offset: -4px;
       }
 
       .preview {
@@ -286,6 +297,17 @@
                 <option value="video">Video</option>
               </select>
             </div>
+            <div class="field">
+              <label for="sortOrder">Slide Sort Order</label>
+              <input
+                id="sortOrder"
+                name="sortOrder"
+                type="number"
+                min="1"
+                step="1"
+                placeholder="1"
+              />
+            </div>
             <div class="field" style="grid-column: 1 / -1">
               <label for="description">Description</label>
               <textarea
@@ -327,6 +349,7 @@
           <h2 style="margin: 0; font-size: 1.15rem">Media Library</h2>
           <span class="badge" id="countBadge">0 items</span>
         </div>
+        <p class="notice" style="margin: 0">Tip: Drag media cards to arrange slideshow order quickly.</p>
         <div id="mediaList"></div>
       </section>
     </main>
@@ -369,6 +392,7 @@
       const mediaIdInput = document.getElementById("mediaId");
       const titleInput = document.getElementById("title");
       const typeInput = document.getElementById("mediaType");
+      const sortOrderInput = document.getElementById("sortOrder");
       const descriptionInput = document.getElementById("description");
       const fileInput = document.getElementById("fileInput");
       const submitButton = document.getElementById("submitButton");
@@ -378,6 +402,7 @@
       const statusMessage = document.getElementById("statusMessage");
 
       let mediaItems = [];
+      let dragSourceId = "";
 
       const uid = () =>
         `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -405,9 +430,55 @@
           src: record.src || "",
           source: record.source || "firebase",
           storagePath: record.storagePath || "",
+          sortOrder:
+            Number.isFinite(Number(record.sortOrder)) &&
+            Number(record.sortOrder) > 0
+              ? Number(record.sortOrder)
+              : null,
           createdAt: record.createdAt || "",
           updatedAt: record.updatedAt || "",
         };
+      }
+
+      function getNextSortOrder() {
+        const maxOrder = mediaItems.reduce(
+          (max, item) => Math.max(max, Number(item.sortOrder) || 0),
+          0,
+        );
+        return maxOrder + 1;
+      }
+
+      function parseSortOrder(value) {
+        if (value === "" || value === null || value === undefined) return null;
+        const parsed = Number(value);
+        if (!Number.isInteger(parsed) || parsed < 1) return null;
+        return parsed;
+      }
+
+      function toRecordPayload(item, sortOrder) {
+        return {
+          title: item.title || "Untitled",
+          description: item.description || "",
+          type: item.type || "image",
+          src: item.src || "",
+          source: item.source || "firebase-storage",
+          storagePath: item.storagePath || "",
+          sortOrder,
+          createdAt: item.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+      }
+
+      function moveItemByIds(items, sourceId, targetId) {
+        const sourceIndex = items.findIndex((item) => item.id === sourceId);
+        const targetIndex = items.findIndex((item) => item.id === targetId);
+        if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
+          return items;
+        }
+        const reordered = [...items];
+        const [moved] = reordered.splice(sourceIndex, 1);
+        reordered.splice(targetIndex, 0, moved);
+        return reordered;
       }
 
       function renderList() {
@@ -430,12 +501,13 @@
                 : `<img src="${safeSrc}" alt="${safeTitle}">`;
 
             return `
-          <article class="media-card">
+          <article class="media-card" data-id="${item.id}" draggable="true">
             <div class="preview">${preview}</div>
             <div class="card-body">
               <strong>${safeTitle}</strong>
               <p class="meta">${safeDescription}</p>
               <p class="meta">Type: ${item.type} • Source: ${item.source}</p>
+              <p class="meta">Slide order: ${item.sortOrder ?? "Not set"}</p>
               <div class="card-actions">
                 <button class="btn-secondary" data-action="edit" data-id="${item.id}">Edit</button>
                 <button class="btn-danger" data-action="delete" data-id="${item.id}">Delete</button>
@@ -450,6 +522,7 @@
       function resetForm() {
         form.reset();
         mediaIdInput.value = "";
+        sortOrderInput.value = "";
         submitButton.textContent = "Create Media";
         submitButton.disabled = false;
       }
@@ -484,6 +557,7 @@
         const title = titleInput.value.trim();
         const description = descriptionInput.value.trim();
         let type = typeInput.value;
+        const parsedSortOrder = parseSortOrder(sortOrderInput.value);
 
         if (!title) {
           alert("Please enter a title.");
@@ -503,6 +577,13 @@
           alert("Please choose media type.");
           return;
         }
+
+        if (sortOrderInput.value && parsedSortOrder === null) {
+          alert("Slide sort order must be a positive whole number.");
+          return;
+        }
+
+        const sortOrder = parsedSortOrder ?? getNextSortOrder();
 
         submitButton.disabled = true;
         submitButton.textContent = editingId ? "Updating..." : "Creating...";
@@ -534,6 +615,7 @@
                 src: nextSrc,
                 source: "firebase-storage",
                 storagePath: nextStoragePath,
+                sortOrder,
                 updatedAt: new Date().toISOString(),
               },
             );
@@ -548,6 +630,7 @@
               src: uploaded.src,
               source: "firebase-storage",
               storagePath: uploaded.storagePath,
+              sortOrder,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             });
@@ -590,6 +673,75 @@
         }
       }
 
+      async function saveSortOrder(items) {
+        setStatus("Saving slide order...", "ok");
+        try {
+          await Promise.all(
+            items.map((item, index) =>
+              set(
+                dbRef(database, `valentine/slideshow/assets/${item.id}`),
+                toRecordPayload(item, index + 1),
+              ),
+            ),
+          );
+          setStatus("Slide order updated.", "ok");
+        } catch (error) {
+          setStatus(
+            `Unable to save new order: ${error?.message || "Unknown error"}`,
+            "error",
+          );
+        }
+      }
+
+      function handleDragStart(event) {
+        const card = event.target.closest(".media-card");
+        if (!card) return;
+        dragSourceId = card.dataset.id || "";
+        card.classList.add("dragging");
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", dragSourceId);
+      }
+
+      function handleDragOver(event) {
+        event.preventDefault();
+        const card = event.target.closest(".media-card");
+        if (!card || card.dataset.id === dragSourceId) return;
+        card.classList.add("drop-target");
+      }
+
+      function handleDragLeave(event) {
+        const card = event.target.closest(".media-card");
+        if (!card) return;
+        card.classList.remove("drop-target");
+      }
+
+      async function handleDrop(event) {
+        event.preventDefault();
+        const targetCard = event.target.closest(".media-card");
+        if (!targetCard) return;
+        const targetId = targetCard.dataset.id;
+        const sourceId = dragSourceId || event.dataTransfer.getData("text/plain");
+        targetCard.classList.remove("drop-target");
+
+        if (!sourceId || !targetId || sourceId === targetId) {
+          dragSourceId = "";
+          return;
+        }
+
+        mediaItems = moveItemByIds(mediaItems, sourceId, targetId).map(
+          (item, index) => ({ ...item, sortOrder: index + 1 }),
+        );
+        renderList();
+        dragSourceId = "";
+        await saveSortOrder(mediaItems);
+      }
+
+      function handleDragEnd() {
+        mediaList
+          .querySelectorAll(".media-card")
+          .forEach((card) => card.classList.remove("dragging", "drop-target"));
+      }
+
       function handleListClick(event) {
         const button = event.target.closest("button[data-action]");
         if (!button) return;
@@ -606,6 +758,7 @@
         titleInput.value = item.title;
         descriptionInput.value = item.description || "";
         typeInput.value = item.type;
+        sortOrderInput.value = item.sortOrder || "";
         submitButton.textContent = "Update Media";
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -619,9 +772,12 @@
             mediaItems = entries
               .map(([id, record]) => normalizeRecord(id, record))
               .filter((item) => item.src)
-              .sort((a, b) =>
-                (b.updatedAt || "").localeCompare(a.updatedAt || ""),
-              );
+              .sort((a, b) => {
+                const orderA = a.sortOrder ?? Number.POSITIVE_INFINITY;
+                const orderB = b.sortOrder ?? Number.POSITIVE_INFINITY;
+                if (orderA !== orderB) return orderA - orderB;
+                return (b.updatedAt || "").localeCompare(a.updatedAt || "");
+              });
             renderList();
             setStatus("Connected to Firebase realtime updates.", "ok");
           },
@@ -637,6 +793,11 @@
       resetButton.addEventListener("click", resetForm);
       form.addEventListener("submit", handleSubmit);
       mediaList.addEventListener("click", handleListClick);
+      mediaList.addEventListener("dragstart", handleDragStart);
+      mediaList.addEventListener("dragover", handleDragOver);
+      mediaList.addEventListener("dragleave", handleDragLeave);
+      mediaList.addEventListener("drop", handleDrop);
+      mediaList.addEventListener("dragend", handleDragEnd);
       fileInput.addEventListener("change", () => {
         if (!typeInput.value && fileInput.files[0]) {
           typeInput.value = detectType(fileInput.files[0].name);
