@@ -36,6 +36,47 @@
         align-items: center;
         justify-content: center;
         padding: 28px 18px;
+        isolation: isolate;
+      }
+
+      body::selection {
+        background: rgba(255, 190, 220, 0.35);
+      }
+
+      .ambient-layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -2;
+        overflow: hidden;
+      }
+
+      .ambient-layer::before {
+        content: "";
+        position: absolute;
+        inset: -30%;
+        filter: blur(1);
+        background: conic-gradient(
+          from 0deg at 50% 50%,
+          rgba(255, 132, 183, 0.2),
+          rgba(255, 255, 255, 0.06),
+          rgba(255, 105, 156, 0.16),
+          rgba(255, 132, 183, 0.2)
+        );
+        animation: gradientSpin 30s linear infinite;
+        filter: blur(28px);
+        border-radius: 100%;
+      }
+
+      .floating-heart {
+        position: absolute;
+        bottom: -10vh;
+        color: rgba(255, 235, 245, 0.7);
+        text-shadow: 0 0 14px rgba(255, 128, 177, 0.4);
+        animation: rise var(--heart-duration, 12s) linear infinite;
+        animation-delay: var(--heart-delay, 0s);
+        font-size: var(--heart-size, 1rem);
+        opacity: 0;
       }
       body::before,
       body::after {
@@ -47,7 +88,7 @@
         pointer-events: none;
         z-index: -1;
         opacity: 0.28;
-        filter: blur(55px);
+        filter: blur(15px);
       }
 
       body::before {
@@ -73,6 +114,7 @@
         box-shadow: 0 18px 44px rgba(0, 0, 0, 0.3);
         text-align: center;
         display: flex;
+        animation: cardFloat 8s ease-in-out infinite;
       }
       .carddiv {
         width: 100%;
@@ -181,6 +223,45 @@
           transform: translate3d(90px, 55px, 0) scale(1.15);
         }
       }
+      @keyframes cardFloat {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      @keyframes gradientSpin {
+        to {
+          transform: rotate(1turn);
+        }
+      }
+
+      @keyframes rise {
+        0% {
+          transform: translate3d(0, 0, 0) scale(0.9);
+          opacity: 0;
+        }
+        15% {
+          opacity: 0.65;
+        }
+        100% {
+          transform: translate3d(var(--heart-drift, 0px), -120vh, 0) scale(1.25);
+          opacity: 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .card,
+        body::before,
+        body::after,
+        .floating-heart,
+        .ambient-layer::before {
+          animation: none !important;
+        }
+      }
 
       @keyframes floatBlobB {
         0% {
@@ -208,6 +289,7 @@
     </style>
   </head>
   <body>
+    <div class="ambient-layer" id="ambientLayer" aria-hidden="true"></div>
     <div class="card">
       <div class="carddiv cardletter">
         <h1>Dear Meyaaa ❤️</h1>
@@ -276,6 +358,7 @@
       const dotsWrap = document.getElementById("dots");
       const galleryStatus = document.getElementById("galleryStatus");
       const trackId = "4ewAfHYpDTzpW1GKO44CVP";
+      const ambientLayer = document.getElementById("ambientLayer");
       let spotifyController = null;
       let slideTimer = null;
 
@@ -579,6 +662,40 @@ I hope when you see them, you’ll feel how much I love you. 🥺❤️” `);
           setGalleryStatus("Could not load Firebase slideshow right now.");
         }
       }
+
+      function createFloatingHearts() {
+        if (!ambientLayer) return;
+
+        const heartCount = window.innerWidth < 640 ? 30 : 50;
+        const heartChar = ["❤", "♡", "💖", "💕"];
+
+        ambientLayer.innerHTML = "";
+
+        for (let index = 0; index < heartCount; index += 1) {
+          const heart = document.createElement("span");
+          heart.className = "floating-heart";
+          heart.textContent =
+            heartChar[Math.floor(Math.random() * heartChar.length)];
+
+          heart.style.left = `${Math.random() * 100}%`;
+          heart.style.setProperty(
+            "--heart-size",
+            `${0.8 + Math.random() * 1.4}rem`,
+          );
+          heart.style.setProperty("--heart-delay", `${Math.random() * 10}s`);
+          heart.style.setProperty(
+            "--heart-duration",
+            `${9 + Math.random() * 10}s`,
+          );
+          heart.style.setProperty(
+            "--heart-drift",
+            `${-80 + Math.random() * 160}px`,
+          );
+
+          ambientLayer.appendChild(heart);
+        }
+      }
+
       const hideAutoplayHint = () => {
         if (autoplayHint) autoplayHint.style.display = "none";
       };
@@ -626,6 +743,8 @@ I hope when you see them, you’ll feel how much I love you. 🥺❤️” `);
       if (window.__SpotifyIFrameAPI) {
         initSpotifyEmbed(window.__SpotifyIFrameAPI);
       }
+      createFloatingHearts();
+      window.addEventListener("resize", createFloatingHearts);
       initFirebasePalette();
       initFirebaseSlideshow();
     </script>
