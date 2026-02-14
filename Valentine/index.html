@@ -5,50 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Happy Valentine’s ❤️</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #ff758c, #ff7eb3);
-        color: white;
-        text-align: center;
-        padding: 30px;
+        min-height: 100vh;
+        font-family: "Inter", "Segoe UI", Arial, sans-serif;
+        background:
+          radial-gradient(
+            circle at 15% 20%,
+            rgba(255, 255, 255, 0.12) 0,
+            transparent 30%
+          ),
+          radial-gradient(
+            circle at 80% 10%,
+            rgba(255, 160, 210, 0.18) 0,
+            transparent 35%
+          ),
+          linear-gradient(
+            140deg,
+            var(--bg-gradient-start),
+            var(--bg-gradient-end)
+          );
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px 18px;
       }
+
       .card {
-        max-width: 700px;
-        margin: auto;
-        background: rgba(255, 255, 255, 0.15);
-        padding: 25px;
-        border-radius: 20px;
-        backdrop-filter: blur(8px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        width: min(100%, 50vw);
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        padding: 30px 24px;
+        border-radius: 22px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.3);
+        text-align: center;
       }
+
       h1 {
-        font-size: 2.5em;
-        margin-bottom: 10px;
+        font-size: clamp(2rem, 4.8vw, 3.1rem);
+        margin: 0;
+        letter-spacing: 0.02em;
       }
-      p {
-        font-size: 1.2em;
-        line-height: 1.6;
+
+      .subtitle {
+        margin: 12px auto 0;
+        max-width: 640px;
+        font-size: 1rem;
+        line-height: 1.7;
+        color: var(--text-soft);
       }
-      img {
-        width: 100%;
-        max-width: 300px;
-        border-radius: 15px;
-        margin: 10px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+
+      h2 {
+        margin: 30px 0 12px;
+        font-size: 1.3rem;
       }
+
       .gallery {
-        margin-top: 10px;
+        margin-top: 8px;
       }
+
       .slideshow {
         position: relative;
-        width: min(100%, 640px);
+        width: min(100%, 760px);
         margin: 0 auto;
-        border-radius: 16px;
+        border-radius: 18px;
         overflow: hidden;
         aspect-ratio: 16/9;
-        background: rgba(0, 0, 0, 0.25);
+        background: rgba(0, 0, 0, 0.24);
+        border: 1px solid rgba(255, 255, 255, 0.22);
       }
+
       .slide {
         position: absolute;
         inset: 0;
@@ -70,50 +102,62 @@
       .dots {
         display: flex;
         justify-content: center;
-        gap: 8px;
-        margin-top: 10px;
+        gap: 9px;
+        margin-top: 12px;
       }
+
       .dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 99px;
+        aspect-ratio: 2 / 1;
+        width: 12px;
+        border-radius: 50px;
         border: 0;
-        background: rgba(255, 255, 255, 0.45);
+        background: #7a7a7a;
+        transition: all ease 1s;
       }
+
       .dot.active {
-        background: #fff;
+        background: var(--dot-active);
+        aspect-ratio: 10 / 1;
+        width: 50px;
+        background: white;
+        transition: all ease 1s;
       }
+
       .gallery-status {
-        margin-top: 10px;
-        font-size: 0.95rem;
-        opacity: 0.9;
+        margin-top: 12px;
+        font-size: 0.94rem;
+        color: var(--text-soft);
       }
-      button {
-        margin-top: 20px;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 12px;
-        background: #ff2e63;
-        color: white;
-        font-size: 1.1em;
-        cursor: pointer;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-      }
-      button:hover {
-        background: #ff0844;
-      }
+
       #secret {
         display: none;
         margin-top: 20px;
-        font-size: 1.3em;
-        font-weight: bold;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-main);
+      }
+
+      #autoplayHint {
+        font-size: 0.9rem;
+        color: var(--text-soft);
+      }
+
+      @media (max-width: 640px) {
+        .card {
+          padding: 24px 16px;
+          border-radius: 18px;
+        }
+
+        h2 {
+          margin-top: 24px;
+        }
       }
     </style>
   </head>
   <body>
     <div class="card">
       <h1>Happy Valentine’s Day ❤️</h1>
-      <p>
+      <p class="subtitle">
         Hi love 🥺💖 <br /><br />
         I just want you to know that you’re the best thing that ever happened to
         me. Thank you for being my safe place, my happiness, and my favorite
@@ -137,7 +181,7 @@
 
       <div id="spotifyMount" style="margin-top: 15px"></div>
 
-      <p id="autoplayHint" style="font-size: 0.9em; opacity: 0.8">
+      <p id="autoplayHint">
         (If it doesn't play automatically, tap the button again 💖)
       </p>
     </div>
@@ -157,6 +201,97 @@
       const trackId = "4ewAfHYpDTzpW1GKO44CVP";
       let spotifyController = null;
       let slideTimer = null;
+
+      const fallbackPalette = {
+        bgStart: "#2e1328",
+        bgEnd: "#5f1f3a",
+        surface: "rgba(255, 255, 255, 0.1)",
+        surfaceBorder: "rgba(255, 255, 255, 0.28)",
+        textMain: "#fff7fb",
+        textSoft: "rgba(255, 247, 251, 0.85)",
+        accent: "#ff4f83",
+        accentHover: "#ff2f71",
+      };
+
+      const isColorLike = (value) =>
+        typeof value === "string" && value.trim().length > 0;
+
+      function applyPalette(palette) {
+        if (!palette || typeof palette !== "object") return;
+        const rootStyle = document.documentElement.style;
+
+        const map = [
+          ["--bg-gradient-start", palette.bgStart],
+          ["--bg-gradient-end", palette.bgEnd],
+          ["--surface", palette.surface],
+          ["--surface-border", palette.surfaceBorder],
+          ["--text-main", palette.textMain],
+          ["--text-soft", palette.textSoft],
+          ["--accent", palette.accent],
+          ["--accent-hover", palette.accentHover],
+          ["--dot", palette.dot],
+          ["--dot-active", palette.dotActive],
+        ];
+
+        map.forEach(([key, value]) => {
+          if (isColorLike(value)) rootStyle.setProperty(key, value.trim());
+        });
+      }
+
+      function normalizePalette(data) {
+        const raw =
+          data?.palette ||
+          data?.colors ||
+          data?.theme ||
+          data?.valentine?.palette ||
+          data?.valentine?.colors ||
+          data;
+
+        if (!raw || typeof raw !== "object") return null;
+
+        return {
+          bgStart: raw.bgStart || raw.backgroundStart || raw.background1,
+          bgEnd: raw.bgEnd || raw.backgroundEnd || raw.background2,
+          surface: raw.surface || raw.card || raw.cardBackground,
+          surfaceBorder:
+            raw.surfaceBorder || raw.cardBorder || raw.border || raw.outline,
+          textMain: raw.textMain || raw.text || raw.primaryText,
+          textSoft: raw.textSoft || raw.secondaryText || raw.mutedText,
+          accent: raw.accent || raw.button || raw.primary,
+          accentHover: raw.accentHover || raw.buttonHover || raw.primaryHover,
+          dot: raw.dot,
+          dotActive: raw.dotActive,
+        };
+      }
+
+      async function initFirebasePalette() {
+        const palettePaths = [
+          "valentine/palette",
+          "valentine/theme",
+          "palette/valentine",
+        ];
+
+        for (const path of palettePaths) {
+          try {
+            const res = await fetch(`${FIREBASE_DB_URL}/${path}.json`, {
+              cache: "no-store",
+            });
+
+            if (!res.ok) continue;
+
+            const data = await res.json();
+            const palette = normalizePalette(data);
+            if (palette) {
+              applyPalette({ ...fallbackPalette, ...palette });
+              return;
+            }
+          } catch (error) {
+            console.warn(`[Palette] Could not load ${path}`, error);
+          }
+        }
+
+        applyPalette(fallbackPalette);
+      }
 
       const normalizeMedia = (raw) => {
         if (!raw) return null;
@@ -290,7 +425,7 @@
         }
 
         activate(0);
-        setGalleryStatus(`${items.length} memories loaded from Firebase ✨`);
+        setGalleryStatus(`${items.length} memories loaded :>`);
 
         if (slideElements.length > 1) {
           slideTimer = setInterval(() => {
@@ -367,6 +502,7 @@
       if (window.__SpotifyIFrameAPI) {
         initSpotifyEmbed(window.__SpotifyIFrameAPI);
       }
+      initFirebasePalette();
       initFirebaseSlideshow();
     </script>
   </body>
