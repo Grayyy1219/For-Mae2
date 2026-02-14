@@ -1,0 +1,19 @@
+{
+  "valentine": {
+    "slideshow": {
+      "intervalMs": 5000,
+      "assets": [
+        { "src": "assets/1.jpg", "type": "image" },
+        { "src": "assets/2.jpg", "type": "image" },
+        { "src": "assets/3.jpg", "type": "image" },
+        { "src": "assets/4.jpg", "type": "image" },
+        { "src": "assets/5.jpg", "type": "image" },
+        { "src": "assets/6.jpg", "type": "image" },
+        { "src": "assets/7.mp4", "type": "video" },
+        { "src": "assets/8.jpg", "type": "image" },
+        { "src": "assets/9.jpg", "type": "image" },
+        { "src": "assets/10.mp4", "type": "video" }
+      ]
+    }
+  }
+}

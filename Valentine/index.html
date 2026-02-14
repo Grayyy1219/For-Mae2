@@ -38,10 +38,55 @@
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
       }
       .gallery {
+        margin-top: 10px;
+      }
+      .slideshow {
+        position: relative;
+        width: min(100%, 640px);
+        margin: 0 auto;
+        border-radius: 16px;
+        overflow: hidden;
+        aspect-ratio: 16/9;
+        background: rgba(0, 0, 0, 0.25);
+      }
+      .slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 0.45s ease;
+        pointer-events: none;
+      }
+      .slide.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .slide img,
+      .slide video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .dots {
         display: flex;
-        flex-wrap: wrap;
         justify-content: center;
-        gap: 10px;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 99px;
+        border: 0;
+        background: rgba(255, 255, 255, 0.45);
+      }
+      .dot.active {
+        background: #fff;
+      }
+      .gallery-status {
+        margin-top: 10px;
+        font-size: 0.95rem;
+        opacity: 0.9;
       }
       button {
         margin-top: 20px;
@@ -77,7 +122,9 @@
 
       <h2>Our Memories 📸</h2>
       <div class="gallery">
-        <!-- task: here i need to add logic on how i can make the folder assests that has extensions for img and video that will be all be player on a slide show note: video is auto played if currently showed-->
+        <div id="slideshow" class="slideshow" aria-live="polite"></div>
+        <div id="dots" class="dots" aria-label="Slideshow pagination"></div>
+        <p id="galleryStatus" class="gallery-status">Loading memories…</p>
       </div>
 
       <button onclick="showSecret()">Click for a Surprise 💌</button>
@@ -97,11 +144,171 @@
     <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
 
     <script>
+      const FIREBASE_DB_URL =
+        "https://for-mae-default-rtdb.asia-southeast1.firebasedatabase.app";
+      const IMAGE_EXT = /\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i;
+      const VIDEO_EXT = /\.(mp4|webm|ogg|mov)(\?.*)?$/i;
+
       const mount = document.getElementById("spotifyMount");
       const autoplayHint = document.getElementById("autoplayHint");
+      const slideshow = document.getElementById("slideshow");
+      const dotsWrap = document.getElementById("dots");
+      const galleryStatus = document.getElementById("galleryStatus");
       const trackId = "4ewAfHYpDTzpW1GKO44CVP";
       let spotifyController = null;
+      let slideTimer = null;
 
+      const normalizeMedia = (raw) => {
+        if (!raw) return null;
+        if (typeof raw === "string") {
+          const src = raw.trim();
+          if (!src) return null;
+          return { src, type: VIDEO_EXT.test(src) ? "video" : "image" };
+        }
+
+        const src = typeof raw.src === "string" ? raw.src.trim() : "";
+        if (!src) return null;
+        const explicitType = typeof raw.type === "string" ? raw.type : "";
+        const guessedType = VIDEO_EXT.test(src)
+          ? "video"
+          : IMAGE_EXT.test(src)
+            ? "image"
+            : "image";
+        return {
+          src,
+          type:
+            explicitType === "video" || explicitType === "image"
+              ? explicitType
+              : guessedType,
+        };
+      };
+
+      async function fetchSlideshowData() {
+        const res = await fetch(`${FIREBASE_DB_URL}/valentine/slideshow.json`, {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error(`Failed to load slideshow data (${res.status})`);
+        }
+
+        const data = await res.json();
+        const assets = Array.isArray(data?.assets)
+          ? data.assets
+          : Array.isArray(data)
+            ? data
+            : [];
+
+        return {
+          assets: assets.map(normalizeMedia).filter(Boolean),
+          intervalMs:
+            Number.isFinite(Number(data?.intervalMs)) &&
+            Number(data?.intervalMs) >= 2000
+              ? Number(data.intervalMs)
+              : 5000,
+        };
+      }
+
+      function setGalleryStatus(message) {
+        if (galleryStatus) galleryStatus.textContent = message;
+      }
+
+      function renderSlideshow(items, intervalMs) {
+        if (!slideshow || !dotsWrap) return;
+        slideshow.innerHTML = "";
+        dotsWrap.innerHTML = "";
+        if (slideTimer) {
+          clearInterval(slideTimer);
+          slideTimer = null;
+        }
+
+        if (!items.length) {
+          setGalleryStatus(
+            "No memories yet. Add assets in Firebase to display them.",
+          );
+          return;
+        }
+
+        const slideElements = items.map((item) => {
+          const slide = document.createElement("div");
+          slide.className = "slide";
+
+          const media = document.createElement(
+            item.type === "video" ? "video" : "img",
+          );
+          media.src = item.src;
+          media.setAttribute("aria-hidden", "true");
+
+          if (item.type === "video") {
+            media.muted = true;
+            media.playsInline = true;
+            media.preload = "metadata";
+            media.loop = true;
+          } else {
+            media.alt = "Memory";
+            media.loading = "lazy";
+          }
+
+          slide.appendChild(media);
+          slideshow.appendChild(slide);
+          return slide;
+        });
+
+        const dots = slideElements.map((_, index) => {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "dot";
+          dot.setAttribute("aria-label", `Show slide ${index + 1}`);
+          dot.addEventListener("click", () => activate(index));
+          dotsWrap.appendChild(dot);
+          return dot;
+        });
+
+        let current = 0;
+
+        function activate(index) {
+          current = index;
+          slideElements.forEach((slide, i) => {
+            const isActive = i === index;
+            slide.classList.toggle("active", isActive);
+            dots[i].classList.toggle("active", isActive);
+
+            const video = slide.querySelector("video");
+            if (!video) return;
+
+            if (isActive) {
+              try {
+                video.currentTime = 0;
+              } catch (error) {
+                console.warn("Unable to reset video time", error);
+              }
+              video.play().catch(() => {});
+            } else {
+              video.pause();
+            }
+          });
+        }
+
+        activate(0);
+        setGalleryStatus(`${items.length} memories loaded from Firebase ✨`);
+
+        if (slideElements.length > 1) {
+          slideTimer = setInterval(() => {
+            activate((current + 1) % slideElements.length);
+          }, intervalMs);
+        }
+      }
+
+      async function initFirebaseSlideshow() {
+        console.log("initFirebaseSlideshow");
+        try {
+          const { assets, intervalMs } = await fetchSlideshowData();
+          renderSlideshow(assets, intervalMs);
+        } catch (error) {
+          console.error("[Slideshow]", error);
+          setGalleryStatus("Could not load Firebase slideshow right now.");
+        }
+      }
       const hideAutoplayHint = () => {
         if (autoplayHint) autoplayHint.style.display = "none";
       };
@@ -157,14 +364,10 @@
         }
       }
 
-      // document.addEventListener("click", attemptSpotifyPlay, { passive: true });
-      // document.addEventListener("touchstart", attemptSpotifyPlay, {
-      //   passive: true,
-      // });
-
       if (window.__SpotifyIFrameAPI) {
         initSpotifyEmbed(window.__SpotifyIFrameAPI);
       }
+      initFirebaseSlideshow();
     </script>
   </body>
 </html>
