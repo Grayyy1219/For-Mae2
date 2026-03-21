@@ -438,7 +438,7 @@
           <article class="auth-letter" aria-label="Welcome letter">
             <p>Mi,</p>
             <p>
-              Di ko alam pano sisimulan ‘to, pero I’ve been thinking a lot since nung last nating usap. Gusto ko lang sabihin to nang maayos, hindi para makipag away, kundi para maintindihan mo ako.
+              Di ko alam pano sisimulan to, pero I’ve been thinking a lot since nung last nating usap. Gusto ko lang sabihin to nang maayos, hindi para makipag away, kundi para maintindihan mo ako.
             </p>
             <p>
               Hindi ko madeny, nasaktan ako. Siguro kasi recently akala ko okay tayo hindi man perfect pero okay. Yung simpleng usap, tawa, random moments natin, parang safe ako dun. Kaya ang bigat lang na parang biglang nag-iba yung nararamdaman mo.
@@ -468,22 +468,22 @@
               I don’t want to fight you, and I don’t want to blame you. Gusto ko lang maintindihan mo ako, the same way I try to understand you. As your boyfriend, I’m also going through things… sana kahit papano makita mo rin yun.
             </p>
             <p>
-              Hindi ko alam kung anong nangyayari sayo, pero minsan naiisip ko na baka hinahayaan mo nalang din yung sarili mo na ma-fall out of love. Kahit hindi mo namamalayan, parang hinahayaan mo nalang na lumayo yung feelings mo sakin. Pero alam ko rin na may choice ka—pwede mo pa rin piliin isipin na mahal mo ako, na gusto mo pa akong makasama. Kasi dun din naman nagsisimula yun eh, sa pagpili araw-araw. Siguro isa yun sa nakaapekto kung bakit napunta tayo sa ganito.
+              Hindi ko alam kung anong nangyayari sayo, pero minsan naiisip ko na baka hinahayaan mo nalang din yung sarili mo na ma-fall out of love. Kahit hindi mo namamalayan, parang hinahayaan mo nalang na lumayo yung feelings mo sakin. Pero alam ko rin na may choice ka pwede mo pa rin piliin isipin na mahal mo ako, na gusto mo pa akong makasama. Kasi dun din naman nagsisimula yun eh, sa pagpili araw-araw. Siguro isa yun sa nakaapekto kung bakit napunta tayo sa ganito.
             </p>
             <p>
               Hindi ko alam kung anong mangyayari next, and honestly nakakatakot isipin. Pero ayoko rin na pilitin ka kung hindi ka na sure. Ayoko maging dahilan kung bakit ka mastuck.
             </p>
             <p>
-              I’ll respect kung ano man yung kailangan mo right now. Pero to be honest, ayoko pa matapos ‘to ng ganito lang. Hindi pa ako ready na bitawan ka, lalo na kung alam ko sa sarili ko na mahal pa kita at gusto ko pa ayusin kung anong meron tayo.
+              I’ll respect kung ano man yung kailangan mo right now. Pero to be honest, ayoko pa matapos to ng ganito lang. Hindi pa ako ready na bitawan ka, lalo na kung alam ko sa sarili ko na mahal pa kita at gusto ko pa ayusin kung anong meron tayo.
             </p>
             <p>
-              Gusto ko lang malaman mo na naging totoo ako sayo. Pinili kita araw-araw. “I just did my part,” nasasayo nalang on how you will do yours—and ginagawa ko pa rin, nilalabanan ko yung sarili kong thoughts every time na feeling ko ayaw ko na. Pero napapansin ko rin na yung way natin, lalo na yung pag avoid or pag pull away, hindi na nagwo-work para sa atin. Imbis na maayos, lalo lang tayong nagkakalayo, and ako, mas lalo akong nawawala sa sarili ko trying to hold on.
+              Gusto ko lang malaman mo na naging totoo ako sayo. Pinili kita araw-araw. “I just did my part,” nasasayo nalang on how you will do yours and ginagawa ko pa rin, nilalabanan ko yung sarili kong thoughts every time na feeling ko ayaw ko na. Pero napapansin ko rin na yung way natin, lalo na yung pag avoid or pag pull away, hindi na nagwo-work para sa atin. Imbis na maayos, lalo lang tayong nagkakalayo, and ako, mas lalo akong nawawala sa sarili ko trying to hold on.
             </p>
             <p>
               I chose to understand you, to love you as a whole not just the good days, hindi lang kapag madali. Pero sana, kahit papano, maramdaman ko rin yun galing sayo.
             </p>
             <p>
-              Siguro eto na yung last time na hihiling ako sayo na mag-stay. Hindi dahil sumusuko na ako, pero dahil ayoko na umabot sa point na parang pinipilit nalang kita. Gusto ko kung pipiliin mo ako, kusa—hindi dahil hinihingi ko.
+              Siguro eto na yung last time na hihiling ako sayo na mag-stay. Hindi dahil sumusuko na ako, pero dahil ayoko na umabot sa point na parang pinipilit nalang kita. Gusto ko kung pipiliin mo ako, kusa hindi dahil hinihingi ko.
             </p>
             <p>
               If you still want this, sana we both try not just when it’s easy, but especially when it’s hard.
