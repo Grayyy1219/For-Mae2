@@ -7,6 +7,7 @@
   const STORAGE_LAST_OPEN_MONTH = "mtc_last_open_month";
   const STORAGE_DISPLAY_NAME = "mtc_display_name";
   const STORAGE_AUTH_SESSION = "mtc_auth_session";
+  const STORAGE_VISITOR_LOGGED = "mtc_visitor_logged";
   const AMBIENT_IDLE_SRC = "assets/audio/Mine.mp3";
   const AMBIENT_YEARBOOK_SRC = "assets/audio/Anti-Hero.mp3";
   const FIREBASE_DB_URL =
@@ -67,7 +68,7 @@
     const lastDayOfTarget = new Date(
       d.getFullYear(),
       d.getMonth() + 1,
-      0
+      0,
     ).getDate();
     d.setDate(Math.min(day, lastDayOfTarget));
     return d;
@@ -123,7 +124,101 @@
       return null;
     }
   }
+  async function fetchClientIp() {
+    try {
+      const res = await fetch("https://api.ipify.org?format=json", {
+        cache: "no-store",
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data?.ip || null;
+    } catch {
+      return null;
+    }
+  }
 
+  async function fetchLocationFromIp(ipAddress) {
+    if (!ipAddress) return null;
+    try {
+      const res = await fetch(
+        `https://ipapi.co/${encodeURIComponent(ipAddress)}/json/`,
+        {
+          cache: "no-store",
+        },
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      const city = String(data?.city || "").trim();
+      const region = String(data?.region || "").trim();
+      const country = String(data?.country_name || "").trim();
+      const parts = [city, region, country].filter(Boolean);
+      return {
+        city: city || null,
+        region: region || null,
+        country: country || null,
+        label: parts.length ? parts.join(", ") : null,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  async function incrementVisitorOpenCount(userId, context = {}) {
+    if (!userId) return null;
+    const path = `visitorStats/${userId}`;
+    const existing = await fetchFirebaseJSON(path);
+    const currentCount = Number(existing?.openCount || 0);
+    const nextCount = currentCount + 1;
+    const payload = {
+      userId,
+      openCount: nextCount,
+      firstOpenedAt: existing?.firstOpenedAt || context.openedAt || null,
+      lastOpenedAt: context.openedAt || null,
+      lastPage: context.page || "",
+      lastPath: context.path || "",
+      lastIpAddress: context.ipAddress || null,
+      lastLocation: context.location || null,
+      updatedAt: new Date().toISOString(),
+    };
+    await writeFirebaseJSON(path, payload, "PUT");
+    return nextCount;
+  }
+
+  async function logVisitorOpen() {
+    if (typeof sessionStorage !== "undefined") {
+      const alreadyLogged =
+        sessionStorage.getItem(STORAGE_VISITOR_LOGGED) === "1";
+      if (alreadyLogged) return;
+    }
+
+    const userId = getUserId();
+    const ipAddress = await fetchClientIp();
+    const location = await fetchLocationFromIp(ipAddress);
+    const openedAt = new Date().toISOString();
+    const dateKey = openedAt.slice(0, 10);
+    const openCount = await incrementVisitorOpenCount(userId, {
+      openedAt,
+      page: PAGE,
+      path: window.location.pathname || "",
+      ipAddress,
+      location,
+    });
+    const payload = {
+      userId,
+      ipAddress,
+      location,
+      openCount,
+      page: PAGE,
+      path: window.location.pathname || "",
+      referrer: document.referrer || "",
+      userAgent: navigator.userAgent || "",
+      openedAt,
+    };
+    await writeFirebaseJSON(`visitorLogs/${dateKey}`, payload, "POST");
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem(STORAGE_VISITOR_LOGGED, "1");
+    }
+  }
   function getUserId() {
     try {
       const stored = localStorage.getItem(STORAGE_USER_ID);
@@ -153,7 +248,7 @@
     let title = "";
     try {
       const res = await fetch(
-        `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`
+        `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`,
       );
       if (res.ok) {
         const data = await res.json();
@@ -314,7 +409,7 @@
     await writeFirebaseJSON(
       `userProfiles/${ACTIVE_PROFILE.key}`,
       payload,
-      "PUT"
+      "PUT",
     );
   }
 
@@ -334,7 +429,38 @@
     modal.setAttribute("aria-hidden", "true");
     modal.innerHTML = `
       <div class="auth-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="authModalTitle" tabindex="-1">
-        <header class="auth-modal__header">
+      <section class="auth-modal__letter-stage">
+          <header class="auth-modal__header">
+            <p class="auth-modal__eyebrow">For you</p>
+            <h2 class="auth-modal__title" id="authModalTitle">A letter for you</h2>
+            <p class="auth-modal__subtitle" id="authModalSubtitle">If you opened this site, this message is for you.</p>
+          </header>
+          <article class="auth-letter" aria-label="Welcome letter">
+            <p>
+              Hi love,
+            </p>
+            <p>
+              If you are reading this, thank you for opening this little world one more time.
+              I made this page to hold everything I could not always say perfectly in person.
+            </p>
+            <p>
+              You were never just part of my days—you were the meaning inside them.
+              In every memory here, there is gratitude, softness, and the quiet truth that loving you changed me.
+            </p>
+            <p>
+              If life takes us through different seasons, I still hope this letter reminds you:
+              you are deeply loved, sincerely appreciated, and unforgettable to me.
+            </p>
+            <p>
+              I kept this letter here as a small reminder of what you mean to me—simple, honest, and true.
+            </p>
+            <p>Always,</p>
+            <p class="auth-letter__signature">Grayyy ❤️</p>
+          </article>
+          <button class="btn btn-primary auth-modal__start" type="button">Open the capsule</button>
+        </section>
+        <form class="auth-modal__form is-hidden">  
+      <header class="auth-modal__header">
           <p class="auth-modal__eyebrow">Welcome</p>
           <h2 class="auth-modal__title" id="authModalTitle">Let’s set up your profile</h2>
           <p class="auth-modal__subtitle" id="authModalSubtitle">Enter a unique display name to begin.</p>
@@ -375,6 +501,8 @@
     return new Promise((resolve) => {
       const modal = createAuthModal();
       const dialog = modal.querySelector(".auth-modal__dialog");
+      const letterStage = modal.querySelector(".auth-modal__letter-stage");
+      const startBtn = modal.querySelector(".auth-modal__start");
       const form = modal.querySelector(".auth-modal__form");
       const nameInput = form.querySelector('input[name="displayName"]');
       const pinField = form.querySelector(".auth-modal__pin-field");
@@ -404,13 +532,23 @@
         mode = "identify";
         loadedProfile = null;
         submitBtn.textContent = "Continue";
-        subtitle.textContent = "Enter a unique display name to begin.";
+
+        if (subtitle)
+          subtitle.textContent = "Enter a unique display name to begin.";
         setError("");
         pinField?.classList.add("is-hidden");
         if (pinInput) {
           pinInput.value = "";
           pinInput.required = false;
         }
+      };
+  const showProfileForm = () => {
+        letterStage?.classList.add("is-hidden");
+        form?.classList.remove("is-hidden");
+        if (subtitle) {
+          subtitle.textContent = "Enter a unique display name to begin.";
+        }
+        nameInput?.focus();
       };
 
       if (storedName && nameInput) {
@@ -419,6 +557,9 @@
 
       nameInput?.addEventListener("input", () => {
         resetFlow();
+      });
+startBtn?.addEventListener("click", () => {
+        showProfileForm();
       });
 
       const showModal = () => {
@@ -501,7 +642,7 @@
         await writeFirebaseJSON(
           `userProfiles/${toFirebaseKey(displayName)}`,
           payload,
-          "PUT"
+          "PUT",
         );
         storeDisplayName(displayName);
         setActiveProfile(displayName, pinHash);
@@ -706,7 +847,7 @@
     const startDate = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate()
+      today.getDate(),
     );
     const months = Array.from({ length: 12 }).map((_, i) => ({
       id: i + 1,
@@ -737,8 +878,8 @@
         const notes = Array.isArray(firebaseNotes?.notes)
           ? firebaseNotes.notes
           : Array.isArray(firebaseNotes)
-          ? firebaseNotes
-          : [];
+            ? firebaseNotes
+            : [];
         PATCH_NOTES_CACHE = notes;
         return notes;
       }
@@ -1359,7 +1500,7 @@
 
     const loaderTitle = modal.querySelector(".media-modal__loading-title");
     const loaderSubtitle = modal.querySelector(
-      ".media-modal__loading-subtitle"
+      ".media-modal__loading-subtitle",
     );
     if (loaderTitle && title) loaderTitle.textContent = title;
     if (loaderSubtitle) {
@@ -1445,7 +1586,7 @@
       } else {
         slidesWrap.innerHTML = slidesHtml;
         mediaModalSlides = Array.from(
-          slidesWrap.querySelectorAll(".media-modal__slide")
+          slidesWrap.querySelectorAll(".media-modal__slide"),
         );
       }
 
@@ -1489,11 +1630,11 @@
     const { slidesHtml, sources: normalized } = buildSlidesFromSources(sources);
     slidesWrap.innerHTML = slidesHtml;
     mediaModalSlides = Array.from(
-      slidesWrap.querySelectorAll(".media-modal__slide")
+      slidesWrap.querySelectorAll(".media-modal__slide"),
     );
     mediaModalIndex = Math.max(
       0,
-      Math.min(startIndex, mediaModalSlides.length - 1)
+      Math.min(startIndex, mediaModalSlides.length - 1),
     );
 
     if (normalized.length) {
@@ -1537,7 +1678,7 @@
     marker,
     month,
     data,
-    { isOpenable, unlockMs }
+    { isOpenable, unlockMs },
   ) {
     const show = () => {
       primeMonthSlides(month);
@@ -1627,7 +1768,7 @@
           isTimeUnlocked,
           isUnlocked,
         },
-        index
+        index,
       ) => {
         const marker = document.createElement("button");
         marker.type = "button";
@@ -1671,13 +1812,13 @@
 
         marker.setAttribute(
           "aria-label",
-          `${marker.dataset.title}: ${marker.dataset.statusLabel}. ${unlockLabel}`
+          `${marker.dataset.title}: ${marker.dataset.statusLabel}. ${unlockLabel}`,
         );
 
         attachMarkerInteractions(marker, month, data, { isOpenable, unlockMs });
         hydrateMarkerSongLabel(marker, month);
         container.appendChild(marker);
-      }
+      },
     );
   }
 
@@ -1938,7 +2079,7 @@
     const orbit = modal.querySelector(".yearbook-loader__orbit");
     if (!orbit) return;
     const items = Array.from(
-      orbit.querySelectorAll(".yearbook-loader__orbit-item")
+      orbit.querySelectorAll(".yearbook-loader__orbit-item"),
     );
     if (!items.length || !yearbookLoaderState.sources.length) return;
 
@@ -2028,7 +2169,7 @@
   function getSpotifyTrackId(url) {
     if (!url) return null;
     const match = String(url).match(
-      /open\.spotify\.com\/track\/([a-zA-Z0-9]+)/
+      /open\.spotify\.com\/track\/([a-zA-Z0-9]+)/,
     );
     return match ? match[1] : null;
   }
@@ -2066,7 +2207,7 @@
     } else {
       const summary = listSummary(
         soundtrackList,
-        "Add the songs that defined the month."
+        "Add the songs that defined the month.",
       );
       const p = document.createElement("p");
       p.textContent = summary;
@@ -2104,7 +2245,7 @@
 
     const highlightSummary = listSummary(
       highlightsList.length ? highlightsList : placesList,
-      month?.surprise || "Add highlights from the month."
+      month?.surprise || "Add highlights from the month.",
     );
 
     const memoriesSummary = memoriesList.length
@@ -2131,7 +2272,7 @@
         icon: "bxs-photo-album",
         summary: memoriesSummary,
         sources: photosList,
-      })
+      }),
     );
 
     return box;
@@ -2182,7 +2323,7 @@
 
       const supportingSummary = listSummary(
         supportingList.length ? supportingList : placesList,
-        "List the moments that supported you."
+        "List the moments that supported you.",
       );
 
       const page = document.createElement("div");
@@ -2218,7 +2359,7 @@
           label: "Supporting Moments",
           icon: "bxs-heart",
           list: supportingSummary,
-        })
+        }),
       );
       front.append(frontBox);
 
@@ -2252,7 +2393,7 @@
 
       if (nextMonthIndex < months.length) {
         back.append(
-          createYearbookMainEntry(months[nextMonthIndex], nextMonthIndex)
+          createYearbookMainEntry(months[nextMonthIndex], nextMonthIndex),
         );
       } else {
         const wrapBox = document.createElement("div");
@@ -2266,7 +2407,7 @@
 Every month with you taught me something about patience, about understanding, about how even on days na magulo ang lahat, having you around makes things lighter. Hindi naman araw-araw okay, pero it’s good enough, and it’s still us trying, figuring things out month by month.
 
 As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow, and the days after, bring something better for us more calm days, more laughs, more moments na tahimik lang pero safe. I don’t have everything figured out, but one thing’s clear: I still want to be here with you as we step into the new year, together.`,
-          })
+          }),
         );
         back.append(wrapBox);
       }
@@ -2295,7 +2436,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     return {
       controllers: new Map(),
       trackIds: months.map((month) =>
-        getYearbookSoundtrackId(normalizeYearbookList(month?.songsAdded))
+        getYearbookSoundtrackId(normalizeYearbookList(month?.songsAdded)),
       ),
       currentMonthIndex: null,
       pendingMonthIndex: null,
@@ -2306,7 +2447,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     if (!modal || !IFrameAPI?.createController || !yearbookState.spotify)
       return;
     const mounts = modal.querySelectorAll(
-      ".yearbook-spotify-embed[data-spotify-track]"
+      ".yearbook-spotify-embed[data-spotify-track]",
     );
     mounts.forEach((mount) => {
       const trackId = mount.dataset.spotifyTrack;
@@ -2325,7 +2466,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
             }
             yearbookState.spotify.pendingMonthIndex = null;
           }
-        }
+        },
       );
     });
   }
@@ -2567,7 +2708,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
         const pageTurn = state.wrapper.querySelector(`#${pageTurnId}`);
         if (!pageTurn) return;
         const transitionDuration = parseFloat(
-          window.getComputedStyle(pageTurn).transitionDuration
+          window.getComputedStyle(pageTurn).transitionDuration,
         );
         const transitionMs = Number.isNaN(transitionDuration)
           ? 1000
@@ -2596,12 +2737,15 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
       contactMeBtn.addEventListener("click", (event) => {
         event.preventDefault();
         state.pages.forEach((page, index) => {
-          window.setTimeout(() => {
-            page.classList.add("turn");
-            window.setTimeout(() => {
-              page.style.zIndex = String(20 + index);
-            }, 500);
-          }, (index + 1) * 200 + 100);
+          window.setTimeout(
+            () => {
+              page.classList.add("turn");
+              window.setTimeout(() => {
+                page.style.zIndex = String(20 + index);
+              }, 500);
+            },
+            (index + 1) * 200 + 100,
+          );
         });
       });
     }
@@ -2611,16 +2755,19 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
       backProfileBtn.addEventListener("click", (event) => {
         event.preventDefault();
         state.pages.forEach((_, index) => {
-          window.setTimeout(() => {
-            reverseBookIndex(state);
-            const page = state.pages[state.pageNumber];
-            if (page) page.classList.remove("turn");
-            window.setTimeout(() => {
+          window.setTimeout(
+            () => {
               reverseBookIndex(state);
-              const targetPage = state.pages[state.pageNumber];
-              if (targetPage) targetPage.style.zIndex = String(10 + index);
-            }, 500);
-          }, (index + 1) * 200 + 100);
+              const page = state.pages[state.pageNumber];
+              if (page) page.classList.remove("turn");
+              window.setTimeout(() => {
+                reverseBookIndex(state);
+                const targetPage = state.pages[state.pageNumber];
+                if (targetPage) targetPage.style.zIndex = String(10 + index);
+              }, 500);
+            },
+            (index + 1) * 200 + 100,
+          );
         });
       });
     }
@@ -2750,7 +2897,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
         if (!isOpenable && unlockMs > nowMs)
           nextUnlockMs = Math.min(nextUnlockMs, unlockMs - nowMs);
         if (!isOpenable && isTimeUnlocked && !prereqsMet) return;
-      }
+      },
     );
 
     const renderMonthsGrid = () => {
@@ -2765,16 +2912,16 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
             status === "Unlocked"
               ? iconFor(CURRENT_SETTINGS.statusIcons.unlocked)
               : status === "Ready"
-              ? iconFor(CURRENT_SETTINGS.statusIcons.ready)
-              : iconFor(CURRENT_SETTINGS.statusIcons.locked)
+                ? iconFor(CURRENT_SETTINGS.statusIcons.ready)
+                : iconFor(CURRENT_SETTINGS.statusIcons.locked)
           } ${statusTextFor(status)}</div>
           <div class="month-actions">
             <button class="btn btn-secondary" data-open="${month.id}" ${
-          isOpenable ? "" : "disabled"
-        }>Open</button>
+              isOpenable ? "" : "disabled"
+            }>Open</button>
             <a class="btn view" href="capsule.html?m=${month.id}" ${
-          isOpenable ? "" : 'tabindex="-1" aria-disabled="true"'
-        }>View</a>
+              isOpenable ? "" : 'tabindex="-1" aria-disabled="true"'
+            }>View</a>
           </div>
         `;
         monthsGrid.appendChild(card);
@@ -2880,13 +3027,13 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     const songsModal = $("#unlockedSongsModal");
     const songsTimeline = $("#unlockedSongsTimeline");
     const songsClose = songsModal?.querySelector(
-      ".unlocked-songs-modal__close"
+      ".unlocked-songs-modal__close",
     );
     const songsBackdrop = songsModal?.querySelector(
-      ".unlocked-songs-modal__backdrop"
+      ".unlocked-songs-modal__backdrop",
     );
     const songsDialog = songsModal?.querySelector(
-      ".unlocked-songs-modal__dialog"
+      ".unlocked-songs-modal__dialog",
     );
 
     const renderUnlockedSongs = async () => {
@@ -2897,7 +3044,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
           (month.songsAdded || []).filter(Boolean).map((url) => ({
             url,
             monthLabel: displayTitleForMonth(month, data),
-          }))
+          })),
         );
 
       if (!entries.length) {
@@ -2910,7 +3057,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
         entries.map(async (entry) => ({
           ...entry,
           title: (await fetchSongTitle(entry.url)) || "Spotify track",
-        }))
+        })),
       );
 
       songsTimeline.innerHTML = titled
@@ -2921,7 +3068,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
               <div>
                 <div class="patch-item__meta">
                   <span class="patch-item__version">${escapeHTML(
-                    item.monthLabel
+                    item.monthLabel,
                   )}</span>
                   <span>Spotify track</span>
                 </div>
@@ -2936,7 +3083,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
                 </a>
               </div>
             </div>
-          `
+          `,
         )
         .join("");
     };
@@ -2965,7 +3112,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     }
 
     [songsClose, songsBackdrop].forEach(
-      (el) => el && el.addEventListener("click", closeSongsModal)
+      (el) => el && el.addEventListener("click", closeSongsModal),
     );
 
     songsModal?.addEventListener("keydown", (e) => {
@@ -3092,7 +3239,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     });
 
     [closeBtn, backdrop].forEach(
-      (el) => el && el.addEventListener("click", close)
+      (el) => el && el.addEventListener("click", close),
     );
 
     modal.addEventListener("keydown", (e) => {
@@ -3164,7 +3311,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
       statCard.addEventListener(
         "animationend",
         () => statCard.classList.remove("stat-highlight"),
-        { once: true }
+        { once: true },
       );
     };
 
@@ -3250,7 +3397,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
 
     const replyImages = replies.flatMap((reply) => normalizeReplyImages(reply));
     const combinedPhotos = Array.from(
-      new Set([...(month.photos || []), ...replyImages])
+      new Set([...(month.photos || []), ...replyImages]),
     );
     const photoSources = buildSlidesFromSources(combinedPhotos).sources;
 
@@ -3296,11 +3443,11 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
       if (!media) return;
 
       const clickedSrc = normalizeMediaSrc(
-        media.dataset.source || media.currentSrc || media.src || ""
+        media.dataset.source || media.currentSrc || media.src || "",
       );
       const startIndex = Math.max(
         0,
-        photoSources.findIndex((src) => src === clickedSrc)
+        photoSources.findIndex((src) => src === clickedSrc),
       );
 
       showInlineMediaPreview({
@@ -3407,7 +3554,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     const start = data.startDate ? parseISO(data.startDate) : now();
     const daysTogether = Math.max(
       0,
-      Math.floor((now().getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+      Math.floor((now().getTime() - start.getTime()) / (1000 * 60 * 60 * 24)),
     );
 
     const songs = month.songsAdded || [];
@@ -3504,7 +3651,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
                 startTyping();
               }
             });
-          }
+          },
         );
       };
 
@@ -3518,7 +3665,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
 
     const places = data.months.reduce(
       (acc, m) => acc + (m.placesVisited || []).length,
-      0
+      0,
     );
     $("#statDays").textContent = String(daysTogether);
     $("#statPlaces").textContent = String(places);
@@ -3588,7 +3735,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
         const res = await writeFirebaseJSON(
           `replies/${month.id}/${userId}`,
           payload,
-          "POST"
+          "POST",
         );
 
         if (!res) {
@@ -3649,21 +3796,22 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
     configureNavButton(
       document.getElementById("prevMonth"),
       safeIndex - 1,
-      "⟵ Prev"
+      "⟵ Prev",
     );
     configureNavButton(
       document.getElementById("nextMonth"),
       safeIndex + 1,
-      "Next ⟶"
+      "Next ⟶",
     );
 
     $("#backHome").addEventListener(
       "click",
-      () => (window.location.href = "index.html")
+      () => (window.location.href = "index.html"),
     );
   }
 
   (async function init() {
+        logVisitorOpen();
     await ensureUserProfile();
     const data = ensureUnlockDates(await loadData());
     CURRENT_SETTINGS = mergeSettings(data.settings);
