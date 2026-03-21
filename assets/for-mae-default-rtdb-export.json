@@ -567,12 +567,12 @@
   "users": {
     "lance_musngi_gmail_com": {
       "email": "lance.musngi@gmail.com",
-      "password": "Dec@121902",
+      "password": "",
       "role": "admin"
     },
     "lanceka456_gmail_com": {
       "email": "lanceka456@gmail.com",
-      "password": "Dec@121902",
+      "password": "",
       "role": "regular"
     },
     "mockuser_example_com": {
