@@ -1,0 +1,422 @@
+{
+  "capsules": {
+    "months": [
+      {
+        "id": 1,
+        "letter": "Mi,\nHappy monthsary! Thank you for the laughs, the understanding, and every small moment we share. Here’s to many more.\n\n– Grayyy ❤️",
+        "photos": [
+          "assets\\img\\jan1.jpg",
+          "assets\\img\\jan2.jpg",
+          "assets\\img\\jan3.jpg",
+          "assets\\img\\jan4.jpg",
+          "assets\\img\\jan5.jpg",
+          "assets\\img\\jan6.jpg",
+          "assets\\img\\jan7.jpg",
+          "assets\\img\\jan8.jpg"
+        ],
+        "placesVisited": ["BGC"],
+        "songsAdded": [
+          "https://open.spotify.com/track/0GxW5K0qzrq7L1jwSY5OmY?si=1776b11fc8324170"
+        ],
+        "surprise": "Let’s go to the museum? Next month?",
+        "title": "January",
+        "unlockDate": "2025-01-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 2,
+        "letter": "Mi,\nA sweet note for month two, \"I hope we’re doing well together\"\n\n-Grayyy❤️",
+        "photos": [
+          "assets\\img\\feb1.jpg",
+          "assets\\img\\feb2.jpg",
+          "assets\\img\\feb3.jpg",
+          "assets\\img\\feb4.jpg",
+          "assets\\img\\feb5.jpg",
+          "assets\\img\\feb6.jpg",
+          "assets\\img\\feb7.jpg",
+          "assets\\img\\feb8.jpg",
+          "assets\\img\\feb9.jpg",
+          "assets\\img\\feb10.jpg",
+          "assets\\img\\feb11.jpg",
+          "assets\\img\\feb12.jpg",
+          "assets\\img\\feb13.jpg"
+        ],
+        "songsAdded": ["https://open.spotify.com/track/0ug5NqcwcFR2xrfTkc7k8e"],
+        "surprise": "Might another BGC be the solution we need?",
+        "title": "February",
+        "unlockDate": "2025-02-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 3,
+        "letter": "Hello Mi!\nI’ve continue working this website for you. sakit na ulo ko huhu, but it’s worth it hope you love it!. Happy Anniversary.❤️\n\n-Grayyy❤️",
+        "photos": [
+          "assets\\img\\march1.jpg",
+          "assets\\img\\march2.jpg",
+          "assets\\img\\march3.jpg",
+          "assets\\img\\march4.jpg",
+          "assets\\img\\march5.jpg",
+          "assets\\img\\march6.jpg",
+          "assets\\img\\march7.jpg"
+        ],
+        "placesVisited": ["BSU"],
+        "songsAdded": ["https://open.spotify.com/track/1fzAuUVbzlhZ1lJAx9PtY6"],
+        "surprise": "Documentation nalang then ggraduate na tayo :>",
+        "title": "March",
+        "unlockDate": "2025-03-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 4,
+        "letter": "Mi,\nI love Ice skating with you, steady hearts. Maybe we have our problems, but I still choose you. Always.\n\n-Grayyy❤️",
+        "photos": [
+          "assets\\img\\apr1.jpg",
+          "assets\\img\\apr2.jpg",
+          "assets\\img\\apr3.jpg",
+          "assets\\img\\apr4.jpg",
+          "assets\\img\\apr5.jpg",
+          "assets\\img\\apr6.jpg"
+        ],
+        "placesVisited": ["SM Mega Mall"],
+        "songsAdded": ["https://open.spotify.com/track/1u8c2t2Cy7UBoG4ArRcF5g"],
+        "surprise": "I hope we can do this again :<",
+        "title": "April",
+        "unlockDate": "2025-04-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 5,
+        "letter": "Mi.\niknow my time na sumosobra ako, salamuch sa pag intindi🥺\n\n-Grayyy❤️",
+        "photos": [
+          "assets\\img\\may1.mp4",
+          "assets\\img\\may2.mp4",
+          "assets\\img\\may3.mp4",
+          "assets\\img\\may4.jpg"
+        ],
+        "placesVisited": ["KKV Cubao"],
+        "songsAdded": ["https://open.spotify.com/track/1qrpoAMXodY6895hGKoUpA"],
+        "surprise": "hindi din ako mag sasawa sayo:> sana ganto ka ulit ka sabik mag send ng tiktoks vid mo sakin",
+        "title": "May",
+        "unlockDate": "2025-05-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 6,
+        "letter": "Mi,\nI hope we can keep things just like this.\n\n-Grayyy❤️",
+        "photos": [
+          "assets\\img\\june1.mp4",
+          "assets\\img\\june2.jpg",
+          "assets\\img\\june3.jpg",
+          "assets\\img\\june4.jpg",
+          "assets\\img\\june5.jpg",
+          "assets\\img\\june6.jpg",
+          "assets\\img\\june7.jpg",
+          "assets\\img\\june8.jpg",
+          "assets\\img\\june9.jpg"
+        ],
+        "songsAdded": ["https://open.spotify.com/track/6YvqWjhGD8mB5QXcbcUKtx"],
+        "surprise": "Happy?",
+        "title": "June",
+        "unlockDate": "2025-06-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 7,
+        "letter": "Mi,\nagain I hope we’re doing well together even madalas tayo mag away \n\n-Grayyy❤️",
+        "photos": [
+          "assets\\img\\july1.mp4",
+          "assets\\img\\july2.jpg",
+          "assets\\img\\july3.jpg",
+          "assets\\img\\july4.jpg",
+          "assets\\img\\july5.jpg",
+          "assets\\img\\july6.jpg"
+        ],
+        "songsAdded": [
+          "https://open.spotify.com/track/1BxfuPKGuaTgP7aM0Bbdwr?si=e7dc814100b241dc"
+        ],
+        "surprise": "",
+        "title": "July",
+        "unlockDate": "2025-07-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 8,
+        "letter": "",
+        "photos": [
+          "assets\\img\\aug1.mp4",
+          "assets\\img\\aug1.jpg",
+          "assets\\img\\aug2.jpg",
+          "assets\\img\\aug3.jpg",
+          "assets\\img\\aug4.jpg",
+          "assets\\img\\aug5.jpg",
+          "assets\\img\\aug6.jpg",
+          "assets\\img\\aug1.png",
+          "assets\\img\\aug2.png",
+          "assets\\img\\aug3.png"
+        ],
+        "songsAdded": ["https://open.spotify.com/track/3hUxzQpSfdDqwM3ZTFQY0K"],
+        "surprise": "",
+        "title": "August",
+        "unlockDate": "2025-08-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 9,
+        "letter": "Hello love,\nBelated Happy Birthday sayo more birthday na magkasama tayo <3\nAlso Happy Monthsary date later or this weekend?\n\n-Grayyy❤️",
+        "photos": [
+          "assets\\img\\sep1.jpg",
+          "assets\\img\\sep2.jpg",
+          "assets\\img\\sep3.jpg",
+          "assets\\img\\sep4.jpg",
+          "assets\\img\\sep5.jpg",
+          "assets\\img\\sep6.jpg",
+          "assets\\img\\sep7.jpg",
+          "assets\\img\\sep8.jpg",
+          "assets\\img\\sep9.jpg"
+        ],
+        "songsAdded": ["https://open.spotify.com/track/6oVxXO5oQ4pTpO8RSnkzvv"],
+        "surprise": "H sayo!\nyes yung song is from summer that i turned pretty",
+        "title": "September",
+        "unlockDate": "2025-09-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 10,
+        "letter": "Mi,\nGrabe, month 10 of this year na?? Parang kailan lang nagcocomplain ako sa code habang ikaw nagrereklamo sa life wahaha.\n\nThank you for still being my peace kahit minsan ako yung cause ng stress mo 😭. I really love how we still choose each other kahit madalas tayong asaran at inis na minsan iba na yung problema i hope maging more more sweet ka i realy mean this.\n\nThis month’s been chill but special  just having you around makes everything lighter. \nAyun lang, Happy Monthsary, Mi! More sabaw moments, more Roblox, more food trips (sagot mo minsan 😏).\n\n– Grayyy❤️",
+        "photos": [
+          "assets\\img\\oct (1).jpg",
+          "assets\\img\\oct (2).jpg",
+          "assets\\img\\oct (1).mp4",
+          "assets\\img\\oct (2).mp4"
+        ],
+        "songsAdded": [
+          "https://open.spotify.com/track/1dGr1c8CrMLDpV6mPbImSI?si=90b2367bc36a473a"
+        ],
+        "surprise": "i just add ambience sounds sa homepage also yung background img compost ng collage ng pics mo and pics natin hehe",
+        "title": "Month 10",
+        "unlockDate": "2025-10-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 11,
+        "letter": "should i still continue this?",
+        "surprise": "tell me personally",
+        "title": "Month 11",
+        "unlockDate": "2025-11-24T04:00:00.000Z",
+        "voiceNote": ""
+      },
+      {
+        "id": 12,
+        "letter": "Happy monthsary, Mi.\n\nThis month has been a lot. I don't always think rationally, but having you around that day helps me reframe the situation. Not every day is a perfect day, but it's good enough, and it's nice to be with you.\n\nI've realized over the past month how much I trust you and how I rely on you when things get complicated. Not too much, though, because I still do that. But I appreciate it when we don't have to say too much to each other, even when we don't know exactly what happened. \n\nAnother month with you, Mi. Happy monthsary. I'm glad we have this. I'm glad we have this not so much stable but we are still figuring it out month by month. :>",
+        "photos": [
+          "assets\\img\\dec (1).jpg",
+          "assets\\img\\dec (2).mp4",
+          "assets\\img\\dec (3).mp4",
+          "assets\\img\\dec (4).mp4",
+          "assets\\img\\dec (5).mp4",
+          "assets\\img\\dec (6).mp4",
+          "assets\\img\\dec (7).mp4"
+        ],
+        "songsAdded": [
+          "https://open.spotify.com/track/4NAmRvqSITAAzKWnC8yRq3?si=4d7a05cf56f34c6e"
+        ],
+        "surprise": "",
+        "title": "Last Month",
+        "unlockDate": "2025-12-24T11:48:00.000Z",
+        "voiceNote": ""
+      }
+    ],
+    "settings": {
+      "brandText": "❤️ For Mae",
+      "capsuleGreeting": "Happy Monthsary, Mi!",
+      "confettiColors": ["#8b5cf6", "#a78bfa", "#c4b5fd", "#60a5fa", "#f472b6"],
+      "countdownLabel": "Opens in",
+      "favicon": "assets/favicon.svg",
+      "footerText": "Happy Monthsary, Love! • Made with Grayyy",
+      "heartEmoji": "❤️",
+      "homeHeadline": "Open this month’s capsule",
+      "homeSubhead": "Tara, open this month’s surprise. Mahal kita, today and always.",
+      "mediaBackgroundMode": "collage",
+      "openButtonText": "Open",
+      "siteTitle": "Time-Capsule",
+      "statusIcons": {
+        "locked": "🔒",
+        "ready": "💌",
+        "unlocked": "❤️"
+      },
+      "statusText": {
+        "locked": "Coming Soon",
+        "ready": "Ready",
+        "unlocked": "Opened"
+      },
+      "theme": {
+        "accent": "#8b5cf6",
+        "accent2": "#c4b5fd",
+        "ringFill": "#a78bfa"
+      }
+    },
+    "startDate": "2025-01-14T00:00:01.000Z"
+  },
+  "patchNotes": {
+    "notes": [
+      {
+        "changes": [
+          "Introduced a dedicated patch notes timeline with a polished modal layout.",
+          "Added a header shortcut to quickly open the latest release highlights.",
+          "Smoothed animations and readability for update details."
+        ],
+        "date": "2024-09-14",
+        "title": "Timeline-inspired patch notes",
+        "version": "1.1.0"
+      },
+      {
+        "changes": [
+          "Capsules now unlock sequentially so each month opens only after the previous one is unlocked.",
+          "Progress marker tooltips hide details for months that are still locked to avoid spoilers.",
+          "Direct access to locked capsules is blocked until prerequisite months are opened."
+        ],
+        "date": "2025-12-10",
+        "title": "Sequential Unlock Logic & Spoiler-Safe Tooltips",
+        "version": "1.1.1"
+      },
+      {
+        "changes": [
+          "Admin Settings tab now groups fields by branding, homepage copy, confetti palette, and CTA content for quicker edits.",
+          "Capsule editing form organizes basics, story content, media references, and optional links into labeled sections with helper text.",
+          "Contribution form groups donor basics, story, and media/link inputs to make submissions easier to understand."
+        ],
+        "date": "2025-12-11",
+        "title": "Admin UI form grouping improvements",
+        "version": "1.1.2"
+      },
+      {
+        "changes": [
+          "Progress markers now show the month’s song title in the tooltip.",
+          "Capsule view adds minimal prev/next buttons on the sides for quick month hopping."
+        ],
+        "date": "2025-12-12",
+        "title": "Capsule navigation & song titles",
+        "version": "1.1.3"
+      },
+      {
+        "changes": [
+          "Fixed and refined the Patch Notes modal design for improved layout consistency, spacing, and readability.",
+          "Improved visual hierarchy in the modal to clearly distinguish versions, dates, and change lists.",
+          "Connected website data to Firebase for centralized, real-time data storage and retrieval.",
+          "Replaced static/local data sources with Firebase-backed content to improve data reliability and maintainability."
+        ],
+        "date": "2025-12-30",
+        "title": "Patch Notes Modal UI Fix & Firebase Integration",
+        "version": "1.1.4"
+      }
+    ]
+  },
+  "replies": [
+    null,
+    {
+      "user_abc123": {
+        "-OabReply01": {
+          "createdAt": "2025-01-14T08:30:00.000Z",
+          "imageUrls": ["assets/img/jan3.jpg"],
+          "name": "Mae",
+          "placeVisited": "Our favorite cafe",
+          "rant": "Busy week but still worth it.",
+          "reply": "Thank you for the letter, love!",
+          "voiceUrl": ""
+        }
+      }
+    },
+    {
+      "user_xyz456": {
+        "-OacReply77": {
+          "createdAt": "2025-02-14T10:00:00.000Z",
+          "name": "Grayyy",
+          "placeVisited": "City museum",
+          "rant": "Traffic was wild today.",
+          "reply": "Can’t wait for our next date.",
+          "voiceUrl": "https://example.com/audio/reply-feb.mp3"
+        }
+      }
+    }
+  ],
+  "updatedAt": "2026-02-14T00:00:00.000Z",
+  "userCapsuleState": {
+    "user_abc123": {
+      "lastMonthId": 2,
+      "unlockedMonths": [1, 2],
+      "updatedAt": "2025-02-14T10:15:00.000Z"
+    }
+  },
+  "userProfiles": {
+    "3zy": {
+      "audioEnabled": false,
+      "capsuleState": {
+        "lastOpenMonth": 12,
+        "unlockedMonths": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      },
+      "createdAt": "2026-02-20T12:43:54.857Z",
+      "displayName": "3zy",
+      "pinHash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
+      "updatedAt": "2026-02-20T12:43:54.856Z"
+    },
+    "mae": {
+      "audioEnabled": true,
+      "capsuleState": {
+        "currentMonth": 2,
+        "lastOpenMonth": 2,
+        "unlockedMonths": [1, 2]
+      },
+      "createdAt": "2025-01-14T01:00:00.000Z",
+      "displayName": "Mae",
+      "pinHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+      "updatedAt": "2025-02-14T01:00:00.000Z"
+    }
+  },
+  "valentine": {
+    "slideshow": {
+      "assets": [
+        {
+          "src": "assets/1.jpg",
+          "type": "image"
+        },
+        {
+          "src": "assets/2.jpg",
+          "type": "image"
+        },
+        {
+          "src": "assets/3.jpg",
+          "type": "image"
+        },
+        {
+          "src": "assets/4.jpg",
+          "type": "image"
+        },
+        {
+          "src": "assets/5.jpg",
+          "type": "image"
+        },
+        {
+          "src": "assets/6.jpg",
+          "type": "image"
+        },
+        {
+          "src": "assets/7.mp4",
+          "type": "video"
+        },
+        {
+          "src": "assets/8.jpg",
+          "type": "image"
+        },
+        {
+          "src": "assets/9.jpg",
+          "type": "image"
+        },
+        {
+          "src": "assets/10.mp4",
+          "type": "video"
+        }
+      ],
+      "intervalMs": 5000
+    }
+  }
+}
