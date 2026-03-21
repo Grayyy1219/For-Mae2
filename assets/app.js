@@ -431,9 +431,9 @@
       <div class="auth-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="authModalTitle" tabindex="-1">
       <section class="auth-modal__letter-stage">
           <header class="auth-modal__header">
-            <p class="auth-modal__eyebrow">For you</p>
-            <h2 class="auth-modal__title" id="authModalTitle">A letter for you</h2>
-            <p class="auth-modal__subtitle" id="authModalSubtitle">If you opened this site, this message is for you.</p>
+            <p class="auth-modal__eyebrow">Discontinue Notice</p>
+            <h2 class="auth-modal__title" id="authModalTitle">Important notice</h2>
+            <p class="auth-modal__subtitle" id="authModalSubtitle">This message is for Leoneil Mae Bacasong Reyes.</p>
           </header>
           <article class="auth-letter" aria-label="Welcome letter">
             <p>Mi,</p>
@@ -493,7 +493,7 @@
             </p>
             <p>Take care lagi, Mi.</p>
             <p>Sincerely yours,</p>
-            <p class="auth-letter__signature">-Your Jagiya "Gray".</p>
+            <p ><i>-Your Jagiya "Gray".</i></p>
           </article>
           <button class="btn btn-primary auth-modal__start" type="button">Open the capsule</button>
         </section>
@@ -572,7 +572,7 @@
         submitBtn.textContent = "Continue";
 
         if (subtitle)
-          subtitle.textContent = "Enter a unique display name to begin.";
+          subtitle.textContent = "This message is for Leoneil Mae Bacasong Reyes.";
         setError("");
         pinField?.classList.add("is-hidden");
         if (pinInput) {
