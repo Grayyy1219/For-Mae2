@@ -1,6 +1,6 @@
 @font-face {
   font-family: "MyCustomFont";
-  src: url("/assets/Darling.otf") format("opentype");
+  src: url("/assets/fonts/MyFont.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
 }
@@ -773,8 +773,9 @@ header a {
     0 26px 64px rgba(8, 5, 1, 0.5);
   color: #2b1b07;
   line-height: 1.85;
-  font-family: "Welcome Darling", "Comic Sans MS", cursive;
+  font-family: "MyCustomFont", sans-serif;
   font-size: clamp(17px, 1.9vw, 20px);
+  scrollbar-width: thin;
 }
 .auth-letter p {
   margin: 0 0 12px;
