@@ -436,26 +436,64 @@
             <p class="auth-modal__subtitle" id="authModalSubtitle">If you opened this site, this message is for you.</p>
           </header>
           <article class="auth-letter" aria-label="Welcome letter">
+            <p>Mi,</p>
             <p>
-              Hi love,
+              Di ko alam pano sisimulan ‘to, pero I’ve been thinking a lot since nung last nating usap. Gusto ko lang sabihin to nang maayos, hindi para makipag away, kundi para maintindihan mo ako.
             </p>
             <p>
-              If you are reading this, thank you for opening this little world one more time.
-              I made this page to hold everything I could not always say perfectly in person.
+              Hindi ko madeny, nasaktan ako. Siguro kasi recently akala ko okay tayo hindi man perfect pero okay. Yung simpleng usap, tawa, random moments natin, parang safe ako dun. Kaya ang bigat lang na parang biglang nag-iba yung nararamdaman mo.
             </p>
             <p>
-              You were never just part of my days—you were the meaning inside them.
-              In every memory here, there is gratitude, softness, and the quiet truth that loving you changed me.
+              Nahihirapan din ako i-explain minsan pero I feel like I’m slowly losing connection with you. Hindi ko na alam kung love mo pa ba ako or natatakot lang ako na yung taong pinaka inaalagaan ko unti-unti nang lumalayo sa akin.
             </p>
             <p>
-              If life takes us through different seasons, I still hope this letter reminds you:
-              you are deeply loved, sincerely appreciated, and unforgettable to me.
+              I’m trying to understand you. Alam ko you give time and effort in your own way, and hindi kita sinisisi. Pero minsan nahihirapan ako kasi pakiramdam ko ako yung laging nagre-reach out, nag-aadjust, nagta-try mag-connect, habang ikaw parang napapagod or wala sa mood kapag ako na yung nag-aaya.
             </p>
             <p>
-              I kept this letter here as a small reminder of what you mean to me—simple, honest, and true.
+              Kaya siguro napapadalas yung tanong ko na “love mo ba ako?” Hindi yun para mangulit it’s because I’m looking for reassurance. Kahit maliit na bagay lang like lambing, random “I love you,” or effort na hindi ko hinihingi, sobrang big deal tie breaker kung baga nun sakin.
             </p>
-            <p>Always,</p>
-            <p class="auth-letter__signature">Grayyy ❤️</p>
+            <p>
+              Ayoko rin kasi na parang nagbe-beg ako for love or attention, kaya pinipili ko nalang manahimik minsan. Pero ang totoo, ang dami ko nang kinikimkim. Hindi dahil wala akong pake, pero dahil sobra akong may pake sa feeling mo with out you thinking ano ba mararamdaman ko actualy madami ka din nasabi na masakit sa damdamin kaso hindi ako katulad mo mas pini pili ko i brace yung impact ayokong maging soft harted :&lt;.
+            </p>
+            <p>
+              Napapansin ko rin minsan, sa ibang bagay or ibang tao, you can give energy, effort, and time. Pero pagdating sakin, parang kulang or hindi mo maibigay the same way. Doon ako nasasaktan na sa sobrang assurance ko sayo you not thinking if i still like yuo kasi sure ka na “oo” ang sagot ko then habang nag tagal nasanay ka na hindi ako yung i priority hindi nito ibigsabihin yung dapat ako lagi una no it just mean lang na “you should prepare yourself for me as well” take in mind na i'm here too.
+            </p>
+            <p>
+              Mi, mahal pa rin kita… I think. Hindi siya yung basta nawawala lang, kasi nag-grow yun along the way. Pero at the same time, ang gulo na rin ng pakiramdam ko ngayon. Hindi ko na rin alam kung paano ko siya iexplain.
+            </p>
+            <p>
+              Napapagod na rin ako… hindi sa pagmamahal, pero sa pakiramdam na ako lang yung lumalaban para ma keep yung connection natin the way i think when i see your red flags, low thinking capability, na lalaong na push sa akin na i like this girl to be better for me not find better for me i like things this way.
+            </p>
+            <p>
+              I don’t want to fight you, and I don’t want to blame you. Gusto ko lang maintindihan mo ako, the same way I try to understand you. As your boyfriend, I’m also going through things… sana kahit papano makita mo rin yun.
+            </p>
+            <p>
+              Hindi ko alam kung anong nangyayari sayo, pero minsan naiisip ko na baka hinahayaan mo nalang din yung sarili mo na ma-fall out of love. Kahit hindi mo namamalayan, parang hinahayaan mo nalang na lumayo yung feelings mo sakin. Pero alam ko rin na may choice ka—pwede mo pa rin piliin isipin na mahal mo ako, na gusto mo pa akong makasama. Kasi dun din naman nagsisimula yun eh, sa pagpili araw-araw. Siguro isa yun sa nakaapekto kung bakit napunta tayo sa ganito.
+            </p>
+            <p>
+              Hindi ko alam kung anong mangyayari next, and honestly nakakatakot isipin. Pero ayoko rin na pilitin ka kung hindi ka na sure. Ayoko maging dahilan kung bakit ka mastuck.
+            </p>
+            <p>
+              I’ll respect kung ano man yung kailangan mo right now. Pero to be honest, ayoko pa matapos ‘to ng ganito lang. Hindi pa ako ready na bitawan ka, lalo na kung alam ko sa sarili ko na mahal pa kita at gusto ko pa ayusin kung anong meron tayo.
+            </p>
+            <p>
+              Gusto ko lang malaman mo na naging totoo ako sayo. Pinili kita araw-araw. “I just did my part,” nasasayo nalang on how you will do yours—and ginagawa ko pa rin, nilalabanan ko yung sarili kong thoughts every time na feeling ko ayaw ko na. Pero napapansin ko rin na yung way natin, lalo na yung pag avoid or pag pull away, hindi na nagwo-work para sa atin. Imbis na maayos, lalo lang tayong nagkakalayo, and ako, mas lalo akong nawawala sa sarili ko trying to hold on.
+            </p>
+            <p>
+              I chose to understand you, to love you as a whole not just the good days, hindi lang kapag madali. Pero sana, kahit papano, maramdaman ko rin yun galing sayo.
+            </p>
+            <p>
+              Siguro eto na yung last time na hihiling ako sayo na mag-stay. Hindi dahil sumusuko na ako, pero dahil ayoko na umabot sa point na parang pinipilit nalang kita. Gusto ko kung pipiliin mo ako, kusa—hindi dahil hinihingi ko.
+            </p>
+            <p>
+              If you still want this, sana we both try not just when it’s easy, but especially when it’s hard.
+            </p>
+            <p>
+              be open to learning, willing to grow, and choose to work on what we have instead of letting it slowly fade.
+            </p>
+            <p>Take care lagi, Mi.</p>
+            <p>Sincerely yours,</p>
+            <p class="auth-letter__signature">-Your Jagiya "Gray".</p>
           </article>
           <button class="btn btn-primary auth-modal__start" type="button">Open the capsule</button>
         </section>
