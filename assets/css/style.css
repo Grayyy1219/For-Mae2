@@ -737,6 +737,10 @@ header a {
   font-size: 15px;
   color: rgba(255, 233, 196, 0.85);
 }
+.auth-letter-toggle {
+  margin-top: 12px;
+  font-weight: 700;
+}
 
 .auth-letter {
   margin: 0 0 14px;
@@ -807,6 +811,9 @@ header a {
   font-family: "MyCustomFont", sans-serif;
   font-size: clamp(17px, 1.9vw, 20px);
   scrollbar-width: thin;
+}
+.auth-letter.is-hidden {
+  display: none;
 }
 .auth-letter p {
   margin: 0 0 12px;

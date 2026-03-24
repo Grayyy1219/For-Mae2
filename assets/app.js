@@ -434,8 +434,74 @@
             <p class="auth-modal__eyebrow">Discontinue Notice</p>
             <h2 class="auth-modal__title" id="authModalTitle">Important notice</h2>
             <p class="auth-modal__subtitle" id="authModalSubtitle">This message is for Leoneil Mae Bacasong Reyes.</p>
+            <button class="btn auth-letter-toggle" id="authLetterToggle" type="button">Eddited</button>
           </header>
-          <article class="auth-letter" aria-label="Welcome letter">
+          <article class="auth-letter" id="authLetterEdited" aria-label="Edited letter">
+            <p>
+              Hi? just wanted to say hello mae, hindi ako galit or atlease hindi na ako galit, i think we both did our best you din your part, and I just did my part. siguro ako, i could have done a little more than just enough.
+            </p>
+            <p>
+              Iduno how or where you get that anger, gusto ko nalang intindihan ka and I want focus muna ako sa sarili ko. i want to improve, build myself up, maging mas capable not just for anyone else, but for me. ayoko na yung kulang, gusto ko next time buo na ako, walang sabit, walang worries na ibibigay sa kahit sino.
+            </p>
+            <p>
+              also, that night gusto ko lang sana makausap ka para maaya ka sana this anniversary (today) na mag iceskating sa manila yes pinagipunan ko to kaya hindi ako makagastos gasto sayo nung feb.  but now how can i ask you? diba? dont worry I use it na to improve myself I just got my teeth check kahapon  a little I can smile na ulit kahit papaano haha masakit lang talga sa bulsa yung gastos, pero worth it. part na rin siguro  to ng pag aayos ko sa sarili ko.
+            </p>
+            <p>
+              for now, hindi muna ako naghahanap ng anything deeper or asking for us. Gusto ko lang maging okay ka and comfortable ka ulit no pressure, walang hidden intentions, walang expectations. I’ll stand by everything I said to you, and someday, maybe sooner, I’ll become the man I once you wanted alot pero much better and capable. For now, I know I can’t give you everything, and honestly hindi ko rin alam yung perfect way to end this.
+            </p>
+            <p>in english they say, “goodbye and thank you.”</p>
+            <p>in poetry they say</p>
+            <p>
+              “as a final act of love, i’ll become everything i once promised you.<br />
+              i’ll grow into the person i was when i was with you soft, certain, and full of love.<br />
+              i’ll love harder, especially on the days you couldn’t even love yourself.
+            </p>
+            <p>
+              and maybe the hardest part of that love…<br />
+              is that i won’t reach you out anymore.
+            </p>
+            <p>
+              not because i don’t care,<br />
+              but because i care too much to keep holding on to something that’s already slipped away.
+            </p>
+            <p>
+              so i’ll walk away gently.<br />
+              not with anger. not with hate.<br />
+              but carrying a love so deep that i can no longer give it to you<br />
+              so i’ll keep it, quietly, within me.<br />
+              i’ll pour it into memories, so they never fade, never dry out.
+            </p>
+            <p>
+              i’m still addicted to the version of us<br />
+              before ego, before pride, before the late night fights took over.<br />
+              back when loving you felt easy<br />
+              like breathing.
+            </p>
+            <p>
+              but unlearning you…<br />
+              that’s a war i fight every single day.
+            </p>
+            <p>
+              i don’t need a long goodbye.<br />
+              i don’t need closure wrapped in perfect words.<br />
+              i just want to wake up one day<br />
+              and realize i haven’t thought about you for even a single hour.
+            </p>
+            <p>
+              and maybe, in some quiet, bittersweet way<br />
+              i won the “i love you more” battle… :&lt;<br />
+              i don’t even know if you’ll ever understand what that really means.
+            </p>
+            <p>
+              but there’s one thing i’ll always wonder
+            </p>
+            <p>
+              if you felt even a fraction of what i felt…<br />
+              why didn’t you ever fight to stay?”
+            </p>
+            <p>happy 4th technically… happy ex-anniversary, I guess. :&lt;</p>
+          </article>
+          <article class="auth-letter is-hidden" id="authLetterOld" aria-label="Welcome letter">
             <p>Mi,</p>
             <p>
               Di ko alam pano sisimulan to, pero I’ve been thinking a lot since nung last nating usap. Gusto ko lang sabihin to nang maayos, hindi para makipag away, kundi para maintindihan mo ako.
@@ -541,6 +607,9 @@
       const dialog = modal.querySelector(".auth-modal__dialog");
       const letterStage = modal.querySelector(".auth-modal__letter-stage");
       const startBtn = modal.querySelector(".auth-modal__start");
+      const letterToggle = modal.querySelector("#authLetterToggle");
+      const editedLetter = modal.querySelector("#authLetterEdited");
+      const oldLetter = modal.querySelector("#authLetterOld");
       const form = modal.querySelector(".auth-modal__form");
       const nameInput = form.querySelector('input[name="displayName"]');
       const pinField = form.querySelector(".auth-modal__pin-field");
@@ -598,6 +667,17 @@
       });
 startBtn?.addEventListener("click", () => {
         showProfileForm();
+      });
+      letterToggle?.addEventListener("click", () => {
+        const showingOld = oldLetter && !oldLetter.classList.contains("is-hidden");
+        if (!editedLetter || !oldLetter) return;
+        if (showingOld) {
+          oldLetter.classList.add("is-hidden");
+          editedLetter.classList.remove("is-hidden");
+        } else {
+          editedLetter.classList.add("is-hidden");
+          oldLetter.classList.remove("is-hidden");
+        }
       });
 
       const showModal = () => {
