@@ -499,7 +499,7 @@
               if you felt even a fraction of what i felt…<br />
               why didn’t you ever fight to stay?”
             </p>
-            <p>happy 4th technically… happy ex-anniversary, I guess. :&lt;</p>
+            <p>happy 3rd technically… happy ex-anniversary, I guess. :&lt;</p>
           </article>
           <article class="auth-letter is-hidden" id="authLetterOld" aria-label="Welcome letter">
             <p>Mi,</p>
@@ -641,7 +641,8 @@
         submitBtn.textContent = "Continue";
 
         if (subtitle)
-          subtitle.textContent = "This message is for Leoneil Mae Bacasong Reyes.";
+          subtitle.textContent =
+            "This message is for Leoneil Mae Bacasong Reyes.";
         setError("");
         pinField?.classList.add("is-hidden");
         if (pinInput) {
@@ -649,7 +650,7 @@
           pinInput.required = false;
         }
       };
-  const showProfileForm = () => {
+      const showProfileForm = () => {
         letterStage?.classList.add("is-hidden");
         form?.classList.remove("is-hidden");
         if (subtitle) {
@@ -665,11 +666,12 @@
       nameInput?.addEventListener("input", () => {
         resetFlow();
       });
-startBtn?.addEventListener("click", () => {
+      startBtn?.addEventListener("click", () => {
         showProfileForm();
       });
       letterToggle?.addEventListener("click", () => {
-        const showingOld = oldLetter && !oldLetter.classList.contains("is-hidden");
+        const showingOld =
+          oldLetter && !oldLetter.classList.contains("is-hidden");
         if (!editedLetter || !oldLetter) return;
         if (showingOld) {
           oldLetter.classList.add("is-hidden");
@@ -3929,7 +3931,7 @@ As this year ends, I just want you to know na I’m hoping. Hoping that tomorrow
   }
 
   (async function init() {
-        logVisitorOpen();
+    logVisitorOpen();
     await ensureUserProfile();
     const data = ensureUnlockDates(await loadData());
     CURRENT_SETTINGS = mergeSettings(data.settings);
